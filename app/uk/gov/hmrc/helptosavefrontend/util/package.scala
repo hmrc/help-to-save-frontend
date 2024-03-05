@@ -17,7 +17,6 @@
 package uk.gov.hmrc.helptosavefrontend
 
 import cats.data.EitherT
-import org.joda.time.LocalDate
 
 import java.net.{URLDecoder, URLEncoder}
 import java.util.Base64
@@ -36,9 +35,6 @@ package object util {
   type Result[A] = EitherT[Future, String, A]
 
   implicit def toFuture[A](a: A): Future[A] = Future.successful(a)
-
-  implicit def toJavaDate(jodaDate: LocalDate): java.time.LocalDate =
-    java.time.LocalDate.of(jodaDate.getYear, jodaDate.getMonthOfYear, jodaDate.getDayOfMonth)
 
   def base64Encode(input: String): Array[Byte] = Base64.getEncoder.encode(input.getBytes)
 

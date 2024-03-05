@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.helptosavefrontend.controllers
 
-import com.codahale.metrics.{Counter, Timer}
+import com.codahale.metrics.{Counter, MetricRegistry, Timer}
 import com.typesafe.config.ConfigFactory
 import org.scalatestplus.play.guice.GuiceOneAppPerTest
 import play.api.i18n.{I18nSupport, MessagesApi}
@@ -51,12 +51,11 @@ trait ControllerSpecWithGuiceAppPerTest extends ControllerSpecBase with GuiceOne
   override def fakeApplication(): Application = buildFakeApplication(additionalConfig)
 
   private lazy val injector: Injector = fakeApplication().injector
-
   implicit lazy val ec: ExecutionContext = injector.instanceOf[ExecutionContext]
 
-  val messagesApi = injector.instanceOf(classOf[MessagesApi])
+  val messagesApi: MessagesApi = injector.instanceOf(classOf[MessagesApi])
 
-  override val mockMetrics = new Metrics(mock[com.kenshoo.play.metrics.Metrics]) {
+  override val mockMetrics: Metrics = new Metrics(mock[MetricRegistry]) {
     override def timer(name: String): Timer = new Timer()
 
     override def counter(name: String): Counter = new Counter()

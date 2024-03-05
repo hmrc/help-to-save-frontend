@@ -25,7 +25,7 @@
     function wrapNode (toWrap, wrapper) {
       toWrap.parentNode.insertBefore(wrapper, toWrap)
       return wrapper.appendChild(toWrap)
-    };
+    }
 
     // Used to generate a unique string, allows multiple instances of the component without
     // Them conflicting with each other.

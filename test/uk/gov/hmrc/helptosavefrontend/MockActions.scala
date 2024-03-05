@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.helptosavefrontend
 
-import com.codahale.metrics.{Counter, Timer}
+import com.codahale.metrics.{Counter, MetricRegistry, Timer}
 import org.mockito.IdiomaticMockito
 import play.api.Configuration
 import uk.gov.hmrc.helptosavefrontend.forms.EmailValidation
@@ -24,9 +24,8 @@ import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 
 trait MockActions extends IdiomaticMockito {
 
-  val mockMetrics = new Metrics(mock[com.kenshoo.play.metrics.Metrics]) {
+  val mockMetrics: Metrics = new Metrics(mock[MetricRegistry]) {
     override def timer(name: String): Timer = new Timer()
-
     override def counter(name: String): Counter = new Counter()
   }
 

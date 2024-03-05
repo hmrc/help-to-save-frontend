@@ -16,10 +16,9 @@
 
 package uk.gov.hmrc.helptosavefrontend.controllers
 
-import java.net.URLDecoder
-import java.time.LocalDate
 import cats.data.EitherT
 import cats.instances.future._
+import org.mockito.ArgumentMatchersSugar.*
 import play.api.http.Status
 import play.api.mvc.Result
 import play.api.test.FakeRequest
@@ -38,10 +37,11 @@ import uk.gov.hmrc.helptosavefrontend.util.{Email, EmailVerificationParams}
 import uk.gov.hmrc.helptosavefrontend.views.html.closeaccount.close_account_are_you_sure
 import uk.gov.hmrc.helptosavefrontend.views.html.email.accountholder.check_your_email
 import uk.gov.hmrc.helptosavefrontend.views.html.email.{update_email_address, we_updated_your_email}
-import org.mockito.ArgumentMatchersSugar.*
 
-import scala.concurrent.duration._
+import java.net.URLDecoder
+import java.time.LocalDate
 import scala.concurrent.Future
+import scala.concurrent.duration._
 import scala.util.{Failure, Success}
 
 class AccountHolderControllerSpec
