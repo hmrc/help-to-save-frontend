@@ -462,28 +462,61 @@ hts.register.create_account.payInNow.continue=Yn eich blaen
 hts.payInNow.error=Dewiswch a ydych am dalu eich taliad cyntaf i mewn nawr
 
 # Privacy page
-hts.privacy.title.h1=Datganiad preifatrwydd Cymorth i Gynilo
-hts.privacy.p1=Mae’r ddogfen hon yn nodi sut y byddwn yn defnyddio’ch gwybodaeth i gyflwyno’r cynllun Cymorth i Gynilo.
-hts.privacy.p2=Mae Cyllid a Thollau EF (CThEF) yn Rheolwr Data o dan Ddeddf Diogelu Data 1998. Byddwn yn casglu ac yn defnyddio eich gwybodaeth bersonol i wirio eich cymhwystra ar gyfer Cymorth i Gynilo ac i wneud yn siŵr eich bod yn cael unrhyw fonws gan y llywodraeth sydd yn perthyn i chi o dan eich cyfrif Cymorth i Gynilo.
-hts.privacy.p3=Fel rhan o’n gwiriadau cydymffurfio a phrosesu, efallai y byddwn yn:
-hts.privacy.ul1.li1=gwirio eich hawl i fudd-daliadau, Credyd Treth Gwaith, Credyd Treth Plant a Chredyd Cynhwysol
-hts.privacy.ul1.li2=cadarnhau eich statws cyflogaeth a’ch incwm
-hts.privacy.ul1.li3=gwirio a oes gennych hawl i gyfrif Cymorth i Gynilo ac unrhyw fonysau sy’n ddyledus
-hts.privacy.ul1.li4=gwirio a ydych wedi cael cyfrif Cymorth i Gynilo yn flaenorol
-hts.privacy.p4=Byddwn ond yn casglu’r data sydd ei angen arnom i gadarnhau’ch hawl i agor a chynnal cyfrif Cymorth i Gynilo.
-hts.privacy.p5=Y data yr ydym yn eu casglu a’u defnyddio ar hyn o bryd i gyflawni hynny mewn perthynas â chwsmeriaid Credyd Treth Gwaith a Chredyd Cynhwysol fydd eich enw, rhif Yswiriant Gwladol, cyfeiriad, dyddiad geni a’ch cyfeiriad e-bost. Byddwn yn casglu’r wybodaeth hon o’ch manylion ar-lein presennol, sef y rhai rydych yn eu defnyddio i gofrestru ar gyfer eich cyfrif ac i fewngofnodi iddo.
-hts.privacy.p6=Byddwn yn cadarnhau’ch hawl fel derbynnydd Credyd Treth Gwaith drwy wybodaeth a gedwir eisoes ar system Credydau Treth Cenedlaethol fewnol CThEF. Byddwn yn cadarnhau’ch hawl fel derbynnydd Credyd Cynhwysol yn seiliedig ar wybodaeth a gafwyd gan yr Adran Gwaith a Phensiynau (DWP).
-hts.privacy.p7=Yr unig wybodaeth y byddwn yn gofyn amdani’n uniongyrchol, heblaw hyn, yw pan fo angen i chi roi gwybod bod eich cyfeiriad e-bost wedi newid.
-hts.privacy.p8=Byddwn yn rhannu’r holl wybodaeth hon gyda Chynilion a Buddsoddiadau Cenedlaethol (NS&I) sy’n helpu i weinyddu’r cynllun Cymorth i Gynilo.
-hts.privacy.p9=Byddwn ond yn rhannu eich gwybodaeth â thrydydd parti at ddibenion heblaw Cymorth i Gynilo os yw’r gyfraith yn caniatáu i ni wneud hynny ac, os felly, er mwyn:
-hts.privacy.ul2.li1=atal a chanfod troseddau
-hts.privacy.ul2.li2=diogelu arian cyhoeddus
-hts.privacy.h2-1=Staff CThEF yn trin eich gwybodaeth
-hts.privacy.p10=Mae staff CThEF wedi’u hyfforddi o ran trin gwybodaeth, ac maent yn deall pa mor bwysig yw diogelu gwybodaeth bersonol a gwybodaeth sensitif arall.
-hts.privacy.h2-2=Gweld pa wybodaeth sydd gennym
-hts.privacy.p11.1=Gallwch ofyn i weld yr wybodaeth bersonol sydd ym meddiant CThEF amdanoch chi. Er mwyn helpu i ddod o hyd i’r wybodaeth yr ydych am ei gweld, ac i ddelio â’ch cais yn gyflymach, dylech anfon eich cais Deddf Diogelu Data i’r swyddfa CThEF yr ydych wedi bod yn delio â hi. Dylech gyfeirio’ch cais at y ’Swyddog Diogelu Data’. Ceir rhagor o wybodaeth am
-hts.privacy.p11.link-text=Polisi preifatrwydd CThEF (yn agor tab newydd)
-hts.privacy.p11.2=ar wefan GOV.UK.
+hts.privacy.title.h1=Hysbysiad Preifatrwydd Cymorth i Gynilo CThEF
+
+hts.privacy.h2-1=Diben yr hysbysiad hwn
+hts.privacy.p1-1=Mae Cyllid a Thollau EF (CThEF) wedi ymrwymo i ddiogelu preifatrwydd a diogelwch eich gwybodaeth bersonol.
+hts.privacy.p1-2=Mae’r hysbysiad preifatrwydd hwn yn disgrifio sut yr ydym ni, sef CThEF, yn casglu ac yn defnyddio gwybodaeth bersonol amdanoch chi yn unol â chyfraith diogelu data, gan gynnwys Rheoliad Cyffredinol y DU ar Ddiogelu Data (GDPR y DU) a Deddf Diogelu Data (DPA) 2018.
+
+hts.privacy.h2-2=Sut yr ydym yn defnyddio’ch gwybodaeth
+hts.privacy.p2-1=Dim ond yr wybodaeth bersonol sydd ei hangen er mwyn gwirio cymhwystra darpar ddeiliaid cyfrif Cymorth i Gynilo y mae CThEF yn ei chasglu. Mae Deddf Cynilion (Cyfraniadau’r Llywodraeth) 2017 yn nodi’r sail gyfreithiol y mae CThEF yn dibynnu arni i brosesu eich data personol. O dan GDPR y DU, y sail gyfreithiol ar gyfer prosesu eich data personol yn yr amgylchiadau hyn yw Erthygl 6(1)(e), sy’n galluogi CThEF i brosesu data personol pan fydd angen gwneud hynny at ddibenion ein swyddogaethau fel adran o’r llywodraeth.
+hts.privacy.p2-2=Mae CThEF a Chynilion a Buddsoddiadau Cenedlaethol, sef ein partner cyflawni, yn gyfrifol ar y cyd am gyflawni’r cynllun Cymorth i Gynilo ac am benderfynu sut rydym yn storio ac yn defnyddio eich gwybodaeth bersonol.
+hts.privacy.p2-3=I gael esboniad llawn o sut mae CThEF yn defnyddio’ch data, darllenwch <a class="govuk-link" href="https://www.gov.uk/government/publications/data-protection-act-dpa-information-hm-revenue-and-customs-hold-about-you/data-protection-act-dpa-information-hm-revenue-and-customs-hold-about-you" rel="noreferrer noopener" target="_blank">Hysbysiad Preifatrwydd CThEF</a>. I gael rhagor o wybodaeth am sut mae NS&I yn defnyddio’ch data personol, darllenwch <a class="govuk-link" href="https://www.nsandi.com/privacy-notice" rel="noreferrer noopener" target="_blank">Hysbysiad Preifatrwydd NS&I</a>.
+
+hts.privacy.h2-3=Pa ddata yr ydym yn eu casglu
+hts.privacy.p3-1=Mae’r data personol yr ydym yn eu casglu yn cynnwys:
+hts.privacy.ul1-1=eich enw, eich dyddiad geni a’ch rhif yswiriant gwladol
+hts.privacy.ul1-2=lle’r ydych wedi byw dros y 5 mlynedd diwethaf
+hts.privacy.ul1-3=eich cyfeiriad e-bost
+hts.privacy.ul1-4=manylion eich cyfrif banc
+
+hts.privacy.h2-4=Pam yr ydym yn casglu’ch data personol
+hts.privacy.p4-1=Rydym yn casglu data a gwybodaeth bersonol gennych chi, o gronfeydd data mewnol CThEF ac o’r Adran Gwaith a Phensiynau (DWP), i wirio’r canlynol:
+hts.privacy.ul2-1=a ydych yn cael taliadau ar gyfer Credyd Treth Gwaith, Credyd Treth Plant neu Gredyd Cynhwysola
+hts.privacy.p4-2=Bydd y data a’r wybodaeth a gasglwn yn cadarnhau a ydych yn gymwys i agor cyfrif Cymorth i Gynilo. Mae hyn yn cynnwys gwneud penderfyniadau awtomataidd, gweler adran berthnasol <a class="govuk-link" href="https://www.gov.uk/government/publications/data-protection-act-dpa-information-hm-revenue-and-customs-hold-about-you/data-protection-act-dpa-information-hm-revenue-and-customs-hold-about-you" rel="noreferrer noopener" target="_blank">Hysbysiad Preifatrwydd CThEF</a>. Os oes unrhyw un wedi rhoi gwybod i chi nad ydych yn gymwys ar gyfer cyfrif Cymorth i Gynilo, dylech fynd i GOV.UK i wirio’r <a class="govuk-link" href="https://www.gov.uk/get-help-savings-low-income/eligibility" rel="noreferrer noopener" target="_blank">meini prawf cymhwystra</a>. Os ydych eisoes wedi gwneud hyn a’ch bod yn dal o’r farn eich bod yn gymwys, gallwch gysylltu â Gwasanaeth Cwsmeriaid Cymraeg CThEF ar 0300 200 1900.
+
+hts.privacy.h2-5=Os ydych yn cysylltu â Gwasanaeth Cwsmeriaid Cymraeg CThEF dros y ffôn
+hts.privacy.p5-1=Mae’n bosibl y byddwn yn recordio eich galwad at ddibenion sicrhau ansawdd neu ar gyfer hyfforddiant.
+
+hts.privacy.h2-6=Pryd y gallwn rannu eich manylion
+hts.privacy.p6-1=Mae’n bosibl y byddwn yn rhannu eich manylion gydag adrannau eraill o’r llywodraeth, partneriaid cyflenwi neu gyflenwyr trydydd parti at ddibenion galluogi, cynorthwyo neu gynnal ymchwil ynghylch y cynllun Cymorth i Gynilo. Gweler <a class="govuk-link" href="https://www.gov.uk/government/organisations/hm-revenue-customs/about/research#how-hmrc-may-use-information-we-hold-about-you-to-conduct-research" rel="noreferrer noopener" target="_blank">ymchwil yn CThEF</a>.
+hts.privacy.p6-2=Efallai y byddwn hefyd yn rhannu’ch manylion ag asiantaethau gorfodi’r gyfraith, os yw’r gyfraith yn caniatáu i ni wneud hynny, er mwyn atal neu ganfod trosedd ac er mwyn diogelu arian cyhoeddus.
+
+hts.privacy.h2-7=Cadw’ch data’n ddiogel
+hts.privacy.p7-1=Rydym wedi rhoi mesurau ar waith i ddiogelu’ch gwybodaeth.
+hts.privacy.p7-2=Mae diogelu’ch data yn rhywbeth yr ydym yn ei gymryd o ddifrif. Mae gennym safonau diogelwch llym, ac mae ein holl staff a phobl eraill sy’n prosesu data personol ar ein rhan yn cael hyfforddiant rheolaidd ynghylch sut i gadw gwybodaeth yn ddiogel.
+hts.privacy.p7-3=Rydym wedi rhoi gweithdrefnau technegol, ffisegol a rheolaethol priodol ar waith i ddiogelu’r wybodaeth rydym yn ei chasglu amdanoch chi.
+hts.privacy.p7-4=Dim ond y sawl sydd ag angen busnes neu gyfreithiol fydd yn gweld eich gwybodaeth bersonol.
+hts.privacy.p7-5=Pan fyddwn yn defnyddio darparwyr gwasanaeth trydydd parti, byddant ond yn prosesu’ch gwybodaeth bersonol yn unol â’n cyfarwyddyd neu gyda’n cytundeb ni, ac ar yr amod eu bod wedi cytuno i drin yr wybodaeth yn gyfrinachol ac i’w chadw’n ddiogel.
+hts.privacy.p7-6=Rydym wedi rhoi gweithdrefnau ar waith i ymdrin ag unrhyw doriadau drwgdybiedig o ran diogelwch data, a byddwn yn rhoi gwybod i chi a’r rheoleiddiwr am doriad drwgdybiedig pan fo’n ofynnol yn ôl y gyfraith i ni wneud hynny.
+hts.privacy.p7-7=Dylech atal defnydd anawdurdodedig neu dwyllodrus o’ch manylion, er enghraifft drwy ddefnyddio cyfrineiriau diogel.
+
+hts.privacy.h2-8=Pa mor hir yr ydym yn cadw’ch data
+hts.privacy.p8-1=Byddwn ond yn cadw eich gwybodaeth bersonol cyhyd ag y bo’n angenrheidiol i ni wneud hynny at y dibenion yr ydym yn ei defnyddio, a hynny’n unol â’n <a class="govuk-link" href="https://www.gov.uk/government/publications/hmrc-records-management-and-retention-and-disposal-policy" rel="noreferrer noopener" target="_blank">polisi rheoli cofnodion a chadw a gwaredu</a>.
+hts.privacy.p8-2=Y cyfnod cadw safonol diofyn ar gyfer cofnodion CThEF yw 6 blynedd ynghyd â’r flwyddyn bresennol, a elwir fel arall yn 6 blynedd + 1. Diffinnir hyn fel 6 blynedd ar ôl y nodyn olaf mewn cofnod, wedi ei ddilyn gan adolygiad neu ddinistriad sydd i’w gynnal yn ystod y flwyddyn gyfrifo bresennol ychwanegol (+ 1).
+
+hts.privacy.h2-9=Eich hawliau
+hts.privacy.p9-1=O dan rai amgylchiadau, mae gennych yr hawl yn ôl y gyfraith i:
+hts.privacy.ul3-1=ofyn am gael mynediad at eich gwybodaeth bersonol
+hts.privacy.ul3-2=gofyn am gael cywiro’ch gwybodaeth bersonol
+hts.privacy.ul3-3=gofyn am gael dileu gwybodaeth
+hts.privacy.ul3-4=gwrthwynebu i’ch gwybodaeth bersonol gael ei phrosesu
+hts.privacy.p9-2=Os ydych am wneud cais am gopi o’ch data personol, dilynwch arweiniad CThEF ynghylch <a class="govuk-link" href="https://www.gov.uk/guidance/hmrc-subject-access-request" rel="noreferrer noopener" target="_blank">gwneud cais gwrthrych am wybodaeth</a>.
+
+hts.privacy.h2-10=Os oes gennych unrhyw gwestiynau
+hts.privacy.p10-1=Mae CThEF wedi penodi Swyddog Diogelu Data (DPO), i oruchwylio cydymffurfiad â’i rwymedigaethau diogelu data. Gallwch <a class="govuk-link" href="https://www.gov.uk/government/publications/data-protection-act-dpa-information-hm-revenue-and-customs-hold-about-you/data-protection-act-dpa-information-hm-revenue-and-customs-hold-about-you#contact-dpo" rel="noreferrer noopener" target="_blank">gysylltu â ni</a> os oes gennych gwestiynau am yr hysbysiad preifatrwydd hwn neu os ydych am wneud cwyn.
+hts.privacy.p10-2=Mae gennych hefyd yr hawl i wneud cwyn ar unrhyw adeg i <a class="govuk-link" href="https://ico.org.uk/global/contact-us/" rel="noreferrer noopener" target="_blank">Swyddfa’r Comisiynydd Gwybodaeth (ICO)</a>, sef awdurdod goruchwylio’r DU ar gyfer materion diogelu data.
+hts.privacy.p10-3=Mae’n bosibl y bydd GOV.UK hefyd yn casglu <a class="govuk-link" href="https://www.gov.uk/help/privacy-notice" rel="noreferrer noopener" target="_blank">gwybodaeth benodol amdanoch.</a>.
 
 # Close Account
 hts.close-account.title.h1=A ydych yn siŵr eich bod am gau eich cyfrif?
