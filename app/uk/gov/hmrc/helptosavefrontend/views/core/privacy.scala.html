@@ -24,38 +24,65 @@
 
 @layout(title = title, enableSignOutLink = false) {
   <h1 class="govuk-heading-l">@title</h1>
-  <p class="govuk-body">@messages("hts.privacy.p1")</p>
-  <p class="govuk-body">@messages("hts.privacy.p2")</p>
-  <p class="govuk-body">@messages("hts.privacy.p3")</p>
-
-  <ul class="govuk-list govuk-list--bullet">
-    <li>@messages("hts.privacy.ul1.li1")</li>
-    <li>@messages("hts.privacy.ul1.li2")</li>
-    <li>@Html(Messages("hts.privacy.ul1.li3"))</li>
-    <li>@messages("hts.privacy.ul1.li4")</li>
-  </ul>
-
-  <p class="govuk-body">@messages("hts.privacy.p4")</p>
-  <p class="govuk-body">@messages("hts.privacy.p5")</p>
-  <p class="govuk-body">@Html(Messages("hts.privacy.p6"))</p>
-  <p class="govuk-body">@messages("hts.privacy.p7")</p>
-  <p class="govuk-body">@Html(Messages("hts.privacy.p8"))</p>
-  <p class="govuk-body">@messages("hts.privacy.p9")</p>
-
-
-  <ul class="govuk-list govuk-list--bullet">
-    <li>@messages("hts.privacy.ul2.li1")</li>
-    <li>@messages("hts.privacy.ul2.li2")</li>
-  </ul>
 
   <h2 class="govuk-heading-m">@messages("hts.privacy.h2-1")</h2>
-  <p class="govuk-body">@Html(Messages("hts.privacy.p10"))</p>
+  <p class="govuk-body">@Html(messages("hts.privacy.p1-1"))</p>
+  <p class="govuk-body">@Html(messages("hts.privacy.p1-2"))</p>
 
   <h2 class="govuk-heading-m">@messages("hts.privacy.h2-2")</h2>
-  <p class="govuk-body">@Html(Messages("hts.privacy.p11.1"))
-      <a class="govuk-link" rel="noreferrer noopener" href="https://www.gov.uk/government/publications/data-protection-act-dpa-information-hm-revenue-and-customs-hold-about-you"
-         target="_blank">@Html(Messages("hts.privacy.p11.link-text"))
-      </a>@messages("hts.privacy.p11.2")
-  </p>
+  <p class="govuk-body">@Html(messages("hts.privacy.p2-1"))</p>
+  <p class="govuk-body">@Html(messages("hts.privacy.p2-2"))</p>
+  <p class="govuk-body">@Html(messages("hts.privacy.p2-3"))</p>
+
+  <h2 class="govuk-heading-m">@messages("hts.privacy.h2-3")</h2>
+  <p class="govuk-body">@Html(messages("hts.privacy.p3-1"))</p>
+  <ul class="govuk-list govuk-list--bullet">
+      <li>@Html(messages("hts.privacy.ul1-1"))</li>
+      <li>@Html(messages("hts.privacy.ul1-2"))</li>
+      <li>@Html(messages("hts.privacy.ul1-3"))</li>
+      <li>@Html(messages("hts.privacy.ul1-4"))</li>
+  </ul>
+
+  <h2 class="govuk-heading-m">@messages("hts.privacy.h2-4")</h2>
+  <p class="govuk-body">@Html(messages("hts.privacy.p4-1"))</p>
+  <ul class="govuk-list govuk-list--bullet">
+      <li>@Html(messages("hts.privacy.ul2-1"))</li>
+  </ul>
+  <p class="govuk-body">@Html(messages("hts.privacy.p4-2"))</p>
+
+  <h2 class="govuk-heading-m">@messages("hts.privacy.h2-5")</h2>
+  <p class="govuk-body">@Html(messages("hts.privacy.p5-1"))</p>
+
+  <h2 class="govuk-heading-m">@messages("hts.privacy.h2-6")</h2>
+  <p class="govuk-body">@Html(messages("hts.privacy.p6-1"))</p>
+  <p class="govuk-body">@Html(messages("hts.privacy.p6-2"))</p>
+
+  <h2 class="govuk-heading-m">@messages("hts.privacy.h2-7")</h2>
+  <p class="govuk-body">@Html(messages("hts.privacy.p7-1"))</p>
+  <p class="govuk-body">@Html(messages("hts.privacy.p7-2"))</p>
+  <p class="govuk-body">@Html(messages("hts.privacy.p7-3"))</p>
+  <p class="govuk-body">@Html(messages("hts.privacy.p7-4"))</p>
+  <p class="govuk-body">@Html(messages("hts.privacy.p7-5"))</p>
+  <p class="govuk-body">@Html(messages("hts.privacy.p7-6"))</p>
+  <p class="govuk-body">@Html(messages("hts.privacy.p7-7"))</p>
+
+  <h2 class="govuk-heading-m">@messages("hts.privacy.h2-8")</h2>
+  <p class="govuk-body">@Html(messages("hts.privacy.p8-1"))</p>
+  <p class="govuk-body">@Html(messages("hts.privacy.p8-2"))</p>
+
+  <h2 class="govuk-heading-m">@messages("hts.privacy.h2-9")</h2>
+  <p class="govuk-body">@Html(messages("hts.privacy.p9-1"))</p>
+  <ul class="govuk-list govuk-list--bullet">
+      <li>@Html(messages("hts.privacy.ul3-1"))</li>
+      <li>@Html(messages("hts.privacy.ul3-2"))</li>
+      <li>@Html(messages("hts.privacy.ul3-3"))</li>
+      <li>@Html(messages("hts.privacy.ul3-4"))</li>
+  </ul>
+  <p class="govuk-body">@Html(messages("hts.privacy.p9-2"))</p>
+
+  <h2 class="govuk-heading-m">@messages("hts.privacy.h2-10")</h2>
+  <p class="govuk-body">@Html(messages("hts.privacy.p10-1"))</p>
+  <p class="govuk-body">@Html(messages("hts.privacy.p10-2"))</p>
+  <p class="govuk-body">@Html(messages("hts.privacy.p10-3"))</p>
 
 }
