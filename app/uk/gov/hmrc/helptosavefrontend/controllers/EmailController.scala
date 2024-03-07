@@ -100,6 +100,7 @@ class EmailController @Inject() (
             } else {
               if (!s.hasSelectedEmail) {
                 SelectEmailForm.selectEmailForm
+                  .copy(data = Map("new-email" -> eligibleWithEmail.confirmedEmail.getOrElse("")))
               } else {
                 SelectEmailForm.selectEmailForm.copy(
                   data = s.pendingEmail.fold(Map("new-email" -> ""))(e => Map("new-email" -> e))
