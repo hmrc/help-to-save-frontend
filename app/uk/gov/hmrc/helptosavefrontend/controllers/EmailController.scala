@@ -95,18 +95,17 @@ class EmailController @Inject() (
       def ifDigitalNewApplicant = { session: Option[HTSSession] =>
         withEligibleSession(
           (s, eligibleWithEmail) => {
-            val emailFormWithData = if (s.changingDetails) {
-              SelectEmailForm.selectEmailForm.copy(data = Map("new-email" -> ""))
-            } else {
-              if (!s.hasSelectedEmail) {
-                SelectEmailForm.selectEmailForm
-                  .copy(data = Map("new-email" -> eligibleWithEmail.confirmedEmail.getOrElse("")))
-              } else {
-                SelectEmailForm.selectEmailForm.copy(
-                  data = s.pendingEmail.fold(Map("new-email" -> ""))(e => Map("new-email" -> e))
-                )
-              }
-            }
+            val newEmail = (if (s.changingDetails) {
+                              None
+                            } else {
+                              if (s.hasSelectedEmail) {
+                                eligibleWithEmail.confirmedEmail
+                              } else {
+                                s.pendingEmail
+                              }
+                            }).getOrElse("")
+            val emailFormWithData =
+              SelectEmailForm.selectEmailForm.copy(data = Map("new-email" -> newEmail))
             Ok(selectEmail(eligibleWithEmail.email, emailFormWithData, Some(backLinkFromSession(s))))
           },
           (_, _) => SeeOther(routes.EmailController.getGiveEmailPage.url)
