@@ -475,14 +475,14 @@ hts.privacy.p2-3=I gael esboniad llawn o sut mae CThEF yn defnyddio’ch data, d
 
 hts.privacy.h2-3=Pa ddata yr ydym yn eu casglu
 hts.privacy.p3-1=Mae’r data personol yr ydym yn eu casglu yn cynnwys:
-hts.privacy.ul1-1=eich enw, eich dyddiad geni a’ch rhif yswiriant gwladol
-hts.privacy.ul1-2=lle’r ydych wedi byw dros y 5 mlynedd diwethaf
-hts.privacy.ul1-3=eich cyfeiriad e-bost
-hts.privacy.ul1-4=manylion eich cyfrif banc
+hts.privacy.ul3-1=eich enw, eich dyddiad geni a’ch rhif yswiriant gwladol
+hts.privacy.ul3-2=lle’r ydych wedi byw dros y 5 mlynedd diwethaf
+hts.privacy.ul3-3=eich cyfeiriad e-bost
+hts.privacy.ul3-4=manylion eich cyfrif banc
 
 hts.privacy.h2-4=Pam yr ydym yn casglu’ch data personol
 hts.privacy.p4-1=Rydym yn casglu data a gwybodaeth bersonol gennych chi, o gronfeydd data mewnol CThEF ac o’r Adran Gwaith a Phensiynau (DWP), i wirio’r canlynol:
-hts.privacy.ul2-1=a ydych yn cael taliadau ar gyfer Credyd Treth Gwaith, Credyd Treth Plant neu Gredyd Cynhwysola
+hts.privacy.ul4-1=a ydych yn cael taliadau ar gyfer Credyd Treth Gwaith, Credyd Treth Plant neu Gredyd Cynhwysola
 hts.privacy.p4-2=Bydd y data a’r wybodaeth a gasglwn yn cadarnhau a ydych yn gymwys i agor cyfrif Cymorth i Gynilo. Mae hyn yn cynnwys gwneud penderfyniadau awtomataidd, gweler adran berthnasol <a class="govuk-link" href="https://www.gov.uk/government/publications/data-protection-act-dpa-information-hm-revenue-and-customs-hold-about-you/data-protection-act-dpa-information-hm-revenue-and-customs-hold-about-you" rel="noreferrer noopener" target="_blank">Hysbysiad Preifatrwydd CThEF</a>. Os oes unrhyw un wedi rhoi gwybod i chi nad ydych yn gymwys ar gyfer cyfrif Cymorth i Gynilo, dylech fynd i GOV.UK i wirio’r <a class="govuk-link" href="https://www.gov.uk/get-help-savings-low-income/eligibility" rel="noreferrer noopener" target="_blank">meini prawf cymhwystra</a>. Os ydych eisoes wedi gwneud hyn a’ch bod yn dal o’r farn eich bod yn gymwys, gallwch gysylltu â Gwasanaeth Cwsmeriaid Cymraeg CThEF ar 0300 200 1900.
 
 hts.privacy.h2-5=Os ydych yn cysylltu â Gwasanaeth Cwsmeriaid Cymraeg CThEF dros y ffôn
@@ -507,10 +507,10 @@ hts.privacy.p8-2=Y cyfnod cadw safonol diofyn ar gyfer cofnodion CThEF yw 6 blyn
 
 hts.privacy.h2-9=Eich hawliau
 hts.privacy.p9-1=O dan rai amgylchiadau, mae gennych yr hawl yn ôl y gyfraith i:
-hts.privacy.ul3-1=ofyn am gael mynediad at eich gwybodaeth bersonol
-hts.privacy.ul3-2=gofyn am gael cywiro’ch gwybodaeth bersonol
-hts.privacy.ul3-3=gofyn am gael dileu gwybodaeth
-hts.privacy.ul3-4=gwrthwynebu i’ch gwybodaeth bersonol gael ei phrosesu
+hts.privacy.ul9-1=ofyn am gael mynediad at eich gwybodaeth bersonol
+hts.privacy.ul9-2=gofyn am gael cywiro’ch gwybodaeth bersonol
+hts.privacy.ul9-3=gofyn am gael dileu gwybodaeth
+hts.privacy.ul9-4=gwrthwynebu i’ch gwybodaeth bersonol gael ei phrosesu
 hts.privacy.p9-2=Os ydych am wneud cais am gopi o’ch data personol, dilynwch arweiniad CThEF ynghylch <a class="govuk-link" href="https://www.gov.uk/guidance/hmrc-subject-access-request" rel="noreferrer noopener" target="_blank">gwneud cais gwrthrych am wybodaeth</a>.
 
 hts.privacy.h2-10=Os oes gennych unrhyw gwestiynau
