@@ -462,28 +462,61 @@ hts.register.create_account.payInNow.continue=Continue
 hts.payInNow.error=Select whether you want to pay in your first deposit now
 
 # Privacy page
-hts.privacy.title.h1=Help to Save privacy statement
-hts.privacy.p1=This document sets out how we will use your information to deliver the Help to Save scheme.
-hts.privacy.p2=HM Revenue and Customs (HMRC) is a Data Controller under the Data Protection Act 1998. We will collect and use your personal information to check your eligibility for Help to Save and to make sure that you get any government bonus that your Help to Save account entitles you to.
-hts.privacy.p3=As part of our processing and compliance checks, we may:
-hts.privacy.ul1.li1=check your entitlement to benefits, Working Tax Credit, Child Tax Credit and Universal Credit
-hts.privacy.ul1.li2=confirm your employment status and income
-hts.privacy.ul1.li3=check whether you’re entitled to a Help to Save account and any bonuses due
-hts.privacy.ul1.li4=check whether you have held a Help to Save account previously
-hts.privacy.p4=We will gather only the data that we need to establish your entitlement to open and maintain a Help to Save account.
-hts.privacy.p5=The data that we currently gather and use to achieve that with regard to Working Tax Credit and Universal Credit customers will be your name, National Insurance number, address, date of birth and email address. We will gather this information from your existing online details that you use to register for and login into your account.
-hts.privacy.p6=We will establish your entitlement as a Working Tax Credit recipient through information already held on HMRC’s internal National Tax Credits system. We will establish your entitlement as a Universal Credit recipient based on information obtained from the Department for Work and Pensions (DWP).
-hts.privacy.p7=The only information that we will directly ask you for beyond this is where you need to provide a change of your email address.
-hts.privacy.p8=We’ll be sharing all of this information with NS&I who are helping to administer the Help to Save scheme.
-hts.privacy.p9=We will only share your information with third parties for purposes other than Help to Save if the law permits us to, and if then, for the:
-hts.privacy.ul2.li1=prevention or detection of crime
-hts.privacy.ul2.li2=protection of public funds
-hts.privacy.h2-1=HMRC staff handling your information
-hts.privacy.p10=HMRC’s staff are trained in handling information and understand how important it is to protect personal and other sensitive information.
-hts.privacy.h2-2=Seeing what information we hold
-hts.privacy.p11.1=You can ask to see the personal information HMRC holds about you. To help locate the information you want and deal with your request more quickly, you should make your Data Protection Act request to the HMRC office that you’ve been dealing with. You should address your request to the ‘Data Protection Officer’. You can get more information on
-hts.privacy.p11.link-text=HMRC’s privacy policy (opens in a new tab)
-hts.privacy.p11.2=on the GOV.UK website.
+hts.privacy.title.h1=HMRC Help to Save Privacy Notice
+
+hts.privacy.h2-1=The purpose of this notice
+hts.privacy.p1-1=HM Revenue and Customs (HMRC) are committed to protecting the privacy and security of your personal information. For the purposes of this document, HMRC will be referred to as ‘we’.
+hts.privacy.p1-2=This privacy notice describes how we collect and use personal information about you in accordance with data protection law, including the UK General Data Protection Regulation (UK GDPR) and the Data Protection Act (DPA) 2018.
+
+hts.privacy.h2-2=How we use your information
+hts.privacy.p2-1=HMRC only gathers personal information needed to check the eligibility of prospective Help to Save account holders. The Savings (Government Contributions) Act 2017 sets out the legal basis that HMRC relies on to process your personal data. Under UK GDPR, the legal basis for processing your personal data in these circumstances is Article 6(1)(e), which allows HMRC to process personal data when it is necessary to do so for the purposes of our functions as a government department.
+hts.privacy.p2-2=HMRC and National Savings and Investments who are our delivery partner, are jointly responsible for delivering the Help to Save scheme and for deciding how we store and use your personal information.
+hts.privacy.p2-3=For a full explanation of how HMRC uses your data read the <a class="govuk-link" href="https://www.gov.uk/government/publications/data-protection-act-dpa-information-hm-revenue-and-customs-hold-about-you/data-protection-act-dpa-information-hm-revenue-and-customs-hold-about-you" rel="noreferrer noopener" target="_blank">HMRC Privacy Notice</a>. To find out more about how NS&I uses your personal data, read the <a class="govuk-link" href="https://www.nsandi.com/privacy-notice" rel="noreferrer noopener" target="_blank">NS&I Privacy Notice</a>.
+
+hts.privacy.h2-3=What data we collect
+hts.privacy.p3-1=The personal data we collect includes:
+hts.privacy.ul3-1=your name, date of birth and national insurance number
+hts.privacy.ul3-2=your address history for the last 5 years
+hts.privacy.ul3-3=your email address
+hts.privacy.ul3-4=your bank account details
+
+hts.privacy.h2-4=Why we collect your personal data
+hts.privacy.p4-1=We collect personal data and information from you, from HMRC internal databases and the Department of Work and Pensions (DWP) to check if:
+hts.privacy.ul4-1=you are receiving payments for Working Tax Credit or Child Tax Credit or Universal Credit
+hts.privacy.p4-2=The data and information we collect will confirm whether you’re eligible to open a Help to Save account. This involves automated decision making, see the relevant section of the <a class="govuk-link" href="https://www.gov.uk/government/publications/data-protection-act-dpa-information-hm-revenue-and-customs-hold-about-you/data-protection-act-dpa-information-hm-revenue-and-customs-hold-about-you" rel="noreferrer noopener" target="_blank">HMRC Privacy Notice</a>. If you have been told you’re not eligible for a Help to Save account, you should go to GOV.UK to check the <a class="govuk-link" href="https://www.gov.uk/get-help-savings-low-income/eligibility" rel="noreferrer noopener" target="_blank">eligibility criteria</a>. If you have done this and you still think you’re eligible, you can contact the Help to Save service on 0300 322 7093.
+
+hts.privacy.h2-5=If you call the Help to Save service
+hts.privacy.p5-1=We may monitor or record your call for training or quality assurance purposes.
+
+hts.privacy.h2-6=When we may share your details
+hts.privacy.p6-1=We may share  your details with other government departments, delivery partners or third party suppliers for the purposes of enabling, assisting or conducting research on the Help to Save scheme, for example, to <a class="govuk-link" href="https://www.gov.uk/government/organisations/hm-revenue-customs/about/research#how-hmrc-may-use-information-we-hold-about-you-to-conduct-research" rel="noreferrer noopener" target="_blank">Research at HMRC</a>.
+hts.privacy.p6-2=We may also share your details with law enforcement agencies, if the law permits us to do so for the prevention or detection of crime and the protection of public funds.
+
+hts.privacy.h2-7=Keeping your data secure
+hts.privacy.p7-1=We have put in place measures to protect the security of your information.
+hts.privacy.p7-2=We treat the security of your data very seriously. We have strict security standards, and all our staff and other people who process personal data on our behalf get regular training about how to keep information safe.
+hts.privacy.p7-3=We have put in place appropriate technical, physical and managerial procedures to safeguard and secure the information we collect about you.
+hts.privacy.p7-4=Your personal information will only be seen by those who have a business or legal need to see it.
+hts.privacy.p7-5=Where we use third-party service providers they will only process your personal information on our instructions or with our agreement, and where they have agreed to treat the information confidentially and to keep it secure.
+hts.privacy.p7-6=We have put procedures in place to deal with any suspected data security breach and will notify you and the regulator of a suspected breach where we are legally required to do so.
+hts.privacy.p7-7=You should prevent the unauthorised or fraudulent use of your details, for example by using secure passwords.
+
+hts.privacy.h2-8=How long we keep your data
+hts.privacy.p8-1=We aim to retain your personal information for only as long as it is necessary for us to do so for the purposes for which we are using it and in line with our published <a class="govuk-link" href="https://www.gov.uk/government/publications/hmrc-records-management-and-retention-and-disposal-policy" rel="noreferrer noopener" target="_blank">records management and retention and disposal policy</a>.
+hts.privacy.p8-2=The default standard retention period for HMRC records is 6 years plus current, otherwise known as 6 years + 1. This is defined as 6 years after the last entry in a record followed by first review or destruction to be carried out in the additional current (+ 1) accounting year.
+
+hts.privacy.h2-9=Your rights
+hts.privacy.p9-1=Under certain circumstances, by law you have the right to:
+hts.privacy.ul9-1=request access to your personal information
+hts.privacy.ul9-2=request correction of personal information
+hts.privacy.ul9-3=request erasure of information
+hts.privacy.ul9-4=object to processing of personal information
+hts.privacy.p9-2=If you want to request a copy of your personal data, follow HMRC’s <a class="govuk-link" href="https://www.gov.uk/guidance/hmrc-subject-access-request" rel="noreferrer noopener" target="_blank">subject access request guidance</a>.
+
+hts.privacy.h2-10=If you have any questions
+hts.privacy.p10-1=HMRC has appointed a Data Protection Officer (DPO), to oversee compliance with its data protection obligations.  You can <a class="govuk-link" href="https://www.gov.uk/government/publications/data-protection-act-dpa-information-hm-revenue-and-customs-hold-about-you/data-protection-act-dpa-information-hm-revenue-and-customs-hold-about-you#contact-dpo" rel="noreferrer noopener" target="_blank">contact us</a> if you have questions about this privacy notice or want to make a complaint.
+hts.privacy.p10-2=You also have the right to make a complaint at any time to the <a class="govuk-link" href="https://ico.org.uk/global/contact-us/" rel="noreferrer noopener" target="_blank">Information Commissioner's Office (ICO)</a>, the UK supervisory authority for data protection issues.
+hts.privacy.p10-3=GOV.UK may also collect <a class="govuk-link" href="https://www.gov.uk/help/privacy-notice" rel="noreferrer noopener" target="_blank">certain information about you</a>.
 
 # Close Account
 hts.close-account.title.h1=Are you sure you want to close your account?
