@@ -106,7 +106,16 @@ class EmailController @Inject() (
                 )
               }
             }
-            Ok(selectEmail(eligibleWithEmail.email, emailFormWithData, Some(backLinkFromSession(s))))
+
+            val newEmail = if (!s.changingDetails && !s.hasSelectedEmail) {
+              eligibleWithEmail.confirmedEmail
+            } else {
+              None
+            }
+
+            val emailFormWithData = SelectEmailForm.selectEmailForm.copy(data = Map("new-email" -> newEmail))
+
+            Ok(selectEmail(eligibleWithEmail.email, newEmail, emailFormWithData, Some(backLinkFromSession(s))))
           },
           (_, _) => SeeOther(routes.EmailController.getGiveEmailPage.url)
         )(session)
@@ -124,7 +133,7 @@ class EmailController @Inject() (
                   case Right(validEmail) =>
                     updateSessionAndReturnResult(
                       HTSSession(None, None, Some(validEmail)),
-                      Ok(selectEmail(validEmail, SelectEmailForm.selectEmailForm))
+                      Ok(selectEmail(validEmail, None, SelectEmailForm.selectEmailForm))
                     )
 
                   case Left(_) =>
@@ -149,12 +158,22 @@ class EmailController @Inject() (
 
   def selectEmailSubmitter(URI: String): Action[AnyContent] =
     authorisedForHtsWithInfo { implicit request => implicit htsContext =>
-      def handleForm(email: String, backLink: Option[String], session: HTSSession): Future[Result] =
+      def handleForm(
+        userInfoEmail: String,
+        newerEmail: Option[String],
+        backLink: Option[String],
+        session: HTSSession
+      ): Future[Result] =
         SelectEmailForm.selectEmailForm
           .bindFromRequest()
           .fold(
-            withErrors => Ok(selectEmail(email, withErrors, backLink)), { form =>
-              val (updatedSession, result) = form.newEmail.fold {
+            withErrors => Ok(selectEmail(userInfoEmail, withErrors, backLink)), { form =>
+              val (updatedSession, result) = form.newestEmail.fold {
+                val email = if (form.checked === "UserInfo") {
+                  userInfoEmail
+                } else {
+                  newerEmail.getOrElse("")
+                }
                 session.copy(hasSelectedEmail = true) ->
                   SeeOther(routes.EmailController.emailConfirmed(crypto.encrypt(email)).url)
               } { newEmail =>
