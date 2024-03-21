@@ -135,7 +135,9 @@ class EmailController @Inject() (
             )
         )
       }
+
       checkSessionAndEnrolmentStatus(ifDigitalNewApplicant, ifDE)
+
     }(loginContinueURL = routes.EmailController.getSelectEmailPage.url)
 
   def selectEmailSubmit: Action[AnyContent] =
@@ -172,7 +174,10 @@ class EmailController @Inject() (
 
       def ifDigitalNewApplicant = { maybeSession: Option[HTSSession] =>
         withEligibleSession(
-          (s, withEmail) => { handleForm(withEmail.email, withEmail.confirmedEmail, Some(backLinkFromSession(s)), s) },
+          (session, eligibleWithEmail) => {
+            val backLink = backLinkFromSession(session)
+            handleForm(eligibleWithEmail.email, eligibleWithEmail.confirmedEmail, Some(backLink), session)
+          },
           (_, _) => SeeOther(routes.EmailController.getGiveEmailPage.url)
         )(maybeSession)
       }
@@ -182,7 +187,8 @@ class EmailController @Inject() (
           SeeOther(routes.EligibilityCheckController.getCheckEligibility.url)
         ) { session =>
           session.pendingEmail.fold[Future[Result]] {
-            logger.warn("Could not find pending email for select email submit"); internalServerError()
+            logger.warn("Could not find pending email for select email submit")
+            internalServerError()
           } { email =>
             handleForm(email, None, None, session)
           }
