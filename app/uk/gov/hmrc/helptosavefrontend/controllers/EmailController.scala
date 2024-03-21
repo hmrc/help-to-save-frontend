@@ -477,15 +477,15 @@ class EmailController @Inject() (
     )
 
   private def updateSessionIfChangedAndReturnResult(
-    session: HTSSession, updatedSession : HTSSession,
+    session: HTSSession,
+    updatedSession: HTSSession,
     ifSuccessful: => Result
-  )(implicit hc: HeaderCarrier, request: Request[AnyContent]): Future[Result] = {
+  )(implicit hc: HeaderCarrier, request: Request[AnyContent]): Future[Result] =
     if (updatedSession =!= session) {
       updateSessionAndReturnResult(updatedSession, ifSuccessful)
     } else {
       ifSuccessful
     }
-  }
 
   private def updateSessionAndReturnResult(
     session: HTSSession,
