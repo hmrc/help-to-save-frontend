@@ -97,11 +97,10 @@ class EmailController @Inject() (
           (s, eligibleWithEmail) => {
             val emailFormWithData =
               SelectEmailForm.selectEmailForm.copy(
-                data = Map("new-email" -> (if (!s.changingDetails && !s.hasSelectedEmail) {
-                                             eligibleWithEmail.confirmedEmail.getOrElse("")
-                                           } else {
-                                             ""
-                                           }))
+                data = Map("new-email" -> (eligibleWithEmail.confirmedEmail match {
+                  case Some(email) if !s.changingDetails && !s.hasSelectedEmail => email
+                  case _ => ""
+                }))
               )
             val newerEmail = eligibleWithEmail.confirmedEmail match {
               case Some(e) if e != eligibleWithEmail.email => Some(e)
