@@ -50,4 +50,11 @@ object SelectEmailForm {
   }
 }
 
-case class SelectEmail(checked: String, newestEmail: Option[String])
+case class SelectEmail(checked: String, newestEmail: Option[String]) {
+  def userInfoIfChecked(userInfoEmail: String, newerEmail: Option[String]): String =
+    if (checked === "UserInfo") {
+      userInfoEmail
+    } else {
+      newerEmail.getOrElse("")
+    }
+}

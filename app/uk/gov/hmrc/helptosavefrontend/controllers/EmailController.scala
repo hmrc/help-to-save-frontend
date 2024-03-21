@@ -95,27 +95,19 @@ class EmailController @Inject() (
       def ifDigitalNewApplicant = { session: Option[HTSSession] =>
         withEligibleSession(
           (s, eligibleWithEmail) => {
-            val emailFormWithData = if (s.changingDetails) {
-              SelectEmailForm.selectEmailForm.copy(data = Map("new-email" -> ""))
-            } else {
-              if (!s.hasSelectedEmail) {
-                SelectEmailForm.selectEmailForm
-              } else {
-                SelectEmailForm.selectEmailForm.copy(
-                  data = s.pendingEmail.fold(Map("new-email" -> ""))(e => Map("new-email" -> e))
-                )
-              }
+            val emailFormWithData =
+              SelectEmailForm.selectEmailForm.copy(
+                data = Map("new-email" -> (if (!s.changingDetails && !s.hasSelectedEmail) {
+                                             eligibleWithEmail.confirmedEmail.getOrElse("")
+                                           } else {
+                                             ""
+                                           }))
+              )
+            val newerEmail = eligibleWithEmail.confirmedEmail match {
+              case Some(e) if e != eligibleWithEmail.email => Some(e)
+              case _                                       => None
             }
-
-            val newEmail = if (!s.changingDetails && !s.hasSelectedEmail) {
-              eligibleWithEmail.confirmedEmail
-            } else {
-              None
-            }
-
-            val emailFormWithData = SelectEmailForm.selectEmailForm.copy(data = Map("new-email" -> newEmail))
-
-            Ok(selectEmail(eligibleWithEmail.email, newEmail, emailFormWithData, Some(backLinkFromSession(s))))
+            Ok(selectEmail(eligibleWithEmail.email, newerEmail, emailFormWithData, Some(backLinkFromSession(s))))
           },
           (_, _) => SeeOther(routes.EmailController.getGiveEmailPage.url)
         )(session)
@@ -135,7 +127,6 @@ class EmailController @Inject() (
                       HTSSession(None, None, Some(validEmail)),
                       Ok(selectEmail(validEmail, None, SelectEmailForm.selectEmailForm))
                     )
-
                   case Left(_) =>
                     updateSessionAndReturnResult(
                       HTSSession(None, None, None),
@@ -145,9 +136,7 @@ class EmailController @Inject() (
             )
         )
       }
-
       checkSessionAndEnrolmentStatus(ifDigitalNewApplicant, ifDE)
-
     }(loginContinueURL = routes.EmailController.getSelectEmailPage.url)
 
   def selectEmailSubmit: Action[AnyContent] =
@@ -167,34 +156,24 @@ class EmailController @Inject() (
         SelectEmailForm.selectEmailForm
           .bindFromRequest()
           .fold(
-            withErrors => Ok(selectEmail(userInfoEmail, withErrors, backLink)), { form =>
+            withErrors => {
+              Ok(selectEmail(userInfoEmail, None, withErrors, backLink))
+            }, { form =>
               val (updatedSession, result) = form.newestEmail.fold {
-                val email = if (form.checked === "UserInfo") {
-                  userInfoEmail
-                } else {
-                  newerEmail.getOrElse("")
-                }
+                val email = form.userInfoIfChecked(userInfoEmail, newerEmail)
                 session.copy(hasSelectedEmail = true) ->
                   SeeOther(routes.EmailController.emailConfirmed(crypto.encrypt(email)).url)
               } { newEmail =>
                 session.copy(pendingEmail = Some(newEmail), confirmedEmail = None, hasSelectedEmail = true) ->
                   SeeOther(routes.EmailController.confirmEmail.url)
               }
-
-              if (updatedSession =!= session) {
-                updateSessionAndReturnResult(updatedSession, result)
-              } else {
-                result
-              }
+              updateSessionIfChangedAndReturnResult(session = session, updatedSession = updatedSession, result)
             }
           )
 
       def ifDigitalNewApplicant = { maybeSession: Option[HTSSession] =>
         withEligibleSession(
-          (session, eligibleWithEmail) => {
-            val backLink = backLinkFromSession(session)
-            handleForm(eligibleWithEmail.email, Some(backLink), session)
-          },
+          (s, withEmail) => { handleForm(withEmail.email, withEmail.confirmedEmail, Some(backLinkFromSession(s)), s) },
           (_, _) => SeeOther(routes.EmailController.getGiveEmailPage.url)
         )(maybeSession)
       }
@@ -204,16 +183,13 @@ class EmailController @Inject() (
           SeeOther(routes.EligibilityCheckController.getCheckEligibility.url)
         ) { session =>
           session.pendingEmail.fold[Future[Result]] {
-            logger.warn("Could not find pending email for select email submit")
-            internalServerError()
+            logger.warn("Could not find pending email for select email submit"); internalServerError()
           } { email =>
-            handleForm(email, None, session)
+            handleForm(email, None, None, session)
           }
         }
       }
-
       checkSessionAndEnrolmentStatus(ifDigitalNewApplicant, ifDE)
-
     }(loginContinueURL = URI)
 
   def getGiveEmailPage: Action[AnyContent] =
@@ -500,6 +476,17 @@ class EmailController @Inject() (
       }
     )
 
+  private def updateSessionIfChangedAndReturnResult(
+    session: HTSSession, updatedSession : HTSSession,
+    ifSuccessful: => Result
+  )(implicit hc: HeaderCarrier, request: Request[AnyContent]): Future[Result] = {
+    if (updatedSession =!= session) {
+      updateSessionAndReturnResult(updatedSession, ifSuccessful)
+    } else {
+      ifSuccessful
+    }
+  }
+
   private def updateSessionAndReturnResult(
     session: HTSSession,
     ifSuccessful: => Result
@@ -528,7 +515,7 @@ class EmailController @Inject() (
           } else {
             val newInfo = eligibleWithUserInfo.userInfo.updateEmail(params.email)
             val newSession = HTSSession(
-              Some(Right(eligibleWithUserInfo.copy(userInfo = newInfo))),
+              Some(Right(eligibleWithUserInfo)),
               Some(params.email),
               session.flatMap(_.pendingEmail),
               None,
