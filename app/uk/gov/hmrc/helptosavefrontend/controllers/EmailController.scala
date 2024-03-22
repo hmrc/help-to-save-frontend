@@ -99,7 +99,7 @@ class EmailController @Inject() (
               SelectEmailForm.selectEmailForm.copy(
                 data = Map("new-email" -> (eligibleWithEmail.confirmedEmail match {
                   case Some(email) if !s.changingDetails && !s.hasSelectedEmail => email
-                  case _ => ""
+                  case _                                                        => ""
                 }))
               )
             val newerEmail = eligibleWithEmail.confirmedEmail match {
@@ -168,7 +168,7 @@ class EmailController @Inject() (
                 session.copy(pendingEmail = Some(newEmail), confirmedEmail = None, hasSelectedEmail = true) ->
                   SeeOther(routes.EmailController.confirmEmail.url)
               }
-              updateSessionIfChangedAndReturnResult(session = session, updatedSession = updatedSession, result)
+              updateSessionAndReturnResult(updated = updatedSession, result, Some(session))
             }
           )
 
@@ -238,11 +238,11 @@ class EmailController @Inject() (
             withErrors => Ok(giveEmail(withErrors, Some(backLinkFromSession(session)))),
             form => {
               val updatedSession = session.copy(confirmedEmail = None, pendingEmail = Some(form.email))
-              if (session =!= updatedSession) {
-                updateSessionAndReturnResult(updatedSession, SeeOther(routes.EmailController.confirmEmail.url))
-              } else {
-                SeeOther(routes.EmailController.confirmEmail.url)
-              }
+              updateSessionAndReturnResult(
+                updated = updatedSession,
+                SeeOther(routes.EmailController.confirmEmail.url),
+                original = Some(session)
+              )
             }
           )
 
@@ -481,30 +481,25 @@ class EmailController @Inject() (
       }
     )
 
-  private def updateSessionIfChangedAndReturnResult(
-    session: HTSSession,
-    updatedSession: HTSSession,
-    ifSuccessful: => Result
-  )(implicit hc: HeaderCarrier, request: Request[AnyContent]): Future[Result] =
-    if (updatedSession =!= session) {
-      updateSessionAndReturnResult(updatedSession, ifSuccessful)
-    } else {
-      ifSuccessful
-    }
-
   private def updateSessionAndReturnResult(
-    session: HTSSession,
-    ifSuccessful: => Result
+    updated: HTSSession,
+    ifSuccessful: => Result,
+    original: Option[HTSSession] = None
   )(implicit hc: HeaderCarrier, request: Request[AnyContent]): Future[Result] =
-    sessionStore
-      .store(session)
-      .fold[Result](
-        e => {
-          logger.warn(s"error updating the session, error = $e")
-          internalServerError()
-        },
-        _ => ifSuccessful
-      )
+    //    if (Eq[Option[HTSSession]].neqv(Some[HTSSession](updatedSession), session)) {
+    if (original.contains(updated)) {
+      ifSuccessful
+    } else {
+      sessionStore
+        .store(updated)
+        .fold[Result](
+          e => {
+            logger.warn(s"error updating the session, error = $e")
+            internalServerError()
+          },
+          _ => ifSuccessful
+        )
+    }
 
   /** Return `None` if user is ineligible */
   private def updateSession(session: Option[HTSSession], params: EmailVerificationParams)(
