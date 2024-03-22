@@ -286,11 +286,11 @@ class EmailControllerSpec
       def selectEmailSubmit(newEmail: Option[String]): Future[Result] =
         newEmail.fold(
           csrfAddToken(controller.selectEmailSubmit())(
-            fakeRequest.withMethod("POST").withFormUrlEncodedBody("email" -> "Yes")
+            fakeRequest.withMethod("POST").withFormUrlEncodedBody("email" -> "UserInfo")
           )
         ) { e =>
           csrfAddToken(controller.selectEmailSubmit())(
-            fakeRequest.withMethod("POST").withFormUrlEncodedBody("email" -> "No", "new-email" -> e)
+            fakeRequest.withMethod("POST").withFormUrlEncodedBody("email" -> "Change", "new-email" -> e)
           )
         }
 
@@ -439,11 +439,11 @@ class EmailControllerSpec
       def selectEmailSubmitReminder(newEmail: Option[String]): Future[Result] =
         newEmail.fold(
           csrfAddToken(controller.selectEmailSubmitReminder())(
-            fakeRequest.withMethod("POST").withFormUrlEncodedBody("email" -> "Yes")
+            fakeRequest.withMethod("POST").withFormUrlEncodedBody("email" -> "UserInfo")
           )
         ) { e =>
           csrfAddToken(controller.selectEmailSubmitReminder())(
-            fakeRequest.withMethod("POST").withFormUrlEncodedBody("email" -> "No", "new-email" -> e)
+            fakeRequest.withMethod("POST").withFormUrlEncodedBody("email" -> "Change", "new-email" -> e)
           )
         }
 
