@@ -486,7 +486,6 @@ class EmailController @Inject() (
     ifSuccessful: => Result,
     original: Option[HTSSession] = None
   )(implicit hc: HeaderCarrier, request: Request[AnyContent]): Future[Result] =
-    //    if (Eq[Option[HTSSession]].neqv(Some[HTSSession](updatedSession), session)) {
     if (original.contains(updated)) {
       ifSuccessful
     } else {
