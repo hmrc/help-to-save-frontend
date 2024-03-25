@@ -24,7 +24,7 @@
 
 @this(layout: uk.gov.hmrc.helptosavefrontend.views.html.layout, viewHelpers: ViewHelpers, errorHelpers: FormErrorMessage)
 
-@(email: String, form: Form[SelectEmail], backLink: Option[String] = None)(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
+@(userInfoEmail: String, newerEmail: Option[String], form: Form[SelectEmail], backLink: Option[String] = None)(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
 
 @title = @{messages("hts.select-email.title.h1")}
 @key = @{"email"}
@@ -94,18 +94,23 @@
         idPrefix = Some(key),
         name = key,
         items = Seq(
-          RadioItem(
+          Some(RadioItem(
+            content = Text(userInfoEmail),
+            value = Some("UserInfo"),
+            checked = form.data.values.toList.contains("UserInfo")
+          )),
+          newerEmail.map( email => RadioItem(
             content = Text(email),
-            value = Some("Yes"),
-            checked = form.data.values.toList.contains("Yes")
-          ),
-          RadioItem(
+            value = Some("Newer"),
+            checked = form.data.values.toList.contains("Newer")
+          )),
+          Some(RadioItem(
             content = Text(messages("hts.select-email.select-new-address")),
-            value = Some("No"),
-            checked = form.data.values.toList.contains("No"),
+            value = Some("Change"),
+            checked = form.data.values.toList.contains("Change"),
             conditionalHtml = Some(newEmailHtml)
-          )
-        ),
+          ))
+        ).flatten,
         errorMessage = if(hasNotSelected) {
           Some(ErrorMessage(
             content = Text(messages("hts.select-email.select-an-option")),

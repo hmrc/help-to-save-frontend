@@ -30,7 +30,7 @@ class SummaryListRowsHelper {
     changeLocation: Call,
     changeScreenReaderText: String,
     changeLabel: Option[String]
-  )(implicit messages: Messages): SummaryListRow =
+  ): SummaryListRow =
     SummaryListRow(
       key = Key(content = Text(question), classes = "govuk-!-width-one-third"),
       value = Value(content = Text(answer)),

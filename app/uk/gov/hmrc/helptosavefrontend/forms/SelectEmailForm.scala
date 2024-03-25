@@ -28,11 +28,12 @@ object SelectEmailForm {
     val emailFormatter = new Formatter[Option[String]] {
       override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], Option[String]] =
         data.get("email") match {
-          // if "No" make sure that we have a new email
-          case Some("No") => emailValidation.emailFormatter.bind(key, data).map(Some(_))
+          // if "Change" make sure that we have a new email
+          case Some("Change") => emailValidation.emailFormatter.bind(key, data).map(Some(_))
 
-          // the value for "email" should be "Yes" or "No" - this will get picked up in the mapping in the form below.
-          // if the value is "Yes" ignore any new email that has been entered
+          // the value for "email" should be "UserInfo" or "Newer" or "Change" - this will get picked up in the mapping in
+          // the form below.
+          // if the value is "UserInfo" or "Newer" ignore any new email that has been entered
           case _ => Right(None)
         }
 
@@ -42,11 +43,18 @@ object SelectEmailForm {
 
     Form(
       mapping(
-        "email"     -> text.verifying(l => l === "Yes" || l === "No"),
+        "email"     -> text.verifying(l => l === "UserInfo" || l === "Newer" || l === "Change"),
         "new-email" -> of(emailFormatter)
       )(SelectEmail.apply)(SelectEmail.unapply)
     )
   }
 }
 
-case class SelectEmail(checked: String, newEmail: Option[String])
+case class SelectEmail(checked: String, newestEmail: Option[String]) {
+  def userInfoIfChecked(userInfoEmail: String, newerEmail: Option[String]): String =
+    if (checked === "UserInfo") {
+      userInfoEmail
+    } else {
+      newerEmail.getOrElse("")
+    }
+}

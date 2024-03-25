@@ -286,11 +286,11 @@ class EmailControllerSpec
       def selectEmailSubmit(newEmail: Option[String]): Future[Result] =
         newEmail.fold(
           csrfAddToken(controller.selectEmailSubmit())(
-            fakeRequest.withMethod("POST").withFormUrlEncodedBody("email" -> "Yes")
+            fakeRequest.withMethod("POST").withFormUrlEncodedBody("email" -> "UserInfo")
           )
         ) { e =>
           csrfAddToken(controller.selectEmailSubmit())(
-            fakeRequest.withMethod("POST").withFormUrlEncodedBody("email" -> "No", "new-email" -> e)
+            fakeRequest.withMethod("POST").withFormUrlEncodedBody("email" -> "Change", "new-email" -> e)
           )
         }
 
@@ -439,11 +439,11 @@ class EmailControllerSpec
       def selectEmailSubmitReminder(newEmail: Option[String]): Future[Result] =
         newEmail.fold(
           csrfAddToken(controller.selectEmailSubmitReminder())(
-            fakeRequest.withMethod("POST").withFormUrlEncodedBody("email" -> "Yes")
+            fakeRequest.withMethod("POST").withFormUrlEncodedBody("email" -> "UserInfo")
           )
         ) { e =>
           csrfAddToken(controller.selectEmailSubmitReminder())(
-            fakeRequest.withMethod("POST").withFormUrlEncodedBody("email" -> "No", "new-email" -> e)
+            fakeRequest.withMethod("POST").withFormUrlEncodedBody("email" -> "Change", "new-email" -> e)
           )
         }
 
@@ -1036,7 +1036,7 @@ class EmailControllerSpec
         )
         mockSessionStorePut(
           HTSSession(
-            Some(Right(eligibleWithUserInfo.withEmail(Some(newEmail)))),
+            Some(Right(eligibleWithUserInfo)),
             Some(newEmail),
             None,
             changingDetails = true
@@ -1068,7 +1068,7 @@ class EmailControllerSpec
         mockDecrypt("encrypted")(s"$nino#$newEmail")
         mockSessionStoreGet(Right(Some(HTSSession(Some(Right(eligibleWithUserInfo.withEmail(None))), None, None))))
         mockSessionStorePut(
-          HTSSession(Some(Right(eligibleWithUserInfo.withEmail(Some(newEmail)))), Some(newEmail), None)
+          HTSSession(Some(Right(eligibleWithUserInfo.withEmail(None))), Some(newEmail), None)
         )(Right(None))
         mockStoreConfirmedEmail(newEmail)(Right(None))
         mockAudit(
@@ -1121,7 +1121,7 @@ class EmailControllerSpec
         mockDecrypt("encrypted")(s"$nino#$newEmail")
         mockSessionStoreGet(Right(Some(HTSSession(Some(Right(eligibilityResult)), Some(email), None))))
         mockSessionStorePut(
-          HTSSession(Some(Right(eligibilityResult.withEmail(Some(newEmail)))), Some(newEmail), None)
+          HTSSession(Some(Right(eligibilityResult)), Some(newEmail), None)
         )(Right(None))
         mockStoreConfirmedEmail(newEmail)(Right(None))
         mockAudit(

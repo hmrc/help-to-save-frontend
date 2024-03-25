@@ -18,7 +18,7 @@ package uk.gov.hmrc.helptosavefrontend.models.userinfo
 
 import uk.gov.hmrc.helptosavefrontend.util.NINO
 
-trait MissingUserInfo
+sealed trait MissingUserInfo
 
 object MissingUserInfo {
 
