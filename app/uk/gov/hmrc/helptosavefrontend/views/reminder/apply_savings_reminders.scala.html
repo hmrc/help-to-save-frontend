@@ -60,12 +60,12 @@
               RadioItem(
                 content = Text(messages("hts.reminder-frequency.yes")),
                 value = Some("yes"),
-                checked = form.data.values.toList.contains("yes")
+                checked = selection.matches("yes")
               ),
               RadioItem(
                 content = Text(messages("hts.reminder-frequency.no")),
                 value = Some("no"),
-                checked = form.data.values.toList.contains("no")
+                checked = selection.matches("no")
               )
             ),
             errorMessage = if(errorMessage.isDefined) {
