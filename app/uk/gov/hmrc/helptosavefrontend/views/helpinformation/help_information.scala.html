@@ -69,6 +69,15 @@
   )}
 @layout(title = title + " " + Messages("hts.global.accountholder.title-suffix"), Some(appConfig.nsiManageAccountUrl)){
 <h1 class="govuk-heading-l">@title</h1>
+
+<h2 class="govuk-heading-m">@messages("hts.help.information.h2")</h2>
+    <p class="govuk-body">
+        @messages("hts.help.information.p1-1")
+        <a class= "govuk-link" href="https://www.tax.service.gov.uk/ask-hmrc/chat/help-to-save" target="_blank">
+            @messages("hts.help.information.p1-2").
+        </a>
+    </p>
+
 <!--payments-->
 @help_intro_section(heading = Messages("hts.help-information.section.payments.title"))
   @for(detail <- paymentDetailsList) {

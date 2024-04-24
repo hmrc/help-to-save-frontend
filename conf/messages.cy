@@ -560,6 +560,10 @@ report.a.problem.link=A oes unrhyw beth o’i le gyda’r dudalen hon?
 # Help/information
 hts.help.information.title.h1=Help a gwybodaeth
 
+hts.help.information.h2=Gofyn i CThEF ar-lein
+hts.help.information.p1-1=I gael rhagor o wybodaeth am y cynllun Cymorth i Gynilo
+hts.help.information.p1-2=gofynnwch i gynorthwyydd digidol CThEF (yn Saesneg)
+
 # Help/information: Payments
 hts.help-information.section.payments.title=Taliadau
 hts.help-information.section.payments.s1.title=Faint y gallwch ei dalu i mewn i’r cyfrif
