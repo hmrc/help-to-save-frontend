@@ -17,6 +17,7 @@
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 
 @import java.time.LocalDate
+@import uk.gov.hmrc.helptosavefrontend.views.helpers.DateUtils
 
 @this(layout: uk.gov.hmrc.helptosavefrontend.views.html.layout)
 
@@ -31,7 +32,7 @@
  </h1>
 
  <p class="govuk-body">
-  @Html(messages("hts.closed-account.p1", clsDate.toString))
+  @Html(messages("hts.closed-account.p1", DateUtils.toLocalisedString(clsDate)))
  </p>
 
 }
