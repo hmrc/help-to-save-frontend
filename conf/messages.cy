@@ -353,7 +353,7 @@ hts.no-account.exit-message=Canslo a mynd i GOV.UK
 
 # Closed account
 hts.closed-account.title.h1=Cyfrif wedi cau
-hts.closed-account.p1 =Ni allwch newid na gosod nodynnau atgoffa mwyach gan fod eich cyfrif wedi cau ar {0}
+hts.closed-account.p1 =Ni allwch newid na gosod nodynnau atgoffa mwyach gan fod eich cyfrif wedi cau ar {0}.
 
 # Account creation error
 hts.account-creation-error.title.h1=Aeth rhywbeth o’i le

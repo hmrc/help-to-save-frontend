@@ -354,7 +354,7 @@ hts.no-account.exit-message=Cancel and go to GOV.UK
 
 # Closed account
 hts.closed-account.title.h1=Account closed
-hts.closed-account.p1 = You can no longer change or set reminders as your account closed on {0}
+hts.closed-account.p1 = You can no longer change or set reminders as your account closed on {0}.
 
 # Account creation error
 hts.account-creation-error.title.h1=Something went wrong
