@@ -39,7 +39,7 @@ import uk.gov.hmrc.helptosavefrontend.services.{HelpToSaveReminderService, HelpT
 import uk.gov.hmrc.helptosavefrontend.util.Logging._
 import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Email, EmailVerificationParams, Logging, MaintenanceSchedule, NINOLogMessageTransformer, toFuture}
 import uk.gov.hmrc.helptosavefrontend.views.html.closeaccount.close_account_are_you_sure
-import uk.gov.hmrc.helptosavefrontend.views.html.email.accountholder.check_your_email
+import uk.gov.hmrc.helptosavefrontend.views.html.email.accountholder.{check_your_details, check_your_email}
 import uk.gov.hmrc.helptosavefrontend.views.html.email.{update_email_address, we_updated_your_email}
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -62,7 +62,8 @@ class AccountHolderController @Inject() (
   updateEmailAddress: update_email_address,
   checkYourEmail: check_your_email,
   weUpdatedYourEmail: we_updated_your_email,
-  closeAccountAreYouSure: close_account_are_you_sure
+  closeAccountAreYouSure: close_account_are_you_sure,
+  checkYourDetails: check_your_details
 )(
   implicit crypto: Crypto,
   emailValidation: EmailValidation,
@@ -76,7 +77,7 @@ class AccountHolderController @Inject() (
 
   import AccountHolderController._
 
-  def getUpdateYourEmailAddress(): Action[AnyContent] =
+  def getUpdateYourEmailAddress: Action[AnyContent] =
     authorisedForHtsWithNINO { implicit request => implicit htsContext =>
       checkIfAlreadyEnrolled(
         _ => Ok(updateEmailAddress(UpdateEmailForm.verifyEmailForm)),

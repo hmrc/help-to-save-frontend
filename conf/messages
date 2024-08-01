@@ -297,6 +297,9 @@ hts.email-verified.title.h1=Email address verified
 hts.email-verified.p1=We’ll use this address to contact you about your Help to Save account.
 hts.email-verified.p2=Your email has not been updated in other government services.
 
+# Existing Account - Check details
+hts.email-verified.check-details.title.h1=Your details
+
 # Existing Account - Verify your email address
 hts.email-verification.existing-user.check-your-email.title.h1=You have 30 minutes to confirm the email address
 hts.email-verification.existing-user.check-your-email.we-have-sent-mail=We’ve sent an email to {0}. <a class="govuk-link" href={1}>Use a different email address</a>.
