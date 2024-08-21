@@ -406,6 +406,7 @@ hts.register.create_account.change-your-sort-code=Change your sort code
 hts.register.create_account.change-your-account-number=Change your account number
 hts.register.create_account.change-your-roll-number=Change your roll number
 hts.register.create_account.change-your-account-name=Change your account name
+hts.register.create_account.address=Address
 
 hts.register.create_account.your-bank-details.sort-code=Sort code
 hts.register.create_account.your-bank-details.account-number=Account number

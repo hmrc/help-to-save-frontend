@@ -406,6 +406,7 @@ hts.register.create_account.change-your-sort-code=Newid eich cod didoli
 hts.register.create_account.change-your-account-number=Newid rhif eich cyfrif
 hts.register.create_account.change-your-roll-number=Newid eich rhif rôl
 hts.register.create_account.change-your-account-name=Newid enw eich cyfrif
+hts.register.create_account.address=Cyfeiriad
 
 hts.register.create_account.your-bank-details.sort-code=Cod didoli
 hts.register.create_account.your-bank-details.account-number=Rhif y cyfrif

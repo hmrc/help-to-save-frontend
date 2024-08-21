@@ -1,0 +1,77 @@
+@*
+ * Copyright 2023 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import uk.gov.hmrc.govukfrontend.views.html.components._
+@import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
+@import uk.gov.hmrc.helptosavefrontend.controllers.routes
+@import uk.gov.hmrc.helptosavefrontend.models.HtsContext
+@import uk.gov.hmrc.helptosavefrontend.models.userinfo.UserInfo
+@import uk.gov.hmrc.helptosavefrontend.views.ViewHelpers
+
+@this(layout: uk.gov.hmrc.helptosavefrontend.views.html.layout, viewHelpers: ViewHelpers,
+        button: uk.gov.hmrc.helptosavefrontend.views.html.helpers.button, govukSummaryList: GovukSummaryList,
+        govukButton: GovukButton)
+
+@(userInfo: UserInfo, postcode: String, dob: String, addressLines: List[String])(
+        implicit htsContext: HtsContext, request: Request[_], messages: Messages, frontendAppConfig: FrontendAppConfig)
+
+  @title = @{
+    Messages("hts.register.create_account.your-details")
+  }
+
+  @layout(title = title) {
+    <h1 class="govuk-heading-l">@title</h1>
+    @govukSummaryList(SummaryList(
+      rows = Seq(
+        SummaryListRow(
+          key = Key(content = Text(Messages("hts.register.create_account.your-details.name"))),
+          value = Value(content = Text(s"${userInfo.forename} ${userInfo.surname}")),
+          actions = Some(Actions(
+            items = Seq(
+              ActionItem(
+                href = routes.RegisterController.getDetailsAreIncorrect.url,
+                content = Text(Messages("hts.register.create_account.change"))
+              )
+            )
+          ))
+        ),
+        SummaryListRow(
+          key = Key(content = Text(Messages("hts.register.create_account.your-details.dob"))),
+          value = Value(content = Text(dob))
+        ),
+        SummaryListRow(
+          key = Key(content = Text(Messages("hts.register.create_account.your-details.nino"))),
+          value = Value(content = Text(userInfo.nino))
+        ),
+        SummaryListRow(
+          key = Key(content = Text(Messages("hts.register.create_account.address"))),
+          value = Value(content = HtmlContent(s"${addressLines.mkString("<br>")}<br>$postcode")),
+          actions = Some(Actions(
+            items = Seq(
+              ActionItem(
+                href = routes.RegisterController.getDetailsAreIncorrect.url,
+                content = Text(Messages("hts.register.create_account.change"))
+              )
+            )
+          ))
+        )
+      )
+    ))
+    @govukButton(Button(
+      content = Text(Messages("hts.global.continue-button")),
+      href = Some(routes.EligibilityCheckController.getIsEligible.url)
+    ))
+  }
