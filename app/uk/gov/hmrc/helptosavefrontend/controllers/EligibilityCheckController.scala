@@ -184,7 +184,11 @@ class EligibilityCheckController @Inject() (
   def getMissingInfoPage: Action[AnyContent] =
     authorisedForHtsWithInfo { implicit request => implicit htsContext =>
       htsContext.userDetails.fold(
-        missingInfo => Ok(missingUserInfo(missingInfo.missingInfo)),
+        { missingInfo =>
+          // DLS-10416 - Check in Kibana to see whether we can remove the Date of Birth warning
+          logger.info("Missing user info: " + missingInfo.missingInfo.toString())
+          Ok(missingUserInfo(missingInfo.missingInfo))
+        },
         _ => SeeOther(routes.EligibilityCheckController.getCheckEligibility.url)
       )
     }(loginContinueURL = routes.EligibilityCheckController.getCheckEligibility.url)
