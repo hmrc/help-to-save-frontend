@@ -35,10 +35,6 @@
   <h1 class="govuk-heading-l">@title</h1>
 
   <p class="govuk-body">@Html(Messages("hts.register.create_account.intro"))</p>
-  <h2 class="govuk-heading-m">@messages("hts.register.create_account.your-details")</h2>
-      @viewHelpers.govukSummaryList(SummaryList(rows =
-      summaryRows.yourDetailsRow(eligibleWithUserInfo)
-      ))
     <h2 class="govuk-heading-m">@messages("hts.register.create_account.your-email")</h2>
       @viewHelpers.govukSummaryList(SummaryList(rows =
       summaryRows.yourEmailDetailsRow(email,period,areRemindersEnabled)
