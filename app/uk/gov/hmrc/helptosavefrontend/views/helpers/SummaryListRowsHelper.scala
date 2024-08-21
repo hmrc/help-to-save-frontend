@@ -164,10 +164,10 @@ class SummaryListRowsHelper {
         changeLabel = Some(messages("hts.register.create_account.change"))
       )
     List(
-      Some(accountName),
       Some(sortCode),
       Some(accountNumber),
-      rollNumber
+      rollNumber,
+      Some(accountName)
     ).collect { case Some(r) => r }
   }
 
