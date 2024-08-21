@@ -153,7 +153,7 @@ class EligibilityCheckControllerSpec
 
         val result = getIsNotEligible()
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getIsEligible.url)
+        redirectLocation(result) shouldBe Some(routes.CheckYourDetailsController.checkYourDetails.url)
       }
 
       "redirect to check eligibility if the session data indicates they have not done the eligibility checks yet" in {
@@ -271,7 +271,7 @@ class EligibilityCheckControllerSpec
 
         val result = controller.getThinkYouAreEligiblePage(FakeRequest())
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getIsEligible.url)
+        redirectLocation(result) shouldBe Some(routes.CheckYourDetailsController.checkYourDetails.url)
       }
 
       "show the correct page if the session data indicates that the user is ineligible" in {
@@ -313,7 +313,7 @@ class EligibilityCheckControllerSpec
 
           val result = doCheckEligibilityRequest()
           status(result) shouldBe SEE_OTHER
-          redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getIsEligible.url)
+          redirectLocation(result) shouldBe Some(routes.CheckYourDetailsController.checkYourDetails.url)
         }
 
         "show the you are not eligible page if the eligibility check indicates the user is ineligible" in {
@@ -442,7 +442,7 @@ class EligibilityCheckControllerSpec
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
           val result = doCheckEligibilityRequest()
           status(result) shouldBe Status.SEE_OTHER
-          redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getIsEligible.url)
+          redirectLocation(result) shouldBe Some(routes.CheckYourDetailsController.checkYourDetails.url)
         }
 
         "redirect to NS&I if the eligibility check indicates the user already has an account" in {
@@ -471,7 +471,7 @@ class EligibilityCheckControllerSpec
           val responseFuture: Future[PlayResult] = doCheckEligibilityRequest()
           val result = Await.result(responseFuture, 5.seconds)
           status(result) shouldBe Status.SEE_OTHER
-          redirectLocation(responseFuture) shouldBe Some(routes.EligibilityCheckController.getIsEligible.url)
+          redirectLocation(responseFuture) shouldBe Some(routes.CheckYourDetailsController.checkYourDetails.url)
         }
 
         "redirect to the not eligible page if there is no session data and the ineligibility check" +
@@ -515,7 +515,7 @@ class EligibilityCheckControllerSpec
 
           val result = controller.getCheckEligibility(FakeRequest())
           status(result) shouldBe Status.SEE_OTHER
-          redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getIsEligible.url)
+          redirectLocation(result) shouldBe Some(routes.CheckYourDetailsController.checkYourDetails.url)
         }
 
         "show the TotalCapReached page when the enable-early-cap-check config is set to true " +
