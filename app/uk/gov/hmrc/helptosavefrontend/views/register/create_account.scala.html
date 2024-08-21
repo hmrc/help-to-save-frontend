@@ -25,7 +25,7 @@
 
 @this(layout: uk.gov.hmrc.helptosavefrontend.views.html.layout, viewHelpers: ViewHelpers, summaryRows: SummaryListRowsHelper)
 
-@(eligibleWithUserInfo: EligibleWithUserInfo,period: String, email: String, bankDetails: BankDetails)(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
+@(eligibleWithUserInfo: EligibleWithUserInfo, period: String, email: String, bankDetails: BankDetails)(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 
 @areRemindersEnabled = @{appConfig.reminderServiceFeatureSwitch}
 
@@ -33,16 +33,15 @@
 
 @layout(title, Some(routes.BankAccountController.getBankDetailsPage.url)) {
   <h1 class="govuk-heading-l">@title</h1>
-
   <p class="govuk-body">@Html(Messages("hts.register.create_account.intro"))</p>
-    <h2 class="govuk-heading-m">@messages("hts.register.create_account.your-email")</h2>
-      @viewHelpers.govukSummaryList(SummaryList(rows =
-      summaryRows.yourEmailDetailsRow(email,period,areRemindersEnabled)
-      ))
-    <h2 class="govuk-heading-m">@messages("hts.register.create_account.your-bank-details")</h2>
-      @viewHelpers.govukSummaryList(SummaryList(rows =
-      summaryRows.yourBankDetailsRow(bankDetails)
-      ))
+  <h2 class="govuk-heading-m">@messages("hts.register.create_account.your-email")</h2>
+  @viewHelpers.govukSummaryList(SummaryList(rows =
+    summaryRows.yourEmailDetailsRow(email, period, areRemindersEnabled)
+  ))
+  <h2 class="govuk-heading-m">@messages("hts.register.create_account.your-bank-details")</h2>
+  @viewHelpers.govukSummaryList(SummaryList(rows =
+    summaryRows.yourBankDetailsRow(bankDetails)
+  ))
   <h2 class="govuk-heading-m">@Messages("hts.register.create_account.tandc-title")</h2>
   <p class="govuk-body">@Html(Messages("hts.register.create_account.tandc-p1"))</p>
   <ul class="govuk-list govuk-list--bullet">
@@ -53,7 +52,7 @@
     <li>@Messages("hts.register.create_account.tandc-ul1-li5")</li>
   </ul>
 
-  @viewHelpers.form(routes.RegisterController.createAccount, Symbol("data-prevent-multiple-submit") -> "true", Symbol("id") -> "submission-form"){
+  @viewHelpers.form(routes.RegisterController.createAccount, Symbol("data-prevent-multiple-submit") -> "true", Symbol("id") -> "submission-form") {
     <span id="submission-progress" aria-live="assertive"></span>
     @viewHelpers.govukButton(Button(
       preventDoubleClick = Some(true),
