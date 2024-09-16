@@ -87,7 +87,7 @@ class EmailController @Inject() (
     if (session.changingDetails) {
       routes.RegisterController.getCreateAccountPage.url
     } else {
-      routes.CheckYourDetailsController.checkYourDetails.url
+      routes.EligibilityCheckController.getIsEligible.url
     }
 
   def getSelectEmailPage: Action[AnyContent] =
