@@ -14,7 +14,7 @@ GET         /exit/we-signed-you-out                             uk.gov.hmrc.help
 GET         /keep-alive                                         uk.gov.hmrc.helptosavefrontend.controllers.IntroductionController.keepAlive
 
 GET         /sign-in                                            uk.gov.hmrc.helptosavefrontend.controllers.AccessAccountController.getSignInPage
-GET         /check-details                                      uk.gov.hmrc.helptosavefrontend.controllers.CheckYourDetailsController.checkYourDetails
+GET         /check-your-details                                 uk.gov.hmrc.helptosavefrontend.controllers.CheckYourDetailsController.checkYourDetails
 GET         /access-account                                     uk.gov.hmrc.helptosavefrontend.controllers.AccessAccountController.accessAccount
 GET         /pay-in                                             uk.gov.hmrc.helptosavefrontend.controllers.AccessAccountController.payIn
 GET         /no-account                                         uk.gov.hmrc.helptosavefrontend.controllers.AccessAccountController.getNoAccountPage
