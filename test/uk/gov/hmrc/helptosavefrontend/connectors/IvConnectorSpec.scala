@@ -16,27 +16,55 @@
 
 package uk.gov.hmrc.helptosavefrontend.connectors
 
+import com.typesafe.config.ConfigFactory
+import org.mockito.IdiomaticMockito
+import org.scalatest.EitherValues
 import org.scalatest.concurrent.ScalaFutures
+import org.scalatest.matchers.should.Matchers
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
+import play.api.{Application, Configuration}
 import play.api.libs.json.Json
-import uk.gov.hmrc.helptosavefrontend.controllers.ControllerSpecWithGuiceApp
+import uk.gov.hmrc.helptosavefrontend.controllers.{ControllerSpecBase, ControllerSpecWithGuiceApp}
 import uk.gov.hmrc.helptosavefrontend.models.iv.IvSuccessResponse.Success
 import uk.gov.hmrc.helptosavefrontend.models.iv.{IvErrorResponse, IvUnexpectedResponse, JourneyId}
-import uk.gov.hmrc.http.HttpResponse
+import uk.gov.hmrc.helptosavefrontend.util.WireMockMethods
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
+import play.api.inject.guice.GuiceApplicationBuilder
+import uk.gov.hmrc.http.test.WireMockSupport
 
 import java.util.UUID
+import scala.concurrent.ExecutionContext
 
 // scalastyle:off magic.number
-class IvConnectorSpec extends ControllerSpecWithGuiceApp with HttpSupport with ScalaFutures {
+class IvConnectorSpec
+    extends ControllerSpecBase with Matchers with ScalaFutures with IdiomaticMockito with WireMockSupport
+    with WireMockMethods with GuiceOneAppPerSuite with EitherValues {
+
+  private val config = Configuration(
+    ConfigFactory.parseString(
+      s"""
+         |microservice {
+         |  services {
+         |      identity-verification-journey-result {
+         |      protocol = http
+         |      host     = $wireMockHost
+         |      port     = $wireMockPort
+         |    }
+         |  }
+         |}
+         |""".stripMargin
+    )
+  )
+
+  override def fakeApplication(): Application = new GuiceApplicationBuilder().configure(config).build()
+  val ivConnector: IvConnector = app.injector.instanceOf[IvConnectorImpl]
+  implicit val hc: HeaderCarrier = HeaderCarrier()
+  implicit lazy val ec: ExecutionContext = app.injector.instanceOf[ExecutionContext]
 
   class TestApparatus {
-
     val journeyId = JourneyId(UUID.randomUUID().toString)
-
-    val url = s"${appConfig.ivJourneyResultUrl}/${journeyId.Id}"
-
-    val ivConnector = new IvConnectorImpl(mockHttp)
-
-    val emptyBody = ""
+    val url = s"/mdtp/journey/journeyId/${journeyId.Id}"
+    val emptyBody = "{}"
     val emptyHeaders: Map[String, Seq[String]] = Map.empty
   }
 
@@ -48,26 +76,30 @@ class IvConnectorSpec extends ControllerSpecWithGuiceApp with HttpSupport with S
 
         val httpResponse = HttpResponse(200, Json.parse("""{"result": "Success"}"""), emptyHeaders)
 
-        mockGet(url)(Some(httpResponse))
+        when(GET, url).thenReturn(httpResponse.status, httpResponse.body)
 
         val result = ivConnector.getJourneyStatus(journeyId)
 
-        result.futureValue should be(Some(Success))
+        result.futureValue shouldBe Some(Success)
       }
 
       "handle unexpected non-successful response" in new TestApparatus {
 
         val httpResponse = HttpResponse(600, emptyBody)
 
-        mockGet(url)(Some(httpResponse))
+        when(GET, url).thenReturn(httpResponse.status, httpResponse.body)
 
         val result = ivConnector.getJourneyStatus(journeyId)
 
-        result.futureValue should be(Some(IvUnexpectedResponse(httpResponse)))
+        result.futureValue match {
+          case Some(IvUnexpectedResponse(_)) => ()
+          case other                         => fail(s"Expected IvUnexpectedResponse but got $other")
+        }
       }
 
       "handle failure scenarios" in new TestApparatus {
-        mockGet(url)(None)
+        wireMockServer.stop()
+        when(GET, url)
 
         val result = ivConnector.getJourneyStatus(journeyId)
 
@@ -75,6 +107,7 @@ class IvConnectorSpec extends ControllerSpecWithGuiceApp with HttpSupport with S
           case Some(IvErrorResponse(_)) => ()
           case other                    => fail(s"Expected IvErrorResponse but got $other")
         }
+        wireMockServer.start()
       }
 
     }

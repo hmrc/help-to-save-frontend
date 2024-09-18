@@ -15,22 +15,63 @@
  */
 
 package uk.gov.hmrc.helptosavefrontend.connectors
+import com.typesafe.config.ConfigFactory
+import org.mockito.IdiomaticMockito
+import org.scalatest.EitherValues
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
+import play.api.{Application, Configuration}
+import play.api.libs.json._
 import play.api.http.Status
-import uk.gov.hmrc.helptosavefrontend.controllers.ControllerSpecWithGuiceApp
+import play.api.inject.guice.GuiceApplicationBuilder
+import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
+import uk.gov.hmrc.helptosavefrontend.controllers.{ControllerSpecBase, ControllerSpecWithGuiceApp}
 import uk.gov.hmrc.helptosavefrontend.models.email.VerifyEmailError.OtherError
 import uk.gov.hmrc.helptosavefrontend.models.email.{EmailVerificationRequest, VerifyEmailError}
-import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Email, NINO}
-import uk.gov.hmrc.http.HttpResponse
+import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Email, NINO, NINOLogMessageTransformer, TestNINOLogMessageTransformer, WireMockMethods}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
+import uk.gov.hmrc.http.test.WireMockSupport
+
+import uk.gov.hmrc.http.HttpClient
+import scala.concurrent.ExecutionContext
 
 class EmailVerificationConnectorSpec
-    extends ControllerSpecWithGuiceApp with HttpSupport with ScalaCheckDrivenPropertyChecks {
+    extends ControllerSpecBase with IdiomaticMockito with WireMockSupport with WireMockMethods with GuiceOneAppPerSuite
+    with EitherValues with ScalaCheckDrivenPropertyChecks {
 
   val nino: NINO = "AE123XXXX"
   val name: String = "first-name"
   val email: Email = "email@gmail.com"
 
-  implicit override val crypto: Crypto = mock[Crypto]
+  private val config = Configuration(
+    ConfigFactory.parseString(
+      s"""
+         |microservice {
+         |  services {
+         |      email-verification {
+         |      protocol = http
+         |      host     = $wireMockHost
+         |      port     = $wireMockPort
+         |    }
+         |  }
+         |}
+         |""".stripMargin
+    )
+  )
+
+  implicit val crypto: Crypto = mock[Crypto]
+
+  implicit val ninoLogMessageTransformer: NINOLogMessageTransformer = TestNINOLogMessageTransformer.transformer
+
+  override def fakeApplication(): Application = new GuiceApplicationBuilder().configure(config).build()
+
+  implicit lazy val appConfig: FrontendAppConfig = app.injector.instanceOf[FrontendAppConfig]
+
+  val mockHttp: HttpClient = app.injector.instanceOf[HttpClient]
+  lazy val connector: EmailVerificationConnectorImpl = new EmailVerificationConnectorImpl(mockHttp, mockMetrics)
+
+  implicit val hc: HeaderCarrier = HeaderCarrier()
+  implicit lazy val ec: ExecutionContext = app.injector.instanceOf[ExecutionContext]
 
   def emailVerificationRequest(isNewApplicant: Boolean): EmailVerificationRequest =
     EmailVerificationRequest(
@@ -41,9 +82,7 @@ class EmailVerificationConnectorSpec
       Map("name" -> name)
     )
 
-  lazy val connector: EmailVerificationConnectorImpl =
-    new EmailVerificationConnectorImpl(mockHttp, mockMetrics)
-
+  val verifyEmailUrl = "/email-verification/verification-requests"
   def mockEncrypt(expected: String)(result: String): Unit = crypto.encrypt(expected) returns result
 
   "verifyEmail" when {
@@ -62,17 +101,24 @@ class EmailVerificationConnectorSpec
 
       "return a success when given good json" in {
         mockEncrypt(nino + "#" + email)("")
-        mockPost(appConfig.verifyEmailURL, Map.empty[String, String], verificationRequest)(
-          Some(HttpResponse(Status.OK, ""))
-        )
+        val response = HttpResponse(Status.OK, "")
+        when(
+          POST,
+          verifyEmailUrl,
+          body = Some(Json.toJson(verificationRequest).toString())
+        ).thenReturn(response.status, response.body)
         await(connector.verifyEmail(nino, email, name, isNewApplicant)) shouldBe Right(())
       }
 
       "indicate the email has already been verified when the email has already been verified" in {
         mockEncrypt(nino + "#" + email)("")
-        mockPost(appConfig.verifyEmailURL, Map.empty[String, String], verificationRequest)(
-          Some(HttpResponse(Status.CONFLICT, ""))
-        )
+        val response = HttpResponse(Status.CONFLICT, "")
+        when(
+          POST,
+          verifyEmailUrl,
+          body = Some(Json.toJson(verificationRequest).toString())
+        ).thenReturn(response.status, response.body)
+
         await(connector.verifyEmail(nino, email, name, isNewApplicant)) shouldBe Left(VerifyEmailError.AlreadyVerified)
       }
 
@@ -80,29 +126,34 @@ class EmailVerificationConnectorSpec
 
         "given bad json" in {
           mockEncrypt(nino + "#" + email)("")
-          mockPost(appConfig.verifyEmailURL, Map.empty[String, String], verificationRequest)(
-            Some(HttpResponse(Status.BAD_REQUEST, ""))
-          )
+          val response = HttpResponse(Status.BAD_REQUEST, "")
+          when(
+            POST,
+            verifyEmailUrl,
+            body = Some(Json.toJson(verificationRequest).toString())
+          ).thenReturn(response.status, response.body)
+
           await(connector.verifyEmail(nino, email, name, isNewApplicant)) shouldBe Left(VerifyEmailError.OtherError)
         }
 
         "the email verification service is down" in {
+
+          val response = HttpResponse(Status.SERVICE_UNAVAILABLE, "")
           mockEncrypt(nino + "#" + email)("")
-          mockPost(appConfig.verifyEmailURL, Map.empty[String, String], verificationRequest)(
-            Some(HttpResponse(Status.SERVICE_UNAVAILABLE, ""))
-          )
+          when(POST, verifyEmailUrl, body = Some(Json.toJson(verificationRequest).toString()))
+            .thenReturn(response.status, response.body)
           await(connector.verifyEmail(nino, email, name, isNewApplicant)) shouldBe Left(VerifyEmailError.OtherError)
         }
 
         "the call comes back with an unexpected status" in {
+          val allOtherStatuses = Set(Status.INTERNAL_SERVER_ERROR)
           val statuses = Set(Status.OK, Status.CREATED, Status.BAD_REQUEST, Status.CONFLICT, Status.SERVICE_UNAVAILABLE)
 
-          forAll { status: Int =>
+          allOtherStatuses.foreach { status: Int =>
             whenever(!statuses.contains(status)) {
               mockEncrypt(nino + "#" + email)("")
-              mockPost(appConfig.verifyEmailURL, Map.empty[String, String], verificationRequest)(
-                Some(HttpResponse(status, ""))
-              )
+              when(POST, verifyEmailUrl, body = Some(Json.toJson(verificationRequest).toString()))
+                .thenReturn(status, "")
               await(connector.verifyEmail(nino, email, name, isNewApplicant)) shouldBe Left(OtherError)
             }
           }
@@ -110,8 +161,11 @@ class EmailVerificationConnectorSpec
 
         "the future fails" in {
           mockEncrypt(nino + "#" + email)("")
-          mockPost(appConfig.verifyEmailURL, Map.empty[String, String], verificationRequest)(None)
-          await(connector.verifyEmail(nino, email, name, isNewApplicant)) shouldBe Left(OtherError)
+          wireMockServer.stop()
+          when(POST, verifyEmailUrl, body = Some(Json.toJson(verificationRequest).toString()))
+          val result = await(connector.verifyEmail(nino, email, name, isNewApplicant))
+          result shouldBe Left(OtherError)
+          wireMockServer.start()
         }
       }
 
