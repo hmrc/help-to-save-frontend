@@ -16,29 +16,56 @@
 
 package uk.gov.hmrc.helptosavefrontend.connectors
 
+import com.typesafe.config.ConfigFactory
+import org.mockito.IdiomaticMockito
+import org.scalatest.EitherValues
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
+import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.{Application, Configuration}
 import play.api.libs.json._
 import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.helptosavefrontend.controllers.ControllerSpecWithGuiceApp
+import uk.gov.hmrc.helptosavefrontend.controllers.{ControllerSpecBase, ControllerSpecWithGuiceApp}
 import uk.gov.hmrc.helptosavefrontend.models.reminder.{CancelHtsUserReminder, HtsUserSchedule, UpdateReminderEmail}
-import uk.gov.hmrc.http.HttpResponse
+import uk.gov.hmrc.helptosavefrontend.util.WireMockMethods
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
+import uk.gov.hmrc.http.test.WireMockSupport
 
 import java.time.LocalDate
+import scala.concurrent.ExecutionContext
 
 // scalastyle:off magic.number
-class HelpToSaveReminderConnectorSpec extends ControllerSpecWithGuiceApp with HttpSupport {
+class HelpToSaveReminderConnectorSpec
+    extends ControllerSpecBase with IdiomaticMockito with WireMockSupport with WireMockMethods with GuiceOneAppPerSuite
+    with EitherValues {
 
-  lazy val connector: HelpToSaveReminderConnector = new HelpToSaveReminderConnectorImpl(mockHttp)
+  private val config = Configuration(
+    ConfigFactory.parseString(
+      s"""
+         |microservice {
+         |  services {
+         |      help-to-save-reminder {
+         |      protocol = http
+         |      host     = $wireMockHost
+         |      port     = $wireMockPort
+         |    }
+         |  }
+         |}
+         |""".stripMargin
+    )
+  )
 
-  val htsReminderURL = "http://localhost:7008"
+  override def fakeApplication(): Application = new GuiceApplicationBuilder().configure(config).build()
+  lazy val connector: HelpToSaveReminderConnector = app.injector.instanceOf[HelpToSaveReminderConnectorImpl]
+  implicit val hc: HeaderCarrier = HeaderCarrier()
+  implicit lazy val ec: ExecutionContext = app.injector.instanceOf[ExecutionContext]
 
-  val UpdateHtsURL =
-    s"$htsReminderURL/help-to-save-reminder/update-htsuser-entity"
+  val UpdateHtsURL = "/help-to-save-reminder/update-htsuser-entity"
 
-  def getHtsReminderUserURL(nino: String) = s"$htsReminderURL/help-to-save-reminder/gethtsuser/$nino"
+  def getHtsReminderUserURL(nino: String) = s"/help-to-save-reminder/gethtsuser/$nino"
 
-  val cancelHtsReminderURL = s"$htsReminderURL/help-to-save-reminder/delete-htsuser-entity"
+  val cancelHtsReminderURL = "/help-to-save-reminder/delete-htsuser-entity"
 
-  val emailUpdateHtsReminderURL = s"$htsReminderURL/help-to-save-reminder/update-htsuser-email"
+  val emailUpdateHtsReminderURL = "/help-to-save-reminder/update-htsuser-email"
 
   val emptyBody = ""
   val emptyHeaders: Map[String, Seq[String]] = Map.empty
@@ -59,14 +86,23 @@ class HelpToSaveReminderConnectorSpec extends ControllerSpecWithGuiceApp with Ht
       val htsUser =
         HtsUserSchedule(nino, "user@gmail.com", "Tyrion", "Lannister", true, Seq(1), LocalDate.parse("2000-01-01"))
 
-      val response =
-        HttpResponse(200, Json.toJson(htsUser), emptyHeaders)
-      mockPost(UpdateHtsURL, Map.empty, htsUser)(Some(response))
+      val response = HttpResponse(200, Json.toJson(htsUser), emptyHeaders)
+
+      when(
+        POST,
+        UpdateHtsURL,
+        body = Some(Json.toJson(htsUser).toString())
+      ).thenReturn(
+        response.status,
+        response.body
+      )
+
       val result = connector.updateHtsUser(htsUser)
       await(result.value) should equal(Right(htsUser))
 
     }
   }
+
   "get HtsUser" must {
 
     val ninoNew = "AE123456D"
@@ -78,12 +114,20 @@ class HelpToSaveReminderConnectorSpec extends ControllerSpecWithGuiceApp with Ht
 
       val response =
         HttpResponse(200, Json.toJson(htsUser), emptyHeaders)
-      mockGet(getHtsReminderUserURL(ninoNew), Map.empty)(Some(response))
+      when(
+        GET,
+        getHtsReminderUserURL(ninoNew)
+      ).thenReturn(
+        response.status,
+        response.body
+      )
+
       val result = connector.getHtsUser(ninoNew)
       await(result.value) should equal(Right(htsUser))
 
     }
   }
+
   "cancel HtsUser Reminder" must {
 
     val ninoNew = "AE123456D"
@@ -91,20 +135,40 @@ class HelpToSaveReminderConnectorSpec extends ControllerSpecWithGuiceApp with Ht
 
     "return http response as it is to the caller" in {
       val response = HttpResponse(200, emptyBody)
-      mockPost(cancelHtsReminderURL, Map.empty, cancelHtsUserReminder)(Some(response))
+      when(
+        POST,
+        cancelHtsReminderURL,
+        body = Some(Json.toJson(cancelHtsUserReminder).toString())
+      ).thenReturn(
+        response.status,
+        response.body
+      )
       val result = connector.cancelHtsUserReminders(cancelHtsUserReminder)
       await(result.value) should equal(Right(()))
-
     }
     "return http response as it is to the caller when not modified" in {
       val response = HttpResponse(304, emptyBody)
-      mockPost(cancelHtsReminderURL, Map.empty, cancelHtsUserReminder)(Some(response))
+      when(
+        POST,
+        cancelHtsReminderURL,
+        body = Some(Json.toJson(cancelHtsUserReminder).toString())
+      ).thenReturn(
+        response.status,
+        response.body
+      )
       val result = connector.cancelHtsUserReminders(cancelHtsUserReminder)
       await(result.value) should equal(Right(()))
     }
     "fail when unexpected response received" in {
       val response = HttpResponse(400, emptyBody)
-      mockPost(cancelHtsReminderURL, Map.empty, cancelHtsUserReminder)(Some(response))
+      when(
+        POST,
+        cancelHtsReminderURL,
+        body = Some(Json.toJson(cancelHtsUserReminder).toString())
+      ).thenReturn(
+        response.status,
+        response.body
+      )
       val result = connector.cancelHtsUserReminders(cancelHtsUserReminder)
       await(result.value).isLeft should equal(true)
     }
@@ -119,7 +183,14 @@ class HelpToSaveReminderConnectorSpec extends ControllerSpecWithGuiceApp with Ht
     "return http response as it is to the caller" in {
       val response =
         HttpResponse(200, emptyBody)
-      mockPost(emailUpdateHtsReminderURL, Map.empty, updateReminderEmail)(Some(response))
+      when(
+        POST,
+        emailUpdateHtsReminderURL,
+        body = Some(Json.toJson(updateReminderEmail).toString())
+      ).thenReturn(
+        response.status,
+        response.body
+      )
       val result = connector.updateReminderEmail(updateReminderEmail)
       await(result.value) should equal(Right(()))
 
