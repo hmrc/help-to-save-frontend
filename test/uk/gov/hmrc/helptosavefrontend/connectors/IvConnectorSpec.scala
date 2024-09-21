@@ -22,15 +22,15 @@ import org.scalatest.EitherValues
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.matchers.should.Matchers
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import play.api.{Application, Configuration}
+import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
-import uk.gov.hmrc.helptosavefrontend.controllers.{ControllerSpecBase, ControllerSpecWithGuiceApp}
+import play.api.{Application, Configuration}
+import uk.gov.hmrc.helptosavefrontend.controllers.ControllerSpecBase
 import uk.gov.hmrc.helptosavefrontend.models.iv.IvSuccessResponse.Success
 import uk.gov.hmrc.helptosavefrontend.models.iv.{IvErrorResponse, IvUnexpectedResponse, JourneyId}
 import uk.gov.hmrc.helptosavefrontend.util.WireMockMethods
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
-import play.api.inject.guice.GuiceApplicationBuilder
 import uk.gov.hmrc.http.test.WireMockSupport
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
 import java.util.UUID
 import scala.concurrent.ExecutionContext

@@ -23,10 +23,10 @@ import org.scalatest.EitherValues
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.{Application, Configuration}
 import play.api.libs.json._
+import play.api.{Application, Configuration}
 import uk.gov.hmrc.helptosavefrontend.connectors.HelpToSaveConnectorImpl.GetEmailResponse
-import uk.gov.hmrc.helptosavefrontend.controllers.{ControllerSpecBase, ControllerSpecWithGuiceApp}
+import uk.gov.hmrc.helptosavefrontend.controllers.ControllerSpecBase
 import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.validNSIPayload
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.models.account.{Account, AccountNumber}
@@ -35,12 +35,12 @@ import uk.gov.hmrc.helptosavefrontend.models.eligibility.{EligibilityCheckRespon
 import uk.gov.hmrc.helptosavefrontend.models.register.CreateAccountRequest
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveServiceImpl.SubmissionSuccess
 import uk.gov.hmrc.helptosavefrontend.util.WireMockMethods
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.http.test.WireMockSupport
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
 import java.time.LocalDate
 import java.util.{Base64, UUID}
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 
 // scalastyle:off magic.number
 class HelpToSaveConnectorSpec

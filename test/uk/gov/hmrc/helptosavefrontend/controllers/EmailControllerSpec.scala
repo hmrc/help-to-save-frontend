@@ -22,6 +22,7 @@ import org.mockito.ArgumentMatchersSugar.*
 import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
+import uk.gov.hmrc.auth.core.syntax.retrieved.authSyntaxForRetrieved
 import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
 import uk.gov.hmrc.helptosavefrontend.connectors.EmailVerificationConnector
 import uk.gov.hmrc.helptosavefrontend.controllers.EmailControllerSpec.EligibleWithUserInfoOps
@@ -227,7 +228,9 @@ class EmailControllerSpec
 
       "handle DE users with an existing INVALID email from GG" in {
 
-        mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievalsWithEmail(Some("invalidEmail")))
+        mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(
+          mockedRetrievalsWithEmail(Some("invalidEmail")) and enrolmentsWithMatchingNino
+        )
         mockSessionStoreGet(Right(Some(HTSSession(None, None, None))))
         mockEnrolmentCheck()(Right(Enrolled(true)))
         mockGetConfirmedEmail()(Right(None))
@@ -239,7 +242,9 @@ class EmailControllerSpec
       }
 
       "handle DE users with NO email from GG" in {
-        mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievalsWithEmail(None))
+        mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(
+          mockedRetrievalsWithEmail(None) and enrolmentsWithMatchingNino
+        )
         mockSessionStoreGet(Right(Some(HTSSession(None, None, None))))
         mockEnrolmentCheck()(Right(Enrolled(true)))
         mockGetConfirmedEmail()(Right(None))
@@ -385,7 +390,9 @@ class EmailControllerSpec
 
       "handle DE users who submitted form with no new-email but with checked existing email" in {
         val session = HTSSession(None, None, Some(testEmail))
-        mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievalsWithEmail(None))
+        mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(
+          mockedRetrievalsWithEmail(None) and enrolmentsWithMatchingNino
+        )
         mockSessionStoreGet(Right(Some(session)))
         mockEnrolmentCheck()(Right(Enrolled(true)))
         mockGetConfirmedEmail()(Right(None))
@@ -423,7 +430,9 @@ class EmailControllerSpec
       }
 
       "handle an existing account holder who submitted form with no new-email but with checked existing email" in {
-        mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievalsWithEmail(None))
+        mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(
+          mockedRetrievalsWithEmail(None) and enrolmentsWithMatchingNino
+        )
         mockSessionStoreGet(Right(Some(HTSSession(None, None, Some(testEmail)))))
         mockEnrolmentCheck()(Right(Enrolled(true)))
         mockGetConfirmedEmail()(Right(Some(testEmail)))
@@ -538,7 +547,9 @@ class EmailControllerSpec
 
       "handle DE users who submitted form with no new-email but with checked existing email" in {
         val session = HTSSession(None, None, Some(testEmail))
-        mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievalsWithEmail(None))
+        mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(
+          mockedRetrievalsWithEmail(None) and enrolmentsWithMatchingNino
+        )
         mockSessionStoreGet(Right(Some(session)))
         mockEnrolmentCheck()(Right(Enrolled(true)))
         mockGetConfirmedEmail()(Right(None))
@@ -576,7 +587,9 @@ class EmailControllerSpec
       }
 
       "handle an existing account holder who submitted form with no new-email but with checked existing email" in {
-        mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievalsWithEmail(None))
+        mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(
+          mockedRetrievalsWithEmail(None) and enrolmentsWithMatchingNino
+        )
         mockSessionStoreGet(Right(Some(HTSSession(None, None, Some(testEmail)))))
         mockEnrolmentCheck()(Right(Enrolled(true)))
         mockGetConfirmedEmail()(Right(Some(testEmail)))
@@ -689,7 +702,9 @@ class EmailControllerSpec
 
       "DE users should not contain any Back link" in {
 
-        mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievalsWithEmail(None))
+        mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(
+          mockedRetrievalsWithEmail(None) and enrolmentsWithMatchingNino
+        )
         mockSessionStoreGet(Right(Some(HTSSession(None, None, None))))
         mockEnrolmentCheck()(Right(Enrolled(true)))
         mockGetConfirmedEmail()(Right(None))
@@ -702,7 +717,9 @@ class EmailControllerSpec
 
       "handle DE users with an existing INVALID email from GG" in {
 
-        mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievalsWithEmail(Some("invalidEmail")))
+        mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(
+          mockedRetrievalsWithEmail(Some("invalidEmail")) and enrolmentsWithMatchingNino
+        )
         mockSessionStoreGet(Right(None))
         mockEnrolmentCheck()(Right(Enrolled(true)))
         mockGetConfirmedEmail()(Right(None))
@@ -714,7 +731,9 @@ class EmailControllerSpec
       }
 
       "handle DE users with NO email from GG" in {
-        mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievalsWithEmail(None))
+        mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(
+          mockedRetrievalsWithEmail(None) and enrolmentsWithMatchingNino
+        )
         mockSessionStoreGet(Right(None))
         mockEnrolmentCheck()(Right(Enrolled(true)))
         mockGetConfirmedEmail()(Right(None))
@@ -770,7 +789,7 @@ class EmailControllerSpec
 
       "handle Digital(new applicant) users with no valid session in mongo" in {
 
-        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
         mockSessionStoreGet(Right(None))
         mockEnrolmentCheck()(Right(NotEnrolled))
 
@@ -781,7 +800,7 @@ class EmailControllerSpec
 
       "handle errors during session cache lookup in mongo" in {
 
-        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
         mockSessionStoreGet(Left("unexpected error"))
 
         val result = giveEmailSubmit(email)
@@ -790,7 +809,7 @@ class EmailControllerSpec
 
       "handle Digital(new applicant) who submitted form with new email" in {
         val userInfo = randomEligibleWithUserInfo(validUserInfo)
-        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
         mockSessionStoreGet(
           Right(
             Some(
@@ -824,7 +843,7 @@ class EmailControllerSpec
 
       "handle existing digital account holders and redirect them to nsi" in {
         val userInfo = randomEligibleWithUserInfo(validUserInfo)
-        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
         mockSessionStoreGet(Right(Some(HTSSession(Some(Right(userInfo)), None, Some(testEmail)))))
         mockEnrolmentCheck()(Right(Enrolled(true)))
         mockGetConfirmedEmail()(Right(Some("email")))
@@ -834,7 +853,7 @@ class EmailControllerSpec
       }
 
       "handle DE users - redirect to check eligibility if no existing session found" in {
-        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
         mockSessionStoreGet(Right(None))
         mockEnrolmentCheck()(Right(Enrolled(true)))
         mockGetConfirmedEmail()(Right(None))
@@ -845,7 +864,7 @@ class EmailControllerSpec
       }
 
       "handle DE user who submitted form with new-email" in {
-        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
         mockSessionStoreGet(Right(Some(HTSSession(None, None, None))))
         mockEnrolmentCheck()(Right(Enrolled(true)))
         mockGetConfirmedEmail()(Right(None))
@@ -857,7 +876,7 @@ class EmailControllerSpec
       }
 
       "handle DE user who submitted form with errors" in {
-        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
         mockSessionStoreGet(Right(Some(HTSSession(None, None, Some(testEmail)))))
         mockEnrolmentCheck()(Right(Enrolled(true)))
         mockGetConfirmedEmail()(Right(None))
@@ -1063,7 +1082,9 @@ class EmailControllerSpec
       "handle Digital users and return success result when there is no GG email" in {
         val newEmail = "new@email.com"
 
-        mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievalsWithEmail(None))
+        mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(
+          mockedRetrievalsWithEmail(None) and enrolmentsWithMatchingNino
+        )
         mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
         mockDecrypt("encrypted")(s"$nino#$newEmail")
         mockSessionStoreGet(Right(Some(HTSSession(Some(Right(eligibleWithUserInfo.withEmail(None))), None, None))))
@@ -1361,7 +1382,7 @@ class EmailControllerSpec
         csrfAddToken(controller.confirmEmailErrorTryLater)(fakeRequest)
 
       "handle Digital users who are already gone through eligibility checks" in {
-        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
         mockSessionStoreGet(Right(Some(HTSSession(None, None, None))))
         mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
 
@@ -1371,7 +1392,7 @@ class EmailControllerSpec
       }
 
       "handle DE users" in {
-        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
         mockSessionStoreGet(Right(Some(HTSSession(None, None, None))))
         mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(true)))
         mockGetConfirmedEmail()(Right(None))
@@ -1390,7 +1411,7 @@ class EmailControllerSpec
         )
 
       "handle Digital users and redirect to the email verify error page try later if there is no email for the user" in {
-        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
         mockSessionStoreGet(
           Right(
             Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo.copy(email = None)))), None, None))
@@ -1405,7 +1426,7 @@ class EmailControllerSpec
 
       "handle Digital users and redirect to the emailConfirmed endpoint if there is an email for the user and the user selects to continue" in {
 
-        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
         mockSessionStoreGet(Right(Some(HTSSession(Some(Right(eligibleWithValidUserInfo)), None, None))))
         mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
         mockEncrypt(emailStr)(encryptedEmail)
@@ -1417,7 +1438,7 @@ class EmailControllerSpec
       }
 
       "handle Digital users and redirect to the info endpoint if there is an email for the user and the user selects not to continue" in {
-        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
         mockSessionStoreGet(Right(Some(HTSSession(Some(Right(eligibleWithValidUserInfo)), None, None))))
         mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
 
@@ -1427,7 +1448,7 @@ class EmailControllerSpec
       }
 
       "handle Digital users and show the verify email error page again if there is an error in the form" in {
-        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
         mockSessionStoreGet(Right(Some(HTSSession(Some(Right(eligibleWithValidUserInfo)), None, None))))
         mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
 
@@ -1437,7 +1458,7 @@ class EmailControllerSpec
       }
 
       "handle existing digital account holders and redirect them to nsi" in {
-        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
         mockSessionStoreGet(Right(Some(HTSSession(None, None, None))))
         mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(true)))
         mockGetConfirmedEmail()(Right(Some("email@email.com")))
@@ -1449,7 +1470,7 @@ class EmailControllerSpec
 
       "handle DE users and redirect to the emailConfirmed endpoint if there is an email for the user and the user selects to continue" in {
 
-        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
         mockSessionStoreGet(Right(Some(HTSSession(None, Some(emailStr), None))))
         mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(true)))
         mockGetConfirmedEmail()(Right(None))
@@ -1468,7 +1489,7 @@ class EmailControllerSpec
       def getEmailConfirmed = csrfAddToken(controller.getEmailConfirmed)(fakeRequest)
 
       "handle Digital users and return the email verified page" in {
-        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
         mockSessionStoreGet(Right(Some(HTSSession(Some(Right(eligibleWithValidUserInfo)), Some("email"), None))))
         mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
 
@@ -1480,7 +1501,7 @@ class EmailControllerSpec
       "handle Digital users and redirect to check eligibility" when {
 
         "there is no session" in {
-          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
           mockSessionStoreGet(Right(None))
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
 
@@ -1494,7 +1515,7 @@ class EmailControllerSpec
       "handle Digital users and return an error" when {
 
         "there is no confirmed email in the session" in {
-          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
           mockSessionStoreGet(Right(Some(HTSSession(Some(Right(eligibleWithValidUserInfo)), None, None))))
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
 
@@ -1504,7 +1525,7 @@ class EmailControllerSpec
         }
 
         "there is no confirmed email in the session when there is no email for the user" in {
-          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
           mockSessionStoreGet(
             Right(
               Some(
@@ -1524,7 +1545,7 @@ class EmailControllerSpec
         }
 
         "the call to session cache fails" in {
-          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
           mockSessionStoreGet(Left(""))
 
           val result = getEmailConfirmed
@@ -1533,7 +1554,7 @@ class EmailControllerSpec
       }
 
       "handle DE users and return the give email page" in {
-        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
         mockSessionStoreGet(Right(Some(HTSSession(Some(Right(eligibleWithValidUserInfo)), Some("email"), None))))
         mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(true)))
         mockGetConfirmedEmail()(Right(None))
@@ -1551,7 +1572,7 @@ class EmailControllerSpec
         csrfAddToken(controller.getEmailUpdated())(fakeRequest)
 
       "show the email updated page otherwise" in {
-        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
         mockSessionStoreGet(Right(Some(HTSSession(Some(Right(eligibleWithValidUserInfo)), None, None))))
         mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
 
@@ -1567,7 +1588,7 @@ class EmailControllerSpec
 
       "handle Digital users and redirect to the getBankDetailsPage if bank details are not already in session" in {
 
-        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
         mockSessionStoreGet(Right(Some(HTSSession(Some(Right(eligibleWithValidUserInfo)), None, None))))
         mockEnrolmentCheck()(Right(NotEnrolled))
 
@@ -1578,7 +1599,7 @@ class EmailControllerSpec
 
       "handle Digital users and redirect to the checkDetailsPage if the user is in the process of changing details" in {
 
-        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
         mockSessionStoreGet(
           Right(
             Some(
@@ -1603,7 +1624,7 @@ class EmailControllerSpec
 
       "handle Digital users and redirect to the eligibilityCheck if session doesnt contain eligibility result" in {
 
-        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
         mockSessionStoreGet(Right(None))
         mockEnrolmentCheck()(Right(NotEnrolled))
 
@@ -1613,7 +1634,7 @@ class EmailControllerSpec
       }
 
       "handle existing digital account holders and redirect them to NSI" in {
-        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
         mockSessionStoreGet(Right(Some(HTSSession(Some(Right(eligibleWithValidUserInfo)), Some("email"), None))))
         mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(true)))
         mockGetConfirmedEmail()(Right(Some("email")))
@@ -1624,7 +1645,7 @@ class EmailControllerSpec
       }
 
       "handle DE users and redirect to the give email page" in {
-        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
         mockSessionStoreGet(Right(Some(HTSSession(Some(Right(eligibleWithValidUserInfo)), None, None))))
         mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(true)))
         mockGetConfirmedEmail()(Right(None))

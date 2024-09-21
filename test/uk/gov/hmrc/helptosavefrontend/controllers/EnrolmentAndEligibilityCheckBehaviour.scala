@@ -21,6 +21,7 @@ import cats.instances.future._
 import org.mockito.ArgumentMatchersSugar.*
 import play.api.mvc.Result
 import play.api.test.Helpers._
+import uk.gov.hmrc.auth.core.syntax.retrieved.authSyntaxForRetrieved
 import uk.gov.hmrc.helptosavefrontend.connectors.{HelpToSaveConnector, HelpToSaveReminderConnector}
 import uk.gov.hmrc.helptosavefrontend.forms.{BankDetails, SortCode}
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
@@ -96,8 +97,10 @@ trait EnrolmentAndEligibilityCheckBehaviour {
 
   def commonEnrolmentAndSessionBehaviour(
     getResult: () => Future[Result], // scalastyle:ignore method.length
-    mockSuccessfulAuth: () => Unit = () => mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval),
-    mockNoNINOAuth: () => Unit = () => mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(None),
+    mockSuccessfulAuth: () => Unit = () =>
+      mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment),
+    mockNoNINOAuth: () => Unit = () =>
+      mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(None and noPersonalTaxEnrolment),
     testRedirectOnNoSession: Boolean = true,
     testEnrolmentCheckError: Boolean = true,
     testRedirectOnNoEligibilityCheckResult: Boolean = true

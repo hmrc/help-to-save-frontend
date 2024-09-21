@@ -22,6 +22,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.authorise.EmptyPredicate
 import uk.gov.hmrc.auth.core.retrieve.EmptyRetrieval
+import uk.gov.hmrc.auth.core.syntax.retrieved.authSyntaxForRetrieved
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
 import uk.gov.hmrc.helptosavefrontend.models.account.{Account, BonusTerm}
@@ -89,7 +90,7 @@ class AccessAccountControllerSpec
         Future.successful(await(controller.getNoAccountPage(FakeRequest())))
 
       "show the 'no account' page if the user is not enrolled" in {
-        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
         mockSessionStoreGet(Right(None))
         mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
 
@@ -99,7 +100,7 @@ class AccessAccountControllerSpec
       }
 
       "redirect to check eligibility if there is an error checking eligibility" in {
-        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
         mockSessionStoreGet(Right(None))
         mockEnrolmentCheck()(Left(""))
 
@@ -110,7 +111,7 @@ class AccessAccountControllerSpec
 
       "redirect to a previously attempted redirect URL if the user is enrolled and the session indicates they were" +
         "trying to previously reach an account holder page" in {
-        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
         mockSessionStoreGet(Right(Some(HTSSession.empty.copy(attemptedAccountHolderPageURL = Some("abc")))))
         mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(true)))
 
@@ -122,7 +123,7 @@ class AccessAccountControllerSpec
       "redirect to the NS&I homepage by default if the user is enrolled and there is no session data" in {
         def test(session: Option[HTSSession]) =
           withClue(s"For session $session: ") {
-            mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+            mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
             mockSessionStoreGet(Right(session))
             mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(true)))
 
@@ -135,8 +136,24 @@ class AccessAccountControllerSpec
         test(Some(HTSSession.empty))
       }
 
+      "redirect to protect tax if nino from user session doesn't have corresponding pt enrolment" in {
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval and noPersonalTaxEnrolment)
+
+        val result = doRequest()
+        status(result) shouldBe 303
+        redirectLocation(result) shouldBe Some(appConfig.protectTaxInfoUrl)
+      }
+
+      "redirect to protect tax if nino from user session doesn't match nano from PT enrolment" in {
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval and enrolmentsWithNoMatchingNino)
+
+        val result = doRequest()
+        status(result) shouldBe 303
+        redirectLocation(result) shouldBe Some(appConfig.protectTaxInfoUrl)
+      }
+
       "show an error page when there session data cannot be obtained" in {
-        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
         mockSessionStoreGet(Left(""))
 
         val result = doRequest()
@@ -165,7 +182,7 @@ class AccessAccountControllerSpec
 
       val schedule = HtsUserSchedule(Nino(nino2), "", "", "", false, List(), LocalDate.parse("1900-01-01"), "")
       "redirect to NS&I if the user is enrolled" in {
-        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
         if (withRemindersRemoval) {
           mockGetAccount()(Right(account))
           mockGetHtsUserReminders(nino2)(Right(schedule))
@@ -179,7 +196,7 @@ class AccessAccountControllerSpec
 
       "redirect to NS&I if the user is enrolled even when account closed" in {
         val closedAccount = account.copy(isClosed = true)
-        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
         if (withRemindersRemoval) {
           mockGetAccount()(Right(closedAccount))
           mockCancelHtsUserReminders(cancelHtsUserReminder)(Right(()))
@@ -193,7 +210,7 @@ class AccessAccountControllerSpec
 
       "redirect to NS&I if the user is enrolled and set the ITMP flag if " +
         "it hasn't already been set" in {
-        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
         if (withRemindersRemoval) {
           mockGetAccount()(Right(account))
           mockGetHtsUserReminders(nino2)(Right(schedule))
@@ -207,7 +224,7 @@ class AccessAccountControllerSpec
       }
 
       "redirect to the no-account page if the user is not enrolled to HTS" in {
-        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
         if (withRemindersRemoval) {
           mockGetAccount()(Right(account))
           mockGetHtsUserReminders(nino2)(Right(schedule))
@@ -224,7 +241,7 @@ class AccessAccountControllerSpec
 
       "store the attempted redirect location and redirect to check eligibility if there is  an error" +
         "checking the enrolment status" in {
-        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
         if (withRemindersRemoval) {
           mockGetAccount()(Right(account))
           mockGetHtsUserReminders(nino2)(Right(schedule))
@@ -240,7 +257,7 @@ class AccessAccountControllerSpec
       }
 
       "show an error screen if there is an error storing the session data" in {
-        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
         if (withRemindersRemoval) {
           mockGetAccount()(Right(account))
           mockGetHtsUserReminders(nino2)(Right(schedule))

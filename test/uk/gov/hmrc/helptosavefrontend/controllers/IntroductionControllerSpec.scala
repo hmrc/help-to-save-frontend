@@ -23,6 +23,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.authorise.EmptyPredicate
 import uk.gov.hmrc.auth.core.retrieve.EmptyRetrieval
+import uk.gov.hmrc.auth.core.syntax.retrieved.authSyntaxForRetrieved
 import uk.gov.hmrc.helptosavefrontend.models.EnrolmentStatus.{Enrolled, NotEnrolled}
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
 import uk.gov.hmrc.helptosavefrontend.models.account.{Account, AccountNumber, BonusTerm}
@@ -114,7 +115,7 @@ class IntroductionControllerSpec
     "getHelpPage" should {
 
       "show the help page content if the user is logged in and has a HTS account" in {
-        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(Some(nino))
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(Some(nino) and enrolmentsWithMatchingNino)
         mockEnrolmentCheck()(Right(Enrolled(true)))
         mockGetAccount(nino)(Right(account))
         mockGetAccountNumberFromService()(Right(AccountNumber(Some(accountNumber))))
@@ -127,7 +128,7 @@ class IntroductionControllerSpec
       }
 
       "show an error page if the user's enrolment status cannot be checked" in {
-        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(Some(nino))
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(Some(nino) and enrolmentsWithMatchingNino)
         mockEnrolmentCheck()(Left(""))
 
         val result = helpToSave.getHelpPage(FakeRequest())
@@ -135,7 +136,7 @@ class IntroductionControllerSpec
       }
 
       "show the no-account page if the user does not have a HTS account" in {
-        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(Some(nino))
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(Some(nino) and enrolmentsWithMatchingNino)
         mockEnrolmentCheck()(Right(NotEnrolled))
 
         val result = helpToSave.getHelpPage(FakeRequest())

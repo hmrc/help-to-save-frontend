@@ -25,6 +25,7 @@ import play.api.mvc.{Result => PlayResult}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.retrieve.{ItmpAddress, ItmpName, Name, ~}
+import uk.gov.hmrc.auth.core.syntax.retrieved.authSyntaxForRetrieved
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
 import uk.gov.hmrc.helptosavefrontend.models.TestData.Eligibility._
@@ -83,7 +84,7 @@ class EligibilityCheckControllerSpec
       behave like commonEnrolmentAndSessionBehaviour(() => getIsEligible())
 
       "show the you are eligible page if session data indicates that they are eligible" in {
-        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
         mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
         mockSessionStoreGet(
           Right(
@@ -108,7 +109,7 @@ class EligibilityCheckControllerSpec
       }
 
       "redirect to the you are not eligible page if session data indicates that they are not eligible" in {
-        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
         mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
         mockSessionStoreGet(Right(Some(HTSSession(Some(Left(randomIneligibility())), None, None))))
 
@@ -118,7 +119,7 @@ class EligibilityCheckControllerSpec
       }
 
       "redirect to check eligibility if the session data indicates they have not done the eligibility checks yet" in {
-        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
         mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
         mockSessionStoreGet(Right(Some(HTSSession(None, None, None))))
 
@@ -135,7 +136,7 @@ class EligibilityCheckControllerSpec
       behave like commonEnrolmentAndSessionBehaviour(() => getIsNotEligible())
 
       "show the you are not eligible page if session data indicates that they are not eligible" in {
-        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
         mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
         mockSessionStoreGet(Right(Some(HTSSession(Some(Left(randomIneligibility())), None, None))))
 
@@ -145,7 +146,7 @@ class EligibilityCheckControllerSpec
       }
 
       "redirect to the you are eligible page if session data indicates that they are eligible" in {
-        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
         mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
         mockSessionStoreGet(
           Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo))), None, None)))
@@ -157,7 +158,7 @@ class EligibilityCheckControllerSpec
       }
 
       "redirect to check eligibility if the session data indicates they have not done the eligibility checks yet" in {
-        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
         mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
         mockSessionStoreGet(Right(Some(HTSSession(None, None, None))))
 
@@ -168,7 +169,7 @@ class EligibilityCheckControllerSpec
 
       "show an error if the ineligibility reason cannot be parsed" in {
         val eligibilityCheckResult = randomIneligibility().value.eligibilityCheckResult.copy(reasonCode = 999)
-        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
         mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
         mockSessionStoreGet(
           Right(
@@ -194,7 +195,7 @@ class EligibilityCheckControllerSpec
 
       "display the uc threshold amount when it can be obtained from DES via the BE when the user is not eligible due to " +
         "reason: NotEntitledToWTCAndUCInsufficient (code 5)" in {
-        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
         mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
         mockSessionStoreGet(Right(Some(HTSSession(Some(Left(notEntitledToWTCAndUCInsufficient())), None, None))))
 
@@ -208,7 +209,7 @@ class EligibilityCheckControllerSpec
 
       "not display the uc threshold amount when it cannot be obtained from DES when the user is not eligible due to " +
         "reason: NotEntitledToWTCAndUCInsufficient (code 5)" in {
-        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
         mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
         mockSessionStoreGet(
           Right(Some(HTSSession(Some(Left(notEntitledToWTCAndUCInsufficientWithNoThreshold())), None, None)))
@@ -224,7 +225,7 @@ class EligibilityCheckControllerSpec
 
       "display the uc threshold amount when it can be obtained from DES via the BE when the user is not eligible due to " +
         "reason: EntitledToWTCNoTCAndInsufficientUC | NotEntitledToWTCAndNoUC (code 4 | 9)" in {
-        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
         mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
         mockSessionStoreGet(Right(Some(HTSSession(Some(Left(ineligibilityReason4or9())), None, None))))
 
@@ -238,7 +239,7 @@ class EligibilityCheckControllerSpec
 
       "not display the uc threshold amount when it cannot be obtained from DES when the user is not eligible due to " +
         "reason: EntitledToWTCNoTCAndInsufficientUC | NotEntitledToWTCAndNoUC (code 4 | 9)" in {
-        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
         mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
         mockSessionStoreGet(Right(Some(HTSSession(Some(Left(ineligibilityReason4or9WithNoThreshold())), None, None))))
 
@@ -254,7 +255,9 @@ class EligibilityCheckControllerSpec
     "displaying the you think you're eligible page" must {
 
       "redirect to the eligibility check if there is no session data" in {
-        mockAuthWithNINORetrievalWithSuccess(uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200)(Some(nino))
+        mockAuthWithNINORetrievalWithSuccess(uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200)(
+          Some(nino) and enrolmentsWithMatchingNino
+        )
         mockSessionStoreGet(Right(None))
 
         val result = controller.getThinkYouAreEligiblePage(FakeRequest())
@@ -264,7 +267,9 @@ class EligibilityCheckControllerSpec
       }
 
       "show the you're eligible page if the session data indicates that the user is eligible" in {
-        mockAuthWithNINORetrievalWithSuccess(uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200)(Some(nino))
+        mockAuthWithNINORetrievalWithSuccess(uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200)(
+          Some(nino) and enrolmentsWithMatchingNino
+        )
         mockSessionStoreGet(
           Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo))), None, None, None, None)))
         )
@@ -275,7 +280,9 @@ class EligibilityCheckControllerSpec
       }
 
       "show the correct page if the session data indicates that the user is ineligible" in {
-        mockAuthWithNINORetrievalWithSuccess(uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200)(Some(nino))
+        mockAuthWithNINORetrievalWithSuccess(uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200)(
+          Some(nino) and enrolmentsWithMatchingNino
+        )
         mockSessionStoreGet(Right(Some(HTSSession(Some(Left(randomIneligibility())), None, None, None, None))))
 
         val result = controller.getThinkYouAreEligiblePage(FakeRequest())
@@ -650,7 +657,7 @@ class EligibilityCheckControllerSpec
                 params.address
               )) {
             mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(
-              missingUserInfoRetrieval(params.name, params.surname, params.dob, params.address)
+              missingUserInfoRetrieval(params.name, params.surname, params.dob, params.address) and enrolmentsWithMatchingNino
             )
 
             val result: Future[PlayResult] = controller.getMissingInfoPage(FakeRequest())
@@ -682,7 +689,7 @@ class EligibilityCheckControllerSpec
       def doRequest(): Future[PlayResult] = controller.youAreEligibleSubmit(FakeRequest())
 
       "redirect to the give email page if the user has no email" in {
-        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(Some("nino"))
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(Some(nino) and enrolmentsWithMatchingNino)
         mockSessionStoreGet(
           Right(
             Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo.copy(email = None)))), None, None))
@@ -695,7 +702,7 @@ class EligibilityCheckControllerSpec
       }
 
       "redirect to the select email page if the user has an email" in {
-        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(Some("nino"))
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(Some(nino) and enrolmentsWithMatchingNino)
         mockSessionStoreGet(
           Right(
             Some(
@@ -714,7 +721,7 @@ class EligibilityCheckControllerSpec
       }
 
       "redirect to the check eligibility page if the user has no session" in {
-        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(Some("nino"))
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(Some(nino) and enrolmentsWithMatchingNino)
         mockSessionStoreGet(Right(None))
 
         val result = doRequest()
@@ -723,7 +730,7 @@ class EligibilityCheckControllerSpec
       }
 
       "redirect to the check eligibility page if the user has no eligiblity check result in their session" in {
-        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(Some("nino"))
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(Some(nino) and enrolmentsWithMatchingNino)
         mockSessionStoreGet(Right(Some(HTSSession(None, None, None))))
 
         val result = doRequest()
@@ -732,7 +739,7 @@ class EligibilityCheckControllerSpec
       }
 
       "redirect to the not eligible page if the user is not eligible" in {
-        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(Some("nino"))
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(Some(nino) and enrolmentsWithMatchingNino)
         mockSessionStoreGet(Right(Some(HTSSession(Some(Left(randomIneligibility())), None, None))))
 
         val result = doRequest()

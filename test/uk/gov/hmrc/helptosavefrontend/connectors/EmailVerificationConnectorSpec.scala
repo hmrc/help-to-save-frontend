@@ -20,19 +20,18 @@ import org.mockito.IdiomaticMockito
 import org.scalatest.EitherValues
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
-import play.api.{Application, Configuration}
-import play.api.libs.json._
 import play.api.http.Status
 import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.libs.json._
+import play.api.{Application, Configuration}
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
-import uk.gov.hmrc.helptosavefrontend.controllers.{ControllerSpecBase, ControllerSpecWithGuiceApp}
+import uk.gov.hmrc.helptosavefrontend.controllers.ControllerSpecBase
 import uk.gov.hmrc.helptosavefrontend.models.email.VerifyEmailError.OtherError
 import uk.gov.hmrc.helptosavefrontend.models.email.{EmailVerificationRequest, VerifyEmailError}
 import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Email, NINO, NINOLogMessageTransformer, TestNINOLogMessageTransformer, WireMockMethods}
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.http.test.WireMockSupport
+import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse}
 
-import uk.gov.hmrc.http.HttpClient
 import scala.concurrent.ExecutionContext
 
 class EmailVerificationConnectorSpec

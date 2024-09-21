@@ -22,6 +22,7 @@ import uk.gov.hmrc.auth.core.AuthProvider.GovernmentGateway
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.authorise._
 import uk.gov.hmrc.auth.core.retrieve._
+import uk.gov.hmrc.auth.core.syntax.retrieved.authSyntaxForRetrieved
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.UserInfoRetrievals
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIPayload
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIPayload.ContactDetails
@@ -92,28 +93,50 @@ trait AuthSupport extends IdiomaticMockito {
     "V2.0",
     "MDTP REGISTRATION"
   )
+
+  val enrolmentsWithMatchingNino: Enrolments = Enrolments(
+    Set(
+      Enrolment("HMRC-PT", Seq(EnrolmentIdentifier("NINO", nino)), "activated")
+    )
+  )
+
+  val enrolmentsWithNoMatchingNino: Enrolments = Enrolments(
+    Set(
+      Enrolment("HMRC-PT", Seq(EnrolmentIdentifier("NINO", "invalid-nino")), "activated")
+    )
+  )
+
+  val noPersonalTaxEnrolment: Enrolments = Enrolments(
+    Set(
+      Enrolment("HMRC-PT", Seq(EnrolmentIdentifier("NINO", "invalid-nino")), "activated")
+    )
+  )
+
   val mockedNINORetrieval: Option[String] = Some(nino)
+  val mockedNINORetrievalWithPTEnrolment: ~[Option[String], Enrolments] = Some(nino) and enrolmentsWithMatchingNino
 
-  val mockedNINOAndNameRetrieval: ~[~[Option[Name], Option[ItmpName]], Option[String]] = new ~(
+  val mockedNINOAndNameRetrieval: ~[~[~[Option[Name], Option[ItmpName]], Option[String]], Enrolments] = new ~(
     Some(name),
     Some(itmpName)
-  ) and mockedNINORetrieval
+  ) and mockedNINORetrieval and enrolmentsWithMatchingNino
 
-  val mockedNINOAndNameRetrievalMissingNino: ~[~[Option[Name], Option[ItmpName]], Option[String]] = new ~(
+  val mockedNINOAndNameRetrievalMissingNino
+    : ~[~[~[Option[Name], Option[ItmpName]], Option[String]], Enrolments] = new ~(
     Some(name),
     Some(itmpName)
-  ) and None
+  ) and None and noPersonalTaxEnrolment
 
-  val mockedNINOAndNameRetrievalMissingName: ~[~[Option[Name], Option[ItmpName]], Option[String]] = new ~(
+  val mockedNINOAndNameRetrievalMissingName
+    : ~[~[~[Option[Name], Option[ItmpName]], Option[String]], Enrolments] = new ~(
     Some(Name(None, None)),
     Some(ItmpName(None, None, None))
-  ) and mockedNINORetrieval
+  ) and mockedNINORetrieval and enrolmentsWithMatchingNino
 
   val mockedRetrievals
-    : ~[~[~[~[~[~[Option[Name], Option[String]], Option[LocalDate]], Option[ItmpName]], Option[LocalDate]], Option[
+    : ~[~[~[~[~[~[~[Option[Name], Option[String]], Option[LocalDate]], Option[ItmpName]], Option[LocalDate]], Option[
       ItmpAddress
-    ]], Option[String]] =
-    new ~(Some(name), email) and Option(dob) and Some(itmpName) and itmpDob and Some(itmpAddress) and mockedNINORetrieval
+    ]], Option[String]], Enrolments] =
+    new ~(Some(name), email) and Option(dob) and Some(itmpName) and itmpDob and Some(itmpAddress) and mockedNINORetrieval and enrolmentsWithMatchingNino
 
   def mockedRetrievalsWithEmail(
     email: Option[String]
@@ -123,18 +146,18 @@ trait AuthSupport extends IdiomaticMockito {
     new ~(Some(name), email) and Option(dob) and Some(itmpName) and itmpDob and Some(itmpAddress) and mockedNINORetrieval
 
   val mockedRetrievalsMissingUserInfo
-    : ~[~[~[~[~[~[Option[Name], Option[String]], Option[LocalDate]], Option[ItmpName]], Option[LocalDate]], Option[
+    : ~[~[~[~[~[~[~[Option[Name], Option[String]], Option[LocalDate]], Option[ItmpName]], Option[LocalDate]], Option[
       ItmpAddress
-    ]], Option[String]] =
+    ]], Option[String]], Enrolments] =
     new ~(Some(Name(None, None)), email) and Option(dob) and Some(ItmpName(None, None, None)) and itmpDob and Some(
       itmpAddress
-    ) and mockedNINORetrieval
+    ) and mockedNINORetrieval and enrolmentsWithMatchingNino
 
   val mockedRetrievalsMissingNinoEnrolment
-    : ~[~[~[~[~[~[Option[Name], Option[String]], Option[LocalDate]], Option[ItmpName]], Option[LocalDate]], Option[
+    : ~[~[~[~[~[~[~[Option[Name], Option[String]], Option[LocalDate]], Option[ItmpName]], Option[LocalDate]], Option[
       ItmpAddress
-    ]], Option[String]] =
-    new ~(Some(name), email) and Option(dob) and Some(itmpName) and itmpDob and Some(itmpAddress) and None
+    ]], Option[String]], Enrolments] =
+    new ~(Some(name), email) and Option(dob) and Some(itmpName) and itmpDob and Some(itmpAddress) and None and noPersonalTaxEnrolment
 
   def mockAuthResultWithFail(ex: Throwable): Unit =
     mockAuthConnector.authorise(AuthProviders(GovernmentGateway), *)(*, *) returns Future.failed(ex)
@@ -142,16 +165,23 @@ trait AuthSupport extends IdiomaticMockito {
   def mockAuthWithRetrievalsWithFail(predicate: Predicate)(ex: Throwable): Unit =
     mockAuthConnector.authorise(predicate, *)(*, *) returns Future.failed(ex)
 
-  def mockAuthWithNINORetrievalWithSuccess(predicate: Predicate)(result: Option[String]): Unit =
-    mockAuthConnector.authorise(predicate, v2.Retrievals.nino)(*, *) returns Future.successful(result)
-
-  def mockAuthWithNINOAndName(predicate: Predicate)(result: NameRetrievalType): Unit =
-    mockAuthConnector
-      .authorise(predicate, v2.Retrievals.name and v2.Retrievals.itmpName and v2.Retrievals.nino)(*, *) returns Future
+  def mockAuthWithNINORetrievalWithSuccess(predicate: Predicate)(result: ~[Option[String], Enrolments]): Unit =
+    mockAuthConnector.authorise(predicate, v2.Retrievals.nino and v2.Retrievals.allEnrolments)(*, *) returns Future
       .successful(result)
 
-  def mockAuthWithAllRetrievalsWithSuccess(predicate: Predicate)(result: UserRetrievalType): Unit =
-    mockAuthConnector.authorise(predicate, UserInfoRetrievals and v2.Retrievals.nino)(*, *) returns Future.successful(
+  def mockAuthWithNINOAndName(predicate: Predicate)(result: ~[NameRetrievalType, Enrolments]): Unit =
+    mockAuthConnector
+      .authorise(
+        predicate,
+        v2.Retrievals.name and v2.Retrievals.itmpName and v2.Retrievals.nino and v2.Retrievals.allEnrolments
+      )(*, *) returns Future
+      .successful(result)
+
+  def mockAuthWithAllRetrievalsWithSuccess(predicate: Predicate)(result: ~[UserRetrievalType, Enrolments]): Unit =
+    mockAuthConnector.authorise(predicate, UserInfoRetrievals and v2.Retrievals.nino and v2.Retrievals.allEnrolments)(
+      *,
+      *
+    ) returns Future.successful(
       result
     )
 

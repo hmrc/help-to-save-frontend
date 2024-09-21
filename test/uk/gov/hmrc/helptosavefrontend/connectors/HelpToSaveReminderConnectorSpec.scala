@@ -21,14 +21,14 @@ import org.mockito.IdiomaticMockito
 import org.scalatest.EitherValues
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.{Application, Configuration}
 import play.api.libs.json._
+import play.api.{Application, Configuration}
 import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.helptosavefrontend.controllers.{ControllerSpecBase, ControllerSpecWithGuiceApp}
+import uk.gov.hmrc.helptosavefrontend.controllers.ControllerSpecBase
 import uk.gov.hmrc.helptosavefrontend.models.reminder.{CancelHtsUserReminder, HtsUserSchedule, UpdateReminderEmail}
 import uk.gov.hmrc.helptosavefrontend.util.WireMockMethods
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.http.test.WireMockSupport
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
 import java.time.LocalDate
 import scala.concurrent.ExecutionContext

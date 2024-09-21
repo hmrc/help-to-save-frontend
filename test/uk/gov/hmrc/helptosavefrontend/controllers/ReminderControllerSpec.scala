@@ -23,6 +23,7 @@ import play.api.http.Status
 import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
+import uk.gov.hmrc.auth.core.syntax.retrieved.authSyntaxForRetrieved
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
 import uk.gov.hmrc.helptosavefrontend.forms.ReminderFrequencyValidation
@@ -226,7 +227,7 @@ class ReminderControllerSpec
 
       val fakeRequestWithNoBody = FakeRequest("GET", "/")
 
-      mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+      mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
       mockGetHtsUser(nino)(Right(getHtsUser))
 
       val result = csrfAddToken(controller.getEmailsavingsReminders())(fakeRequestWithNoBody)
@@ -237,7 +238,7 @@ class ReminderControllerSpec
 
       val fakeRequestWithNoBody = FakeRequest("GET", "/")
 
-      mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+      mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
       mockGetHtsUser(nino)(Left("error occurred while getting htsUser"))
 
       val result = csrfAddToken(controller.getEmailsavingsReminders())(fakeRequestWithNoBody)
@@ -248,7 +249,7 @@ class ReminderControllerSpec
     "should return the reminder setting page when asked for it" in {
       val account = Account(false, 123.45, 0, 0, 0, LocalDate.parse("1900-01-01"), List(), None, None)
 
-      mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(Some(nino))
+      mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(Some(nino) and enrolmentsWithMatchingNino)
       mockGetAccount(nino)(Right(account))
 
       val result = csrfAddToken(controller.getSelectRendersPage())(FakeRequest())
@@ -258,7 +259,7 @@ class ReminderControllerSpec
     "should return acount closed page when account is closed" in {
       val account = Account(true, 123.45, 0, 0, 0, LocalDate.parse("1900-01-01"), List(), None, None)
 
-      mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(Some(nino))
+      mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(Some(nino) and enrolmentsWithMatchingNino)
       mockGetAccount(nino)(Right(account))
 
       val result = csrfAddToken(controller.getSelectRendersPage())(FakeRequest())
@@ -267,7 +268,7 @@ class ReminderControllerSpec
 
     "should return the reminder setting page when asked for " in {
 
-      mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(Some(nino))
+      mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(Some(nino) and enrolmentsWithMatchingNino)
       mockGetAccount(nino)(Left("error occurred while getting htsUser"))
 
       val result = csrfAddToken(controller.getSelectRendersPage())(FakeRequest())
@@ -287,7 +288,7 @@ class ReminderControllerSpec
 
     "should redirect to a renders confirmation set page with email encrypted " in {
 
-      mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+      mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
       mockDecrypt("encrypted")("email")
       val fakeRequestWithNoBody = FakeRequest("GET", "/")
       val result = controller.getRendersConfirmPage("encrypted", "1st", "Set")(fakeRequestWithNoBody)
@@ -297,7 +298,7 @@ class ReminderControllerSpec
 
     "should redirect to a renders confirmation update page with email encrypted " in {
 
-      mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+      mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
       mockDecrypt("encrypted")("email")
       val fakeRequestWithNoBody = FakeRequest("GET", "/")
       val result = controller.getRendersConfirmPage("encrypted", "1st", "Update")(fakeRequestWithNoBody)
@@ -309,7 +310,7 @@ class ReminderControllerSpec
       val account = Account(false, 123.45, 0, 0, 0, LocalDate.parse("1900-01-01"), List(), None, None)
       val fakeRequestWithNoBody = FakeRequest("GET", "/")
 
-      mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(Some(nino))
+      mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(Some(nino) and enrolmentsWithMatchingNino)
       mockGetAccount(nino)(Right(account))
       val result = csrfAddToken(controller.getSelectedRendersPage())(fakeRequestWithNoBody)
       status(result) shouldBe Status.SEE_OTHER
@@ -320,7 +321,7 @@ class ReminderControllerSpec
       val account = Account(true, 123.45, 0, 0, 0, LocalDate.parse("1900-01-01"), List(), None, None)
       val fakeRequestWithNoBody = FakeRequest("GET", "/")
 
-      mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(Some(nino))
+      mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(Some(nino) and enrolmentsWithMatchingNino)
       mockGetAccount(nino)(Right(account))
       val result = csrfAddToken(controller.getSelectedRendersPage())(fakeRequestWithNoBody)
       status(result) shouldBe Status.OK
@@ -330,7 +331,7 @@ class ReminderControllerSpec
     "should return the internal error when selected reminderpage " in {
       val fakeRequestWithNoBody = FakeRequest("GET", "/")
 
-      mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+      mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
       mockGetAccount(nino)(Left("error occurred while getting htsUser"))
 
       val result = csrfAddToken(controller.getSelectedRendersPage())(fakeRequestWithNoBody)
@@ -343,7 +344,7 @@ class ReminderControllerSpec
 
       val fakeRequestWithNoBody = FakeRequest("GET", "/")
 
-      mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+      mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
       mockGetHtsUser(nino)(Right(getHtsUser))
 
       val result = csrfAddToken(controller.accountOpenGetSelectedRendersPage())(fakeRequestWithNoBody)
@@ -352,7 +353,7 @@ class ReminderControllerSpec
 
     "should return the internal error when error retrieving account " in {
       val fakeRequestWithNoBody = FakeRequest("GET", "/")
-      mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+      mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
       mockGetHtsUser(nino)(Left("error occurred while getting htsUser"))
       val result = csrfAddToken(controller.accountOpenGetSelectedRendersPage())(fakeRequestWithNoBody)
       status(result) shouldBe Status.INTERNAL_SERVER_ERROR
@@ -362,7 +363,7 @@ class ReminderControllerSpec
 
       val fakeRequestWithNoBody = FakeRequest("GET", "/")
 
-      mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+      mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
 
       val result = csrfAddToken(controller.getRendersCancelConfirmPage())(fakeRequestWithNoBody)
       status(result) shouldBe Status.OK
@@ -475,7 +476,7 @@ class ReminderControllerSpec
 
       val fakeRequestWithNoBody = FakeRequest("POST", "/").withFormUrlEncodedBody("reminderFrequency" -> "")
 
-      mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+      mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
       mockEnrolmentCheck()(Right(Enrolled(true)))
 
       val result = csrfAddToken(controller.submitApplySavingsReminderPage())(fakeRequestWithNoBody)
@@ -485,7 +486,7 @@ class ReminderControllerSpec
     "should return the apply savings reminder  page when asked for it" in {
       val fakeRequestWithNoBody = FakeRequest("GET", "/")
 
-      mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+      mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
       mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
       mockSessionStoreGet(
         Right(
@@ -515,7 +516,7 @@ class ReminderControllerSpec
     "should return the apply savings reminder  page with out select when asked for it" in {
       val fakeRequestWithNoBody = FakeRequest("GET", "/")
 
-      mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+      mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
       mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(true)))
 
       val result = csrfAddToken(controller.getApplySavingsReminderPage())(fakeRequestWithNoBody)
@@ -525,7 +526,7 @@ class ReminderControllerSpec
     "should show a success page if the user submits an ApplySavingsReminderPage with No  " in {
       val fakeRequestWithNoBody = FakeRequest("POST", "/").withFormUrlEncodedBody("reminderFrequency" -> "no")
 
-      mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+      mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
       mockEnrolmentCheck()(Right(NotEnrolled))
       mockSessionStoreGet(Right(None))
 
@@ -536,7 +537,7 @@ class ReminderControllerSpec
     "should show a success page if the user submits an ApplySavingsReminderPage with no  " in {
       val fakeRequestWithNoBody = FakeRequest("POST", "/").withFormUrlEncodedBody("reminderFrequency" -> "no")
       val eligibilityResult = Some(Right(randomEligibleWithUserInfo(validUserInfo)))
-      mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+      mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
       mockEnrolmentCheck()(Right(NotEnrolled))
       mockSessionStoreGet(
         Right(
@@ -581,7 +582,7 @@ class ReminderControllerSpec
     "should show a success page if the user submits an ApplySavingsReminderPage with out option  " in {
       val fakeRequestWithNoBody = FakeRequest("POST", "/").withFormUrlEncodedBody("reminderFrequency" -> "yes")
       val eligibilityResult = Some(Right(randomEligibleWithUserInfo(validUserInfo)))
-      mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+      mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
       mockEnrolmentCheck()(Right(NotEnrolled))
       mockSessionStoreGet(
         Right(
@@ -621,7 +622,7 @@ class ReminderControllerSpec
     "should show a success page if the user submits an ApplySavingsReminderPage with yes  " in {
       val fakeRequestWithNoBody = FakeRequest("POST", "/").withFormUrlEncodedBody("reminderFrequency" -> "")
       val eligibilityResult = Some(Right(randomEligibleWithUserInfo(validUserInfo)))
-      mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+      mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
       mockEnrolmentCheck()(Right(NotEnrolled))
       mockSessionStoreGet(
         Right(
@@ -651,7 +652,7 @@ class ReminderControllerSpec
     "should return the apply savings reminder  signup page when asked for it" in {
       val fakeRequestWithNoBody = FakeRequest("GET", "/")
 
-      mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+      mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
       mockEnrolmentCheck()(Right(Enrolled(true)))
 
       val result = csrfAddToken(controller.getApplySavingsReminderSignUpPage())(fakeRequestWithNoBody)
@@ -820,7 +821,7 @@ class ReminderControllerSpec
 
     "display the page with correct Back link when they came from SelectEmail page" in {
       val fakeRequestWithNoBody = FakeRequest("GET", "/")
-      mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+      mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
       mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
       mockSessionStoreGet(
         Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo))), None, None)))
@@ -836,7 +837,7 @@ class ReminderControllerSpec
 
     "display the page with correct Back link when they came from emailVerified page" in {
       val fakeRequestWithNoBody = FakeRequest("GET", "/")
-      mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+      mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
       mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
       mockSessionStoreGet(
         Right(
@@ -869,7 +870,7 @@ class ReminderControllerSpec
 
     "display the page with correct Back link when they came from check details page" in {
       val fakeRequestWithNoBody = FakeRequest("GET", "/")
-      mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+      mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
       mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
       mockSessionStoreGet(
         Right(
@@ -899,7 +900,7 @@ class ReminderControllerSpec
     }
     "redirect user to eligibility checks if there is no session found" in {
       val fakeRequestWithNoBody = FakeRequest("GET", "/")
-      mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+      mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
       mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
       mockSessionStoreGet(Right(None))
 
@@ -910,7 +911,7 @@ class ReminderControllerSpec
 
     "redirect user to eligibility checks if there is a session but no eligibility result found in the session" in {
       val fakeRequestWithNoBody = FakeRequest("GET", "/")
-      mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+      mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
       mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
       mockSessionStoreGet(Right(Some(HTSSession(None, None, None))))
 
@@ -973,7 +974,7 @@ class ReminderControllerSpec
 
   "show user an in-eligible page if the session is found but user is not eligible" in {
     val fakeRequestWithNoBody = FakeRequest("GET", "/")
-    mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+    mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
     mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
     mockSessionStoreGet(Right(Some(HTSSession(Some(Left(randomIneligibility())), None, None))))
 
@@ -984,7 +985,7 @@ class ReminderControllerSpec
   "show user an error page if the session is found but user is not eligible and in-eligibility reason can't be parsed" in {
     val fakeRequestWithNoBody = FakeRequest("GET", "/")
     val eligibilityCheckResult = randomIneligibility().value.eligibilityCheckResult.copy(reasonCode = 999)
-    mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+    mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
     mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
     mockSessionStoreGet(
       Right(

@@ -102,7 +102,7 @@ class RegisterControllerSpec
 
   def checkRedirectIfNoEmailInSession(doRequest: => Future[PlayResult]): Unit =
     "redirect to the give email page if the session data does not contain an email for the user" in {
-      mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+      mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
       mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
       mockSessionStoreGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo))), None, None))))
 
@@ -204,7 +204,7 @@ class RegisterControllerSpec
       checkRedirectIfNoEmailInSession(doRequest())
 
       "show the user the create account page if the session data contains a confirmed email" in {
-        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
         mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
         mockSessionStoreGet(
           Right(
@@ -233,7 +233,7 @@ class RegisterControllerSpec
       "show an error page if the eligibility reason cannot be parsed" in {
         val userInfo = eligibleSpecificReasonCodeWithUserInfo(validUserInfo, 999)
         val eligibilityCheckResult = randomEligibility().value.eligibilityCheckResult.copy(reasonCode = 999)
-        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
         mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
         mockSessionStoreGet(
           Right(
@@ -264,7 +264,7 @@ class RegisterControllerSpec
       }
 
       "show the appropriate page content for when user is eligible with reason code 6: UCClaimantAndIncomeSufficient" in {
-        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
         mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
         mockSessionStoreGet(
           Right(
@@ -291,7 +291,7 @@ class RegisterControllerSpec
 
       "show the appropriate page content for when user is eligible with reason code 7: UCClaimantButNoWTC" in {
         val userInfo = eligibleSpecificReasonCodeWithUserInfo(validUserInfo, 7)
-        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
         mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
         mockSessionStoreGet(
           Right(
@@ -318,7 +318,7 @@ class RegisterControllerSpec
 
       "show the appropriate page content for when user is eligible with reason code 8: UCClaimantAndWTC" in {
         val userInfo = eligibleSpecificReasonCodeWithUserInfo(validUserInfo, 8)
-        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
         mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
         mockSessionStoreGet(
           Right(
@@ -344,7 +344,7 @@ class RegisterControllerSpec
       }
 
       "show user not eligible page if the user is not eligible" in {
-        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
         mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
         mockSessionStoreGet(
           Right(Some(HTSSession(Some(Left(randomIneligibility())), None, None, None, None, Some(bankDetails))))
@@ -358,7 +358,7 @@ class RegisterControllerSpec
       "handle the case when there are no bank details stored in the session" in {
         val eligibilityResult = Some(Right(eligibleSpecificReasonCodeWithUserInfo(validUserInfo, 6)))
         val email = "valid@email.com"
-        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
         mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
         mockSessionStoreGet(Right(Some(HTSSession(eligibilityResult, Some(email), None))))
         mockSessionStorePut(
@@ -385,7 +385,7 @@ class RegisterControllerSpec
       "retrieve the user info from session cache and indicate to the user that the creation was successful " +
         "and enrol the user if the creation was successful" in {
 
-        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
         mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
         mockSessionStoreGet(
           Right(Some(HTSSession(Some(Right(userInfo)), Some(confirmedEmail), None, None, None, Some(bankDetails))))
@@ -410,7 +410,7 @@ class RegisterControllerSpec
 
       "indicate to the user that account creation was successful " +
         "even if the user couldn't be enrolled into hts at this time" in {
-        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
         mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
         mockSessionStoreGet(
           Right(Some(HTSSession(Some(Right(userInfo)), Some(confirmedEmail), None, None, None, Some(bankDetails))))
@@ -434,7 +434,7 @@ class RegisterControllerSpec
       }
 
       "not update user counts but enrol the user if the user already had an account" in {
-        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
         mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
         mockSessionStoreGet(
           Right(Some(HTSSession(Some(Right(userInfo)), Some(confirmedEmail), None, None, None, Some(bankDetails))))
@@ -447,7 +447,7 @@ class RegisterControllerSpec
       }
 
       "redirect the user to nsi when they already have an account" in {
-        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
         mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
         mockSessionStoreGet(
           Right(Some(HTSSession(Some(Right(userInfo)), Some(confirmedEmail), None, None, None, Some(bankDetails))))
@@ -461,7 +461,7 @@ class RegisterControllerSpec
       }
 
       "redirect the user to the confirm details page if the session indicates they have not done so already" in {
-        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
         mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
         mockSessionStoreGet(
           Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo))), None, None)))
@@ -473,7 +473,7 @@ class RegisterControllerSpec
       }
 
       "redirect user to bank_details page if the session doesn't contain bank details" in {
-        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
         mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
         mockSessionStoreGet(Right(Some(HTSSession(Some(Right(userInfo)), Some(confirmedEmail), None))))
 
@@ -484,7 +484,7 @@ class RegisterControllerSpec
 
       "redirect to the create account error page" when {
         "the help to save service returns with an error" in {
-          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
           mockSessionStoreGet(
             Right(Some(HTSSession(Some(Right(userInfo)), Some(confirmedEmail), None, None, None, Some(bankDetails))))
@@ -497,7 +497,7 @@ class RegisterControllerSpec
         }
 
         "there is an error writing to session" in {
-          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
           mockSessionStoreGet(
             Right(Some(HTSSession(Some(Right(userInfo)), Some(confirmedEmail), None, None, None, Some(bankDetails))))
@@ -523,7 +523,7 @@ class RegisterControllerSpec
 
       "redirect to the create account bank details error page" when {
         "the errorMessageId received in the response from nsi is ZYRC0703" in {
-          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
           mockSessionStoreGet(
             Right(Some(HTSSession(Some(Right(userInfo)), Some(confirmedEmail), None, None, None, Some(bankDetails))))
@@ -536,7 +536,7 @@ class RegisterControllerSpec
         }
 
         "the errorMessageId received in the response from nsi is ZYRC0707" in {
-          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
           mockSessionStoreGet(
             Right(Some(HTSSession(Some(Right(userInfo)), Some(confirmedEmail), None, None, None, Some(bankDetails))))
@@ -558,7 +558,7 @@ class RegisterControllerSpec
       "show the page correctly if the person is enrolled to HTS and the session has an account number in it" in {
         val accountNumber = UUID.randomUUID().toString
 
-        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
         mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(true)))
         mockSessionStoreGet(
           Right(Some(HTSSession(None, Some("email@gmail.com"), None, accountNumber = Some(accountNumber))))
@@ -576,7 +576,7 @@ class RegisterControllerSpec
       "redirect to check eligibility" when {
 
         "there is no session data" in {
-          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
           mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(true)))
           mockSessionStoreGet(Right(None))
 
@@ -586,7 +586,7 @@ class RegisterControllerSpec
         }
 
         "there is no account number in session" in {
-          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
           mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(true)))
           mockSessionStoreGet(Right(Some(HTSSession(None, None, None, accountNumber = None))))
 
@@ -596,7 +596,7 @@ class RegisterControllerSpec
         }
 
         "the person is not enrolled to HTS" in {
-          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
 
           val result = getAccountCreatedPage()
@@ -607,7 +607,7 @@ class RegisterControllerSpec
         "there is no email in the session" in {
           val accountNumber = UUID.randomUUID().toString
 
-          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
           mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(true)))
           mockSessionStoreGet(Right(Some(HTSSession(None, None, None, accountNumber = Some(accountNumber)))))
 
@@ -621,7 +621,7 @@ class RegisterControllerSpec
       "show an error page" when {
 
         "the enrolment status cannot be retrieved" in {
-          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
           mockEnrolmentCheck()(Left(""))
 
           val result = getAccountCreatedPage()
@@ -630,7 +630,7 @@ class RegisterControllerSpec
 
         "the session data could not be retrieved" in {
 
-          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
           mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(true)))
           mockSessionStoreGet(Left(""))
 
@@ -649,7 +649,7 @@ class RegisterControllerSpec
       "show errors on the page" in {
         val accountNumber = UUID.randomUUID().toString
 
-        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
         mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(true)))
         mockSessionStoreGet(
           Right(Some(HTSSession(None, Some("email@gmail.com"), None, accountNumber = Some(accountNumber))))
@@ -664,7 +664,7 @@ class RegisterControllerSpec
       "redirect to PayIn" in {
         val accountNumber = UUID.randomUUID().toString
 
-        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
         mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(true)))
         mockSessionStoreGet(
           Right(Some(HTSSession(None, Some("email@gmail.com"), None, accountNumber = Some(accountNumber))))
@@ -679,7 +679,7 @@ class RegisterControllerSpec
       "redirect to AccessAccount" in {
         val accountNumber = UUID.randomUUID().toString
 
-        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
         mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(true)))
         mockSessionStoreGet(
           Right(Some(HTSSession(None, Some("email@gmail.com"), None, accountNumber = Some(accountNumber))))
@@ -701,7 +701,7 @@ class RegisterControllerSpec
       behave like commonEnrolmentAndSessionBehaviour(() => doRequest())
 
       "show the error page" in {
-        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
         mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
         mockSessionStoreGet(
           Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo))), Some(confirmedEmail), None)))
@@ -720,7 +720,7 @@ class RegisterControllerSpec
       behave like commonEnrolmentAndSessionBehaviour(() => doRequest())
 
       "show the error page" in {
-        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
         mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
         mockSessionStoreGet(
           Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo))), Some(confirmedEmail), None)))
@@ -745,7 +745,7 @@ class RegisterControllerSpec
         val eligibilityResult = Some(Right(randomEligibleWithUserInfo(validUserInfo)))
         val session = HTSSession(eligibilityResult, Some("valid@email.com"), None, None, None, Some(bankDetails))
 
-        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
         mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
         mockSessionStoreGet(Right(Some(session)))
         mockSessionStorePut(
@@ -768,7 +768,7 @@ class RegisterControllerSpec
       "show user not eligible page if the user is not eligible" in {
         val session = HTSSession(Some(Left(randomIneligibility())), None, None, None, None, Some(bankDetails))
 
-        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
         mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
         mockSessionStoreGet(Right(Some(session)))
         val result = doRequest()
@@ -781,7 +781,7 @@ class RegisterControllerSpec
         val eligibilityResult = Some(Right(randomEligibleWithUserInfo(validUserInfo)))
         val session = HTSSession(eligibilityResult, Some("valid@email.com"), None)
 
-        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
         mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
         mockSessionStoreGet(Right(Some(session)))
         mockSessionStorePut(session)(Right(()))
@@ -801,7 +801,7 @@ class RegisterControllerSpec
         val eligibilityResult = Some(Right(randomEligibleWithUserInfo(validUserInfo)))
         val session = HTSSession(eligibilityResult, Some("valid@email.com"), None)
 
-        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
         mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
         mockSessionStoreGet(Right(Some(session)))
         mockSessionStorePut(session.copy(changingDetails = true))(Right(()))
@@ -822,7 +822,7 @@ class RegisterControllerSpec
         val eligibilityResult = Some(Right(randomEligibleWithUserInfo(validUserInfo)))
         val session = HTSSession(eligibilityResult, Some("valid@email.com"), None)
 
-        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
         mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
         mockSessionStoreGet(Right(Some(session)))
         mockSessionStorePut(session.copy(changingDetails = true))(Right(()))
@@ -842,7 +842,7 @@ class RegisterControllerSpec
         val eligibilityResult = Some(Right(randomEligibleWithUserInfo(validUserInfo)))
         val session = HTSSession(eligibilityResult, Some("valid@email.com"), None)
 
-        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
         mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
         mockSessionStoreGet(Right(Some(session)))
         mockSessionStorePut(session.copy(changingDetails = true))(Right(()))

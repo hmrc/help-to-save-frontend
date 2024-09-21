@@ -89,7 +89,7 @@ class HelpToSaveAuthSpec extends ControllerSpecWithGuiceApp with AuthSupport {
     }
 
     "filter out empty emails" in {
-      val retrieval = new ~(Some(name), Option("")) and Option(dob) and Some(itmpName) and itmpDob and Some(itmpAddress) and mockedNINORetrieval
+      val retrieval = new ~(Some(name), Option("")) and Option(dob) and Some(itmpName) and itmpDob and Some(itmpAddress) and mockedNINORetrieval and enrolmentsWithMatchingNino
 
       mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(retrieval)
 
@@ -109,7 +109,7 @@ class HelpToSaveAuthSpec extends ControllerSpecWithGuiceApp with AuthSupport {
       def retrieval(address: ItmpAddress) =
         new ~(Some(Name(None, None)), email) and Option(dob) and Some(ItmpName(None, None, None)) and itmpDob and Some(
           address
-        ) and mockedNINORetrieval
+        ) and mockedNINORetrieval and enrolmentsWithMatchingNino
 
       List(
         ItmpAddress(None, None, None, None, None, Some("postcode"), None, None),

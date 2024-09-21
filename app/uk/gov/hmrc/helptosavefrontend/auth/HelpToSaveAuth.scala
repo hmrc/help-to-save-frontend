@@ -24,7 +24,7 @@ import play.api.mvc.{Action, AnyContent, Request, Result}
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.authorise.Predicate
 import uk.gov.hmrc.auth.core.retrieve._
-import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals.{itmpName => V2ItmpName, name => V2Name, nino => V2Nino}
+import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals.{itmpName => V2ItmpName, name => V2Name, nino => V2Nino, allEnrolments}
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 import uk.gov.hmrc.helptosavefrontend.controllers.routes
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
@@ -53,9 +53,9 @@ trait HelpToSaveAuth extends AuthorisedFunctions with Logging {
   )(
     loginContinueURL: RelativeURL
   )(implicit maintenanceSchedule: MaintenanceSchedule, ec: ExecutionContext): Action[AnyContent] =
-    authorised(V2Nino) {
-      case (mayBeNino, request, time) =>
-        withNINO(mayBeNino, time) { nino =>
+    authorised(V2Nino and allEnrolments) {
+      case (mayBeNino ~ enrolments, request, time) =>
+        withNINO(mayBeNino, enrolments, time) { nino =>
           action(request)(HtsContextWithNINO(authorised = true, nino))
         }(request)
     }(loginContinueURL)
@@ -65,9 +65,9 @@ trait HelpToSaveAuth extends AuthorisedFunctions with Logging {
   )(
     loginContinueURL: RelativeURL
   )(implicit maintenanceSchedule: MaintenanceSchedule, ec: ExecutionContext): Action[AnyContent] =
-    authorised(V2Name and V2ItmpName and V2Nino) {
-      case (maybeName ~ maybeItmpName ~ mayBeNino, request, time) =>
-        withNINO(mayBeNino, time) { nino =>
+    authorised(V2Name and V2ItmpName and V2Nino and allEnrolments) {
+      case (maybeName ~ maybeItmpName ~ mayBeNino ~ enrolments, request, time) =>
+        withNINO(mayBeNino, enrolments, time) { nino =>
           val name = maybeItmpName.flatMap(_.givenName).orElse(maybeName.flatMap(_.name))
           action(request)(HtsContextWithNINOAndFirstName(authorised = true, nino, name))
         }(request)
@@ -78,9 +78,13 @@ trait HelpToSaveAuth extends AuthorisedFunctions with Logging {
   )(
     loginContinueURL: RelativeURL
   )(implicit maintenanceSchedule: MaintenanceSchedule, ec: ExecutionContext): Action[AnyContent] =
-    authorised(UserInfoRetrievals and V2Nino) {
-      case (name ~ email ~ dateOfBirth ~ itmpName ~ itmpDateOfBirth ~ itmpAddress ~ mayBeNino, request, time) =>
-        withNINO(mayBeNino, time) { nino =>
+    authorised(UserInfoRetrievals and V2Nino and allEnrolments) {
+      case (
+          name ~ email ~ dateOfBirth ~ itmpName ~ itmpDateOfBirth ~ itmpAddress ~ mayBeNino ~ enrolments,
+          request,
+          time
+          ) =>
+        withNINO(mayBeNino, enrolments, time) { nino =>
           val userDetails = getUserInfo(nino, name, email, dateOfBirth, itmpName, itmpDateOfBirth, itmpAddress)
 
           userDetails.fold(
@@ -111,9 +115,9 @@ trait HelpToSaveAuth extends AuthorisedFunctions with Logging {
   )(
     loginContinueURL: RelativeURL
   )(implicit maintenanceSchedule: MaintenanceSchedule, ec: ExecutionContext): Action[AnyContent] =
-    authorised(V2Nino, AuthProvider) {
-      case (mayBeNino, request, time) =>
-        withNINO(mayBeNino, time) { nino =>
+    authorised(V2Nino and allEnrolments, AuthProvider) {
+      case (mayBeNino ~ enrolments, request, time) =>
+        withNINO(mayBeNino, enrolments, time) { nino =>
           action(request)(HtsContextWithNINO(authorised = true, nino))
         }(request)
     }(loginContinueURL)
@@ -150,13 +154,25 @@ trait HelpToSaveAuth extends AuthorisedFunctions with Logging {
         }
     }
 
-  private def withNINO[A](mayBeNino: Option[String], nanos: Long)(
+  private def withNINO[A](mayBeNino: Option[String], enrolments: Enrolments, nanos: Long)(
     action: NINO => Future[Result]
   )(implicit request: Request[_]): Future[Result] =
     mayBeNino.fold {
       logger.warn(s"NINO retrieval failed ${timeString(nanos)}")
       toFuture(internalServerError())
-    }(action)
+    } { nino =>
+      enrolments.getEnrolment("HMRC-PT").flatMap(_.getIdentifier("NINO")) match {
+        case enrolmentIdentifiers
+            if enrolmentIdentifiers.exists(enrolmentIdentifier => enrolmentIdentifier.value == nino) =>
+          action(nino)
+        case enrolmentIdentifiers if enrolmentIdentifiers.isEmpty =>
+          logger.error("There is no valid HMRC PT enrolment")
+          toFuture(SeeOther(appConfig.protectTaxInfoUrl))
+        case _ =>
+          logger.error("The nino in HMRC-PT enrolment does not match the one from the user session")
+          toFuture(SeeOther(appConfig.protectTaxInfoUrl))
+      }
+    }
 
   // need this type to be able to use the apply syntax on ValidatedNel and mapN
   private type ValidOrMissingUserInfo[A] = ValidatedNel[MissingUserInfo, A]
