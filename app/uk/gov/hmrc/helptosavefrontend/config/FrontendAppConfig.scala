@@ -103,6 +103,10 @@ class FrontendAppConfig @Inject() (servicesConfig: ServicesConfig) {
   val accountHolderContinueURL: String = s"$helpToSaveFrontendUrl/account-home/email-confirmed-callback"
 
   val nsiManageAccountUrl: String = getUrlFor("nsi.manage-account")
+
+  val protectTaxInfoUrl: String =
+    s"${getUrlFor("protect-tax-info")}?redirectUrl=${urlEncode(getUrlFor("help-to-save-frontend"))}"
+
   val nsiPayInUrl: String = getUrlFor("nsi.pay-in")
 
   val govUkURL: String = servicesConfig.getString("gov-uk.url.base")

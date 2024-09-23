@@ -23,6 +23,7 @@ import play.api.http.Status
 import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
+import uk.gov.hmrc.auth.core.syntax.retrieved.authSyntaxForRetrieved
 import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
 import uk.gov.hmrc.helptosavefrontend.connectors.EmailVerificationConnector
 import uk.gov.hmrc.helptosavefrontend.models.EnrolmentStatus.{Enrolled, NotEnrolled}
@@ -118,13 +119,13 @@ class AccountHolderControllerSpec
 
       behave like commonEnrolmentBehaviour(
         () => getUpdateYourEmailAddress(),
-        () => mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval),
-        () => mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(None)
+        () => mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment),
+        () => mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(None and noPersonalTaxEnrolment)
       )
 
       "show a page which allows the user to change their email if they are already " +
         "enrolled and we have an email stored for them" in {
-        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
         mockEnrolmentCheck()(Right(Enrolled(true)))
         mockEmailGet()(Right(Some("email")))
 
@@ -413,7 +414,7 @@ class AccountHolderControllerSpec
     "handling getCheckYourEmail" must {
 
       "return the check your email page" in {
-        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
         mockSessionStoreGet(Right(Some(HTSSession(None, None, Some("email")))))
 
         val result = csrfAddToken(controller.getCheckYourEmail)(fakeRequest)
@@ -424,7 +425,7 @@ class AccountHolderControllerSpec
       "return an error" when {
 
         "there is no session" in {
-          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
           mockSessionStoreGet(Right(None))
 
           val result = controller.getCheckYourEmail(FakeRequest())
@@ -432,7 +433,7 @@ class AccountHolderControllerSpec
         }
 
         "there is no pending email in the session" in {
-          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
           mockSessionStoreGet(Right(Some(HTSSession(None, None, None))))
 
           val result = controller.getCheckYourEmail(FakeRequest())
@@ -440,7 +441,7 @@ class AccountHolderControllerSpec
         }
 
         "the call to session cache fails" in {
-          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
           mockSessionStoreGet(Left(""))
 
           val result = controller.getCheckYourEmail(FakeRequest())
@@ -457,7 +458,7 @@ class AccountHolderControllerSpec
     val account = Account(false, 123.45, 0, 0, 0, LocalDate.parse("1900-01-01"), List(), None, None)
 
     "return the close account are you sure page if they have a help-to-save account" in {
-      mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(Some(nino))
+      mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(Some(nino) and enrolmentsWithMatchingNino)
       mockEnrolmentCheck()(Right(Enrolled(true)))
       mockGetAccount(nino)(Right(account))
 
@@ -467,7 +468,7 @@ class AccountHolderControllerSpec
     }
 
     "redirect to NS&I if the account is already closed" in {
-      mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(Some(nino))
+      mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(Some(nino) and enrolmentsWithMatchingNino)
       mockEnrolmentCheck()(Right(Enrolled(true)))
       mockGetAccount(nino)(Right(account.copy(isClosed = true)))
 
@@ -477,7 +478,7 @@ class AccountHolderControllerSpec
     }
 
     "return close account page with no account if there is any error during retrieving Account from NS&I" in {
-      mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(Some(nino))
+      mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(Some(nino) and enrolmentsWithMatchingNino)
       mockEnrolmentCheck()(Right(Enrolled(true)))
       mockGetAccount(nino)(Left("unknown error"))
 
@@ -489,7 +490,7 @@ class AccountHolderControllerSpec
     }
 
     "redirect the user to the no account page if they are not enrolled in help-to-save" in {
-      mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(Some(nino))
+      mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(Some(nino) and enrolmentsWithMatchingNino)
       mockEnrolmentCheck()(Right(NotEnrolled))
 
       val result = csrfAddToken(controller.getCloseAccountPage)(fakeRequest)
@@ -498,7 +499,7 @@ class AccountHolderControllerSpec
     }
 
     "throw an Internal Server Error if the enrolment check fails" in {
-      mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(Some(nino))
+      mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(Some(nino) and enrolmentsWithMatchingNino)
       mockEnrolmentCheck()(Left("An error occurred"))
 
       val result = csrfAddToken(controller.getCloseAccountPage)(fakeRequest)
