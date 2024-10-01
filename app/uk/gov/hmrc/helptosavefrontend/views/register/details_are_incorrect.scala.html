@@ -23,7 +23,7 @@
 
 @title = @{messages("hts.incorrect-details.title.h1")}
 
-@layout(title, backLink = Some(routes.RegisterController.getCreateAccountPage.url)) {
+@layout(title, backLink = Some(routes.CheckYourDetailsController.checkYourDetails.url)) {
 
     <h1 class="govuk-heading-l">@title</h1>
     <p class="govuk-body">@Html(messages("hts.incorrect-details.p1"))</p>

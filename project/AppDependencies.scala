@@ -20,7 +20,6 @@ object AppDependencies {
   def test(scope: String = "test"): Seq[ModuleID] = Seq(
     hmrc                   %% "stub-data-generator"          % "1.1.0"                 % scope,
     hmrc                   %% s"bootstrap-test-$playVersion" % bootstrapBackendVersion % scope,
-    "com.vladsch.flexmark" % "flexmark-all"                  % "0.64.8"                % scope,
     "org.mockito"          %% "mockito-scala"                % mockitoScalaVersion     % scope,
     "org.scalatestplus"    %% "scalacheck-1-17"              % "3.2.18.0"              % scope
   )

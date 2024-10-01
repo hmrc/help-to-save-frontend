@@ -184,7 +184,7 @@ class RegisterControllerSpec
         val result = controller.getDetailsAreIncorrect(FakeRequest())
         status(result) shouldBe Status.OK
         contentAsString(result) should include("We need your correct details")
-        contentAsString(result) should include(govukBackLink("/help-to-save/create-account"))
+        contentAsString(result) should include(govukBackLink("/help-to-save/check-your-details"))
       }
     }
 

@@ -93,7 +93,7 @@ class EligibilityCheckController @Inject() (
             s.flatMap(_.eligibilityCheckResult).fold(eligibilityAction(s)) {
               _.fold(
                 _ => SeeOther(routes.EligibilityCheckController.getIsNotEligible.url), // user is not eligible
-                _ => SeeOther(routes.EligibilityCheckController.getIsEligible.url) // user is eligible
+                _ => SeeOther(routes.CheckYourDetailsController.checkYourDetails.url) // user is eligible
               )
             }
         }
@@ -143,7 +143,7 @@ class EligibilityCheckController @Inject() (
                 Ok(notEligible(i, threshold))
               }
             },
-            _ => SeeOther(routes.EligibilityCheckController.getIsEligible.url)
+            _ => SeeOther(routes.CheckYourDetailsController.checkYourDetails.url)
           )
         }
       }
@@ -184,7 +184,11 @@ class EligibilityCheckController @Inject() (
   def getMissingInfoPage: Action[AnyContent] =
     authorisedForHtsWithInfo { implicit request => implicit htsContext =>
       htsContext.userDetails.fold(
-        missingInfo => Ok(missingUserInfo(missingInfo.missingInfo)),
+        { missingInfo =>
+          // DLS-10416 - Check in Kibana to see whether we can remove the Date of Birth warning
+          logger.info("Missing user info: " + missingInfo.missingInfo.toString())
+          Ok(missingUserInfo(missingInfo.missingInfo))
+        },
         _ => SeeOther(routes.EligibilityCheckController.getCheckEligibility.url)
       )
     }(loginContinueURL = routes.EligibilityCheckController.getCheckEligibility.url)
@@ -196,7 +200,7 @@ class EligibilityCheckController @Inject() (
       } {
         _.eligibilityResult.fold(
           _ => Ok(thinkYouAreEligible()),
-          _ => SeeOther(routes.EligibilityCheckController.getIsEligible.url)
+          _ => SeeOther(routes.CheckYourDetailsController.checkYourDetails.url)
         )
       }
     }(loginContinueURL = routes.EligibilityCheckController.getThinkYouAreEligiblePage.url)
@@ -244,7 +248,7 @@ class EligibilityCheckController @Inject() (
   )(implicit htsContext: HtsContextWithNINOAndUserDetails, hc: HeaderCarrier): PlayResult = {
     val nino = htsContext.nino
     result.fold(
-      _ => SeeOther(routes.EligibilityCheckController.getIsEligible.url),
+      _ => SeeOther(routes.CheckYourDetailsController.checkYourDetails.url),
       _ => SeeOther(routes.EligibilityCheckController.getIsNotEligible.url),
       _ => {
         helpToSaveService.setITMPFlagAndUpdateMongo().value.onComplete {
