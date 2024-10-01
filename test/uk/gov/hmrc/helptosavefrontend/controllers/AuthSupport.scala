@@ -154,10 +154,10 @@ trait AuthSupport extends IdiomaticMockito {
     ) and mockedNINORetrieval and enrolmentsWithMatchingNino
 
   val mockedRetrievalsMissingPostcode
-    : ~[~[~[~[~[~[Option[Name], Option[String]], Option[LocalDate]], Option[ItmpName]], Option[LocalDate]], Option[
+    : ~[~[~[~[~[~[~[Option[Name], Option[String]], Option[LocalDate]], Option[ItmpName]], Option[LocalDate]], Option[
       ItmpAddress
-    ]], Option[String]] =
-    new ~(Some(name), email) and Option(dob) and Some(itmpName) and itmpDob and Some(itmpAddress.copy(postCode = None)) and mockedNINORetrieval
+    ]], Option[String]], Enrolments] =
+    new ~(Some(name), email) and Option(dob) and Some(itmpName) and itmpDob and Some(itmpAddress.copy(postCode = None)) and mockedNINORetrieval and enrolmentsWithMatchingNino
 
   val mockedRetrievalsMissingNinoEnrolment
     : ~[~[~[~[~[~[~[Option[Name], Option[String]], Option[LocalDate]], Option[ItmpName]], Option[LocalDate]], Option[
