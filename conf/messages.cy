@@ -565,9 +565,9 @@ hts.help.information.h2=Gofyn i CThEF ar-lein
 hts.help.information.p1-1=I gael rhagor o wybodaeth am y cynllun Cymorth i Gynilo
 hts.help.information.p1-2=gofynnwch i gynorthwyydd digidol CThEF (yn Saesneg)
 
-hts.help-information.section.guidance.title=Guidance
-hts.help-information.section.guidance.s1=Get help with savings if you're on a low income (Help to Save)
-hts.help-information.section.guidance.s2=Get support with the Help to Save scheme
+hts.help-information.section.guidance.title=Arweiniad
+hts.help-information.section.guidance.s1=Cael help gyda chynilion os ydych ar incwm isel (Cymorth i Gynilo)
+hts.help-information.section.guidance.s2=Cael help gyda’r cynllun Cymorth i Gynilo
 
 language-switcher.english.hidden=Change the language to English
 language-switcher.english=English
