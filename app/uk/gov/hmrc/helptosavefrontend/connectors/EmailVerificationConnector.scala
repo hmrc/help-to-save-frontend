@@ -18,6 +18,7 @@ package uk.gov.hmrc.helptosavefrontend.connectors
 
 import com.google.inject.{ImplementedBy, Inject, Singleton}
 import play.api.http.Status._
+import play.api.libs.json.Json
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 import uk.gov.hmrc.helptosavefrontend.http.HttpClient.HttpClientOps
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
@@ -26,7 +27,8 @@ import uk.gov.hmrc.helptosavefrontend.models.email.VerifyEmailError._
 import uk.gov.hmrc.helptosavefrontend.models.email.{EmailVerificationRequest, VerifyEmailError}
 import uk.gov.hmrc.helptosavefrontend.util.Logging._
 import uk.gov.hmrc.helptosavefrontend.util.{Crypto, EmailVerificationParams, Logging, NINO, NINOLogMessageTransformer}
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse}
+import uk.gov.hmrc.http.client.HttpClientV2
+import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse, StringContextOps}
 
 import java.time.Duration
 import scala.concurrent.{ExecutionContext, Future}
@@ -43,7 +45,7 @@ trait EmailVerificationConnector {
 }
 
 @Singleton
-class EmailVerificationConnectorImpl @Inject() (http: HttpClient, metrics: Metrics)(
+class EmailVerificationConnectorImpl @Inject()(http: HttpClientV2, metrics: Metrics)(
   implicit crypto: Crypto,
   transformer: NINOLogMessageTransformer,
   frontendAppConfig: FrontendAppConfig
@@ -71,9 +73,13 @@ class EmailVerificationConnectorImpl @Inject() (http: HttpClient, metrics: Metri
     )
 
     val timerContext = metrics.emailVerificationTimer.time()
+    val requestUrl = frontendAppConfig.verifyEmailURL
 
     http
-      .post[EmailVerificationRequest](frontendAppConfig.verifyEmailURL, verificationRequest)
+      //.post[EmailVerificationRequest](frontendAppConfig.verifyEmailURL, verificationRequest)
+      .post(url"$requestUrl")
+      .withBody(Json.toJson(verificationRequest))
+      .execute[HttpResponse]
       .map[Either[VerifyEmailError, Unit]] { (response: HttpResponse) =>
         val time = timerContext.stop()
 

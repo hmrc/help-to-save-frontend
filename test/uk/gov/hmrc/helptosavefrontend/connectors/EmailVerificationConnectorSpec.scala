@@ -29,6 +29,7 @@ import uk.gov.hmrc.helptosavefrontend.controllers.ControllerSpecBase
 import uk.gov.hmrc.helptosavefrontend.models.email.VerifyEmailError.OtherError
 import uk.gov.hmrc.helptosavefrontend.models.email.{EmailVerificationRequest, VerifyEmailError}
 import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Email, NINO, NINOLogMessageTransformer, TestNINOLogMessageTransformer, WireMockMethods}
+import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.test.WireMockSupport
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse}
 
@@ -66,7 +67,7 @@ class EmailVerificationConnectorSpec
 
   implicit lazy val appConfig: FrontendAppConfig = app.injector.instanceOf[FrontendAppConfig]
 
-  val mockHttp: HttpClient = app.injector.instanceOf[HttpClient]
+  val mockHttp: HttpClientV2 = app.injector.instanceOf[HttpClientV2]
   lazy val connector: EmailVerificationConnectorImpl = new EmailVerificationConnectorImpl(mockHttp, mockMetrics)
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
@@ -106,7 +107,8 @@ class EmailVerificationConnectorSpec
           verifyEmailUrl,
           body = Some(Json.toJson(verificationRequest).toString())
         ).thenReturn(response.status, response.body)
-        await(connector.verifyEmail(nino, email, name, isNewApplicant)) shouldBe Right(())
+        val result = await(connector.verifyEmail(nino, email, name, isNewApplicant))
+        result shouldBe Right(())
       }
 
       "indicate the email has already been verified when the email has already been verified" in {
@@ -118,7 +120,8 @@ class EmailVerificationConnectorSpec
           body = Some(Json.toJson(verificationRequest).toString())
         ).thenReturn(response.status, response.body)
 
-        await(connector.verifyEmail(nino, email, name, isNewApplicant)) shouldBe Left(VerifyEmailError.AlreadyVerified)
+        val result = await(connector.verifyEmail(nino, email, name, isNewApplicant))
+        result shouldBe Left(VerifyEmailError.AlreadyVerified)
       }
 
       "return an error" when {

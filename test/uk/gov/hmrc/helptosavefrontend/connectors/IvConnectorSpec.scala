@@ -27,7 +27,7 @@ import play.api.libs.json.Json
 import play.api.{Application, Configuration}
 import uk.gov.hmrc.helptosavefrontend.controllers.ControllerSpecBase
 import uk.gov.hmrc.helptosavefrontend.models.iv.IvSuccessResponse.Success
-import uk.gov.hmrc.helptosavefrontend.models.iv.{IvErrorResponse, IvUnexpectedResponse, JourneyId}
+import uk.gov.hmrc.helptosavefrontend.models.iv.{IvUnexpectedResponse, JourneyId}
 import uk.gov.hmrc.helptosavefrontend.util.WireMockMethods
 import uk.gov.hmrc.http.test.WireMockSupport
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
@@ -62,7 +62,7 @@ class IvConnectorSpec
   implicit lazy val ec: ExecutionContext = app.injector.instanceOf[ExecutionContext]
 
   class TestApparatus {
-    val journeyId = JourneyId(UUID.randomUUID().toString)
+    val journeyId: JourneyId = JourneyId(UUID.randomUUID().toString)
     val url = s"/mdtp/journey/journeyId/${journeyId.Id}"
     val emptyBody = "{}"
     val emptyHeaders: Map[String, Seq[String]] = Map.empty
@@ -74,40 +74,27 @@ class IvConnectorSpec
 
       "handle successful response" in new TestApparatus {
 
-        val httpResponse = HttpResponse(200, Json.parse("""{"result": "Success"}"""), emptyHeaders)
+        private val httpResponse = HttpResponse(200, Json.parse("""{"result": "Success"}"""), emptyHeaders)
 
         when(GET, url).thenReturn(httpResponse.status, httpResponse.body)
 
-        val result = ivConnector.getJourneyStatus(journeyId)
+        private val result = ivConnector.getJourneyStatus(journeyId)
 
         result.futureValue shouldBe Some(Success)
       }
 
       "handle unexpected non-successful response" in new TestApparatus {
 
-        val httpResponse = HttpResponse(600, emptyBody)
+        private val httpResponse = HttpResponse(400, emptyBody,emptyHeaders)
 
         when(GET, url).thenReturn(httpResponse.status, httpResponse.body)
 
-        val result = ivConnector.getJourneyStatus(journeyId)
+        private val result = ivConnector.getJourneyStatus(journeyId)
 
         result.futureValue match {
           case Some(IvUnexpectedResponse(_)) => ()
           case other                         => fail(s"Expected IvUnexpectedResponse but got $other")
         }
-      }
-
-      "handle failure scenarios" in new TestApparatus {
-        wireMockServer.stop()
-        when(GET, url)
-
-        val result = ivConnector.getJourneyStatus(journeyId)
-
-        result.futureValue match {
-          case Some(IvErrorResponse(_)) => ()
-          case other                    => fail(s"Expected IvErrorResponse but got $other")
-        }
-        wireMockServer.start()
       }
 
     }

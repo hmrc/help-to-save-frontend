@@ -156,8 +156,8 @@ class HelpToSaveReminderConnectorSpec
         response.status,
         response.body
       )
-      val result = connector.cancelHtsUserReminders(cancelHtsUserReminder)
-      await(result.value) should equal(Right(()))
+      val result = await(connector.cancelHtsUserReminders(cancelHtsUserReminder).value)
+      result should equal(Right(()))
     }
     "fail when unexpected response received" in {
       val response = HttpResponse(400, emptyBody)

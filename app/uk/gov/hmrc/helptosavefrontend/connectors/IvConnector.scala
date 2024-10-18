@@ -16,15 +16,13 @@
 
 package uk.gov.hmrc.helptosavefrontend.connectors
 
-import cats.instances.int._
-import cats.syntax.eq._
 import com.google.inject.{ImplementedBy, Inject, Singleton}
-import play.mvc.Http.Status.OK
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
-import uk.gov.hmrc.helptosavefrontend.http.HttpClient.HttpClientOps
 import uk.gov.hmrc.helptosavefrontend.models.iv._
 import uk.gov.hmrc.helptosavefrontend.util.{Logging, toFuture}
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
+import uk.gov.hmrc.http.HttpReadsInstances.readEitherOf
+import uk.gov.hmrc.http.client.HttpClientV2
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, StringContextOps, UpstreamErrorResponse}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -36,30 +34,26 @@ trait IvConnector {
 }
 
 @Singleton
-class IvConnectorImpl @Inject() (http: HttpClient)(implicit val frontendAppConfig: FrontendAppConfig)
+class IvConnectorImpl @Inject()(http: HttpClientV2)(implicit val frontendAppConfig: FrontendAppConfig)
     extends IvConnector with Logging {
+
+
 
   override def getJourneyStatus(
     journeyId: JourneyId
-  )(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Option[IvResponse]] =
+  )(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Option[IvResponse]] = {
+    val ivJourneyResultUrl = frontendAppConfig.ivJourneyResultUrl(journeyId)
     http
-      .get(frontendAppConfig.ivJourneyResultUrl(journeyId))
-      .flatMap {
-
-        case r if r.status === OK =>
-          val result = (r.json \ "result").as[String]
-          IvSuccessResponse.fromString(result)
-
-        case r =>
+      .get(url"$ivJourneyResultUrl").execute[Either[UpstreamErrorResponse,HttpResponse]]
+      .flatMap{
+        case Left(e) =>
           logger.warn(
-            s"Unexpected ${r.status} response getting IV journey status from identity-verification-frontend-service"
+            s"Unexpected ${e.statusCode} response getting IV journey status from identity-verification-frontend-service"
           )
-          Some(IvUnexpectedResponse(r))
-
+          Some(IvUnexpectedResponse(e))
+        case Right(httpResponse) =>
+          val result = (httpResponse.json \ "result").as[String]
+          IvSuccessResponse.fromString(result)
       }
-      .recoverWith {
-        case e: Exception =>
-          logger.warn("Error getting IV journey status from identity-verification-frontend-service", e)
-          Some(IvErrorResponse(e))
-      }
+  }
 }

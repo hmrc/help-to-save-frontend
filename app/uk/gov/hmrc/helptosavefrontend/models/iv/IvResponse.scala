@@ -62,6 +62,6 @@ object IvSuccessResponse {
 
 }
 
-case class IvUnexpectedResponse(r: HttpResponse) extends IvResponse
+case class IvUnexpectedResponse(cause: Exception) extends IvResponse
 
 case class IvErrorResponse(cause: Exception) extends IvResponse
