@@ -124,7 +124,7 @@ class IntroductionControllerSpec
         status(result) shouldBe OK
         val content = contentAsString(result)
         content should include("Help and information")
-        content should include("A calendar month is a full month from the first day of the month")
+        content should include("Guidance")
       }
 
       "show an error page if the user's enrolment status cannot be checked" in {

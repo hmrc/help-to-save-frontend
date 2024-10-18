@@ -18,69 +18,17 @@
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 @import uk.gov.hmrc.helptosavefrontend.models.account.Account
 @import uk.gov.hmrc.helptosavefrontend.views.ViewHelpers
-@import uk.gov.hmrc.helptosavefrontend.views.helpers.DetailsHelper
 @import uk.gov.hmrc.helptosavefrontend.views.html.helpers._
 
 @import java.time.LocalDate
 
-@this(layout: uk.gov.hmrc.helptosavefrontend.views.html.layout, viewHelpers: ViewHelpers, detailsHelper: DetailsHelper)
+@this(layout: uk.gov.hmrc.helptosavefrontend.views.html.layout, viewHelpers: ViewHelpers)
 @(accountNumber: Option[String], maybeAccount: Option[Account])(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 
 @title = @{
     Messages("hts.help.information.title.h1")
 }
-@date = @{
-    maybeAccount.fold[Option[LocalDate]](None)(account => account.bonusTerms.lastOption.fold[Option[LocalDate]](None)(bonusTerm => Some(bonusTerm.endDate)))
-}
-@paymentDetailsList = @{
-    detailsHelper.payment(
-        payments_how_much().toString,
-        setup_regular_payment(accountNumber).toString,
-        when_will_payments_appear().toString,
-        payments_not_showing().toString
-    )
-}
-@bonusesDetailsList = @{
-    detailsHelper.bonuses(
-        what_bonuses().toString,
-        highest_balance().toString,
-        first_bonus().toString,
-        final_bonus().toString,
-        bonus_examples().toString,
-        bonus_paid().toString,
-        how_withdrawals_affect_bonuses().toString
-    )
-}
-@withdrawalsDetailsList = @{
-    detailsHelper.withdrawals(
-        withdrawing_money().toString
-    )
-}
-@howAccountWorksDetailsList = @{
-    detailsHelper.howAccountWorks(
-        savings_explained().toString,
-        how_sign_in().toString,
-        why_use_app().toString,
-        how_contact_you().toString,
-        leave_uk().toString,
-        stop_claiming_benefits().toString,
-        close_account_early().toString,
-        death_terminal_illness().toString
-    )
-}
-@whenYourAccountEndsList = @{
-    detailsHelper.whenYourAccountEnds(
-        before_account_closes(date).toString,
-        after_4_years(date).toString,
-        savings_after_account_closes().toString
-    )
-}
-@hmrcAppList = @{
-    detailsHelper.hmrcApp(
-        app_benefits().toString,
-        get_app().toString
-    )
-}
+
 @layout(title = title + " " + Messages("hts.global.accountholder.title-suffix"), Some(appConfig.nsiManageAccountUrl)) {
     <h1 class="govuk-heading-l">@title</h1>
 
@@ -91,35 +39,14 @@
             @messages("hts.help.information.p1-2").
         </a>
     </p>
+    <h2 class="govuk-heading-m">@messages("hts.help-information.section.guidance.title")</h2>
+    <p class="govuk-body">
+        <a class= "govuk-link" href="https://www.gov.uk/get-help-savings-low-income" target="_blank">
+            @messages("hts.help-information.section.guidance.s1")
+        </a> <br>
+        <a class= "govuk-link" href="https://www.gov.uk/government/organisations/hm-revenue-customs/contact/help-to-save-scheme" target="_blank">
+            @messages("hts.help-information.section.guidance.s2")
+        </a>
+    </p>
 
-        <!--payments-->
-    @help_intro_section(heading = Messages("hts.help-information.section.payments.title"))
-    @for(detail <- paymentDetailsList) {
-        @viewHelpers.govUkDetails(detail)
-    }
-        <!--bonuses-->
-    @help_intro_section(heading = Messages("hts.help-information.section.bonuses.title"))
-    @for(detail <- bonusesDetailsList) {
-        @viewHelpers.govUkDetails(detail)
-    }
-        <!--withdrawals-->
-    @help_intro_section(heading = Messages("hts.help-information.section.withdrawals.title"))
-    @for(detail <- withdrawalsDetailsList) {
-        @viewHelpers.govUkDetails(detail)
-    }
-        <!--how-account-works-->
-    @help_intro_section(heading = Messages("hts.help-information.section.how-account-works.title"))
-    @for(detail <- howAccountWorksDetailsList) {
-        @viewHelpers.govUkDetails(detail)
-    }
-        <!--when-your-account-ends-->
-    @help_intro_section(heading = Messages("hts.help-information.section.when-your-account-ends.title"))
-    @for(detail <- whenYourAccountEndsList) {
-        @viewHelpers.govUkDetails(detail)
-    }
-        <!--hmrc-app-->
-    @help_intro_section(heading = Messages("hts.help-information.section.hmrc-app.title"))
-    @for(detail <- hmrcAppList) {
-        @viewHelpers.govUkDetails(detail)
-    }
 }
