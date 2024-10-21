@@ -62,7 +62,7 @@ class IvConnectorSpec
   implicit lazy val ec: ExecutionContext = app.injector.instanceOf[ExecutionContext]
 
   class TestApparatus {
-    val journeyId = JourneyId(UUID.randomUUID().toString)
+    val journeyId: JourneyId = JourneyId(UUID.randomUUID().toString)
     val url = s"/mdtp/journey/journeyId/${journeyId.Id}"
     val emptyBody = "{}"
     val emptyHeaders: Map[String, Seq[String]] = Map.empty
@@ -74,22 +74,22 @@ class IvConnectorSpec
 
       "handle successful response" in new TestApparatus {
 
-        val httpResponse = HttpResponse(200, Json.parse("""{"result": "Success"}"""), emptyHeaders)
+        private val httpResponse = HttpResponse(200, Json.parse("""{"result": "Success"}"""), emptyHeaders)
 
         when(GET, url).thenReturn(httpResponse.status, httpResponse.body)
 
-        val result = ivConnector.getJourneyStatus(journeyId)
+        private val result = ivConnector.getJourneyStatus(journeyId)
 
         result.futureValue shouldBe Some(Success)
       }
 
       "handle unexpected non-successful response" in new TestApparatus {
 
-        val httpResponse = HttpResponse(600, emptyBody)
+        private val httpResponse = HttpResponse(600, emptyBody)
 
         when(GET, url).thenReturn(httpResponse.status, httpResponse.body)
 
-        val result = ivConnector.getJourneyStatus(journeyId)
+        private val result = ivConnector.getJourneyStatus(journeyId)
 
         result.futureValue match {
           case Some(IvUnexpectedResponse(_)) => ()
@@ -101,7 +101,7 @@ class IvConnectorSpec
         wireMockServer.stop()
         when(GET, url)
 
-        val result = ivConnector.getJourneyStatus(journeyId)
+        private val result = ivConnector.getJourneyStatus(journeyId)
 
         result.futureValue match {
           case Some(IvErrorResponse(_)) => ()

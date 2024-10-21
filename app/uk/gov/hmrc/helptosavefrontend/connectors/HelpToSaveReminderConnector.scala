@@ -18,13 +18,16 @@ package uk.gov.hmrc.helptosavefrontend.connectors
 
 import cats.data.EitherT
 import com.google.inject.{ImplementedBy, Inject, Singleton}
+import play.api.http.Status.{NOT_MODIFIED, OK}
+import play.api.libs.json.Json
 import play.mvc.Http.Status
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
-import uk.gov.hmrc.helptosavefrontend.http.HttpClient.HttpClientOps
 import uk.gov.hmrc.helptosavefrontend.models.reminder.{CancelHtsUserReminder, HtsUserSchedule, UpdateReminderEmail}
 import uk.gov.hmrc.helptosavefrontend.util.HttpResponseOps._
 import uk.gov.hmrc.helptosavefrontend.util.Result
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse}
+import uk.gov.hmrc.http.HttpReads.Implicits._
+import uk.gov.hmrc.http.client.HttpClientV2
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, StringContextOps, UpstreamErrorResponse}
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.control.NonFatal
@@ -44,14 +47,14 @@ trait HelpToSaveReminderConnector {
 }
 
 @Singleton
-class HelpToSaveReminderConnectorImpl @Inject() (http: HttpClient)(implicit frontendAppConfig: FrontendAppConfig)
+class HelpToSaveReminderConnectorImpl @Inject() (http: HttpClientV2)(implicit frontendAppConfig: FrontendAppConfig)
     extends HelpToSaveReminderConnector {
 
   private val htsReminderURL = frontendAppConfig.helpToSaveReminderUrl
 
   private val updateHtsReminderURL = s"$htsReminderURL/help-to-save-reminder/update-htsuser-entity"
 
-  private def getHtsReminderUserURL(nino: String) = s"$htsReminderURL/help-to-save-reminder/gethtsuser/$nino"
+  private def htsReminderUserURL = s"$htsReminderURL/help-to-save-reminder/gethtsuser"
 
   private val cancelHtsReminderURL = s"$htsReminderURL/help-to-save-reminder/delete-htsuser-entity"
 
@@ -60,26 +63,49 @@ class HelpToSaveReminderConnectorImpl @Inject() (http: HttpClient)(implicit fron
   override def updateHtsUser(
     htsUser: HtsUserSchedule
   )(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[HtsUserSchedule] =
-    handle(http.post(updateHtsReminderURL, htsUser), _.parseJSON[HtsUserSchedule](), "update htsUser")
+    handle(
+      http.post(url"$updateHtsReminderURL").withBody(Json.toJson(htsUser)).execute[HttpResponse],
+      _.parseJSON[HtsUserSchedule](),
+      "update htsUser"
+    )
 
   override def getHtsUser(nino: String)(implicit hc: HeaderCarrier, ex: ExecutionContext): Result[HtsUserSchedule] =
-    handle(http.get(getHtsReminderUserURL(nino)), _.parseJSON[HtsUserSchedule](), "get hts user")
+    handle(
+      http.get(url"$htsReminderUserURL/$nino").execute[HttpResponse],
+      _.parseJSON[HtsUserSchedule](),
+      "get hts user"
+    )
 
   override def updateReminderEmail(
     updateReminderEmail: UpdateReminderEmail
   )(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit] =
-    handle(http.post(emailUpdateHtsReminderURL, updateReminderEmail), _ => Right(()), "update email")
+    handle(
+      http.post(url"$emailUpdateHtsReminderURL").withBody(Json.toJson(updateReminderEmail)).execute[HttpResponse],
+      _ => Right(()),
+      "update email"
+    )
 
   override def cancelHtsUserReminders(
     cancelHtsUserReminder: CancelHtsUserReminder
   )(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit] =
     for {
-      response <- toEitherT("cancel reminder", http.post(cancelHtsReminderURL, cancelHtsUserReminder))
-      result <- response.status match {
-                 case Status.OK | Status.NOT_MODIFIED => EitherT.rightT[Future, String](())
-                 case _ =>
+      response <- toEitherT(
+                   "cancel reminder",
+                   http
+                     .post(url"$cancelHtsReminderURL")
+                     .withBody(Json.toJson(cancelHtsUserReminder))
+                     .execute[Either[UpstreamErrorResponse, HttpResponse]]
+                 )
+      result <- response match {
+                 case Right(response) if response.status == OK | response.status == NOT_MODIFIED =>
+                   EitherT.rightT[Future, String](())
+                 case Right(response) =>
                    EitherT.leftT[Future, Unit](
                      s"Call to 'cancel reminder' came back with status ${response.status}. Body was ${response.body}"
+                   )
+                 case Left(e) =>
+                   EitherT.leftT[Future, Unit](
+                     s"Call to 'cancel reminder' came back with status ${e.statusCode}. Body was ${e.getMessage()}"
                    )
                }
     } yield result
