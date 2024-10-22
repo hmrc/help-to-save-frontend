@@ -93,9 +93,9 @@ class HelpToSaveConnectorSpec
   private val emptyHeaders: Map[String, Seq[String]] = Map.empty
 
   implicit val unitFormat: Format[Unit] = new Format[Unit] {
-    override def writes(o: Unit) = JsNull
+    override def writes(o: Unit): JsValue = JsNull
 
-    override def reads(json: JsValue) = json match {
+    override def reads(json: JsValue): JsResult[Unit] = json match {
       case JsNull => JsSuccess(())
       case _      => JsError("JSON was not null")
     }
@@ -338,7 +338,7 @@ class HelpToSaveConnectorSpec
       val correlationId = UUID.randomUUID()
       val url = s"/help-to-save/$nino/account"
       val queryParameters = Map("correlationId" -> correlationId.toString, "systemId" -> "help-to-save-frontend")
-      val account = Account(false, 123.45, 0, 0, 0, LocalDate.parse("1900-01-01"), List(), None, None)
+      val account = Account(isClosed = false, 123.45, 0, 0, 0, LocalDate.parse("1900-01-01"), List(), None, None)
 
       "be able to handle 200 responses with valid Account json" in {
         val response = HttpResponse(200, Json.toJson(account), emptyHeaders)

@@ -18,15 +18,17 @@ package uk.gov.hmrc.helptosavefrontend.connectors
 
 import com.google.inject.{ImplementedBy, Inject, Singleton}
 import play.api.http.Status._
+import play.api.libs.json.Json
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
-import uk.gov.hmrc.helptosavefrontend.http.HttpClient.HttpClientOps
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics.nanosToPrettyString
 import uk.gov.hmrc.helptosavefrontend.models.email.VerifyEmailError._
 import uk.gov.hmrc.helptosavefrontend.models.email.{EmailVerificationRequest, VerifyEmailError}
 import uk.gov.hmrc.helptosavefrontend.util.Logging._
 import uk.gov.hmrc.helptosavefrontend.util.{Crypto, EmailVerificationParams, Logging, NINO, NINOLogMessageTransformer}
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse}
+import uk.gov.hmrc.http.HttpReads.Implicits._
+import uk.gov.hmrc.http.client.HttpClientV2
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, StringContextOps, UpstreamErrorResponse}
 
 import java.time.Duration
 import scala.concurrent.{ExecutionContext, Future}
@@ -43,13 +45,13 @@ trait EmailVerificationConnector {
 }
 
 @Singleton
-class EmailVerificationConnectorImpl @Inject() (http: HttpClient, metrics: Metrics)(
+class EmailVerificationConnectorImpl @Inject() (http: HttpClientV2, metrics: Metrics)(
   implicit crypto: Crypto,
   transformer: NINOLogMessageTransformer,
   frontendAppConfig: FrontendAppConfig
 ) extends EmailVerificationConnector with Logging {
 
-  val templateId: String = "hts_verification_email"
+  private val templateId: String = "hts_verification_email"
 
   def verifyEmail(nino: String, newEmail: String, firstName: String, isNewApplicant: Boolean)(
     implicit
@@ -71,23 +73,25 @@ class EmailVerificationConnectorImpl @Inject() (http: HttpClient, metrics: Metri
     )
 
     val timerContext = metrics.emailVerificationTimer.time()
+    val requestUrl = frontendAppConfig.verifyEmailURL
+    val time = timerContext.stop()
 
     http
-      .post[EmailVerificationRequest](frontendAppConfig.verifyEmailURL, verificationRequest)
-      .map[Either[VerifyEmailError, Unit]] { (response: HttpResponse) =>
-        val time = timerContext.stop()
-
-        response.status match {
-          case OK | CREATED =>
-            logger.info(
-              s"Email verification successfully triggered, received status ${response.status} " +
-                s"(round-trip time: ${nanosToPrettyString(time)})",
-              nino
-            )
-            Right(())
-          case other =>
-            handleErrorStatus(other, response, time, nino)
-        }
+      .post(url"$requestUrl")
+      .withBody(Json.toJson(verificationRequest))
+      .execute[Either[UpstreamErrorResponse, HttpResponse]]
+      .map {
+        case Right(response) if response.status == OK | response.status == CREATED =>
+          logger.info(
+            s"Email verification successfully triggered, received status ${response.status} " +
+              s"(round-trip time: ${nanosToPrettyString(time)})",
+            nino
+          )
+          Right(())
+        case Right(response) =>
+          handleErrorStatus(response.status, time, nino)
+        case Left(e) =>
+          handleErrorStatus(e.statusCode, time, nino)
       }
       .recover {
         case NonFatal(e) =>
@@ -104,7 +108,6 @@ class EmailVerificationConnectorImpl @Inject() (http: HttpClient, metrics: Metri
 
   private def handleErrorStatus(
     status: Int,
-    response: HttpResponse,
     time: Long,
     nino: NINO
   ): Either[VerifyEmailError, Unit] = {

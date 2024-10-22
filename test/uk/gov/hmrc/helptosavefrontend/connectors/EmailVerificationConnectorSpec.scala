@@ -29,8 +29,9 @@ import uk.gov.hmrc.helptosavefrontend.controllers.ControllerSpecBase
 import uk.gov.hmrc.helptosavefrontend.models.email.VerifyEmailError.OtherError
 import uk.gov.hmrc.helptosavefrontend.models.email.{EmailVerificationRequest, VerifyEmailError}
 import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Email, NINO, NINOLogMessageTransformer, TestNINOLogMessageTransformer, WireMockMethods}
+import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.test.WireMockSupport
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
 import scala.concurrent.ExecutionContext
 
@@ -66,7 +67,7 @@ class EmailVerificationConnectorSpec
 
   implicit lazy val appConfig: FrontendAppConfig = app.injector.instanceOf[FrontendAppConfig]
 
-  val mockHttp: HttpClient = app.injector.instanceOf[HttpClient]
+  val mockHttp: HttpClientV2 = app.injector.instanceOf[HttpClientV2]
   lazy val connector: EmailVerificationConnectorImpl = new EmailVerificationConnectorImpl(mockHttp, mockMetrics)
 
   implicit val hc: HeaderCarrier = HeaderCarrier()

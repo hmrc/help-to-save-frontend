@@ -21,7 +21,6 @@ import com.google.inject.{ImplementedBy, Inject, Singleton}
 import play.api.libs.json._
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 import uk.gov.hmrc.helptosavefrontend.connectors.HelpToSaveConnectorImpl._
-import uk.gov.hmrc.helptosavefrontend.http.HttpClient.HttpClientOps
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.models.account.{Account, AccountNumber}
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.{EligibilityCheckResponse, EligibilityCheckResultType}
@@ -29,7 +28,9 @@ import uk.gov.hmrc.helptosavefrontend.models.register.CreateAccountRequest
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.{MissingUserInfo, NSIPayload}
 import uk.gov.hmrc.helptosavefrontend.util.HttpResponseOps._
 import uk.gov.hmrc.helptosavefrontend.util.{Email, Result, base64Encode, maskNino}
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse}
+import uk.gov.hmrc.http.HttpReads.Implicits._
+import uk.gov.hmrc.http.client.HttpClientV2
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, StringContextOps}
 
 import java.util.UUID
 import scala.concurrent.{ExecutionContext, Future}
@@ -70,7 +71,7 @@ trait HelpToSaveConnector {
 }
 
 @Singleton
-class HelpToSaveConnectorImpl @Inject() (http: HttpClient)(implicit frontendAppConfig: FrontendAppConfig)
+class HelpToSaveConnectorImpl @Inject() (http: HttpClientV2)(implicit frontendAppConfig: FrontendAppConfig)
     extends HelpToSaveConnector {
 
   private val helpToSaveUrl: String = frontendAppConfig.helpToSaveUrl
@@ -110,10 +111,10 @@ class HelpToSaveConnectorImpl @Inject() (http: HttpClient)(implicit frontendAppC
 
   private def getAccountUrl(nino: String) = s"$helpToSaveUrl/help-to-save/$nino/account"
 
-  private def getAccountQueryParams(correlationId: UUID): Map[String, String] =
-    Map("correlationId" -> correlationId.toString, "systemId" -> "help-to-save-frontend")
+  private def getAccountQueryParams(correlationId: UUID): Seq[(String, String)] =
+    Seq("correlationId" -> correlationId.toString, "systemId" -> "help-to-save-frontend")
 
-  private val emptyQueryParameters: Map[String, String] = Map.empty[String, String]
+  private val emptyQueryParameters: Seq[(String, String)] = Seq.empty
 
   def getEligibility()(
     implicit hc: HeaderCarrier,
@@ -143,7 +144,7 @@ class HelpToSaveConnectorImpl @Inject() (http: HttpClient)(implicit frontendAppC
     handleGet(setITMPFlagURL, emptyQueryParameters, _ => Right(()), "set ITMP flag and update mongo", identity)
 
   def storeEmail(email: Email)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit] =
-    handleGet(storeEmailURL, Map("email" -> new String(base64Encode(email))), _ => Right(()), "store email", identity)
+    handleGet(storeEmailURL, Seq("email" ->  new String(base64Encode(email))), _ => Right(()), "store email", identity)
 
   def getEmail()(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Option[String]] =
     handleGet(getEmailURL, emptyQueryParameters, _.parseJSON[GetEmailResponse]().map(_.email), "get email", identity)
@@ -171,12 +172,20 @@ class HelpToSaveConnectorImpl @Inject() (http: HttpClient)(implicit frontendAppC
 
   private def handleGet[A, B](
     url: String,
-    queryParameters: Map[String, String],
+    queryParameters: Seq[(String, String)],
     ifHTTP200: HttpResponse => Either[B, A],
     description: => String,
     toError: String => B
   )(implicit hc: HeaderCarrier, ec: ExecutionContext): EitherT[Future, B, A] =
-    handle(http.get(url, queryParameters), ifHTTP200, description, toError)
+    handle(
+      http
+        .get(url"$url")
+        .transform(_.withQueryStringParameters(queryParameters:_*))
+        .execute[HttpResponse],
+      ifHTTP200,
+      description,
+      toError
+    )
 
   private def handle[A, B](
     resF: Future[HttpResponse],
@@ -214,17 +223,17 @@ class HelpToSaveConnectorImpl @Inject() (http: HttpClient)(implicit frontendAppC
   override def createAccount(
     createAccountRequest: CreateAccountRequest
   )(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse] =
-    http.post(createAccountURL, createAccountRequest)
+    http.post(url"$createAccountURL").withBody(Json.toJson(createAccountRequest)).execute[HttpResponse]
 
   override def updateEmail(
     userInfo: NSIPayload
   )(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse] =
-    http.put(updateEmailURL, userInfo)
+    http.put(url"$updateEmailURL").withBody(Json.toJson(userInfo)).execute[HttpResponse]
 
   override def validateBankDetails(
     request: ValidateBankDetailsRequest
   )(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[HttpResponse] =
-    http.post(validateBankDetailsURL, request)
+    http.post(url"$validateBankDetailsURL").withBody(Json.toJson(request)).execute[HttpResponse]
 }
 
 object HelpToSaveConnectorImpl {
