@@ -111,10 +111,10 @@ class HelpToSaveConnectorImpl @Inject() (http: HttpClientV2)(implicit frontendAp
 
   private def getAccountUrl(nino: String) = s"$helpToSaveUrl/help-to-save/$nino/account"
 
-  private def getAccountQueryParams(correlationId: UUID): Map[String, String] =
-    Map("correlationId" -> correlationId.toString, "systemId" -> "help-to-save-frontend")
+  private def getAccountQueryParams(correlationId: UUID): Seq[(String, String)] =
+    Seq("correlationId" -> correlationId.toString, "systemId" -> "help-to-save-frontend")
 
-  private val emptyQueryParameters: Map[String, String] = Map.empty[String, String]
+  private val emptyQueryParameters: Seq[(String, String)] = Seq.empty
 
   def getEligibility()(
     implicit hc: HeaderCarrier,
@@ -144,7 +144,7 @@ class HelpToSaveConnectorImpl @Inject() (http: HttpClientV2)(implicit frontendAp
     handleGet(setITMPFlagURL, emptyQueryParameters, _ => Right(()), "set ITMP flag and update mongo", identity)
 
   def storeEmail(email: Email)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit] =
-    handleGet(storeEmailURL, Map("email" -> new String(base64Encode(email))), _ => Right(()), "store email", identity)
+    handleGet(storeEmailURL, Seq("email" -> new String(base64Encode(email))), _ => Right(()), "store email", identity)
 
   def getEmail()(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Option[String]] =
     handleGet(getEmailURL, emptyQueryParameters, _.parseJSON[GetEmailResponse]().map(_.email), "get email", identity)
@@ -172,14 +172,15 @@ class HelpToSaveConnectorImpl @Inject() (http: HttpClientV2)(implicit frontendAp
 
   private def handleGet[A, B](
     url: String,
-    queryParameters: Map[String, String],
+    queryParameters: Seq[(String, String)],
     ifHTTP200: HttpResponse => Either[B, A],
     description: => String,
     toError: String => B
   )(implicit hc: HeaderCarrier, ec: ExecutionContext): EitherT[Future, B, A] =
     handle(
       http
-        .get(url"$url?$queryParameters")
+        .get(url"$url").transform(_
+      .withQueryStringParameters(queryParameters:_*))
         .execute[HttpResponse],
       ifHTTP200,
       description,
