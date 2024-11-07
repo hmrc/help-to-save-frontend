@@ -32,7 +32,7 @@
   @viewHelpers.form(routes.EmailController.emailUpdatedSubmit) {
     @viewHelpers.govukButton(
       Button(
-        attributes = Map("id" -> "continue-to-create-account"),
+        attributes = Map("id" -> "continue-to-create-account", "data-prevent-double-click"->"true"),
         content = Text(messages("hts.email-updated.continue_button"))
       )
     )

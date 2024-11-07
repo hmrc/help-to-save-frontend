@@ -121,7 +121,7 @@
     )
 
     @viewHelpers.govukButton(Button(
-      attributes = Map("id" -> "confirm-selected-email"),
+      attributes = Map("id" -> "confirm-selected-email", "data-prevent-double-click"->"true"),
       content = Text(messages("hts.global.continue-button"))
     ))
   }

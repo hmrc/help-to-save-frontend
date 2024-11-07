@@ -33,7 +33,7 @@
     @viewHelpers.form(uk.gov.hmrc.helptosavefrontend.controllers.routes.EligibilityCheckController.getCheckEligibility) {
         @viewHelpers.govukButton(Button(
         attributes = Map(
-        "id" -> "start-creating-account"
+        "id" -> "start-creating-account", "data-prevent-double-click"->"true"
         ),
         content = Text(messages("hts.no-account.button-1"))
         ))
