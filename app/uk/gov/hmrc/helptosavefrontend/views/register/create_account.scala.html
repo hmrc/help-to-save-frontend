@@ -55,8 +55,8 @@
   @viewHelpers.form(routes.RegisterController.createAccount, Symbol("data-prevent-multiple-submit") -> "true", Symbol("id") -> "submission-form") {
     <span id="submission-progress" aria-live="assertive"></span>
     @viewHelpers.govukButton(Button(
-      preventDoubleClick = Some(true),
       attributes = Map(
+        "data-prevent-double-click"->"true",
         "id" -> "accept-and-create-account",
         "data-ga-event-category" -> "buttons",
         "data-ga-event-action" -> "Accept and create account",

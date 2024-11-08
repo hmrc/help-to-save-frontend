@@ -46,7 +46,7 @@
 
     @viewHelpers.form(routes.EligibilityCheckController.youAreEligibleSubmit) {
     @viewHelpers.govukButton(Button(
-        attributes = Map("id" -> "start-creating-account"),
+        attributes = Map("id" -> "start-creating-account", "data-prevent-double-click"->"true"),
         content = Text(Messages("hts.global.continue-button"))
         ))
     }

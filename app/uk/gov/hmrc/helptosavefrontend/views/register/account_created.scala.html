@@ -102,6 +102,7 @@ viewHelpers: ViewHelpers
 
         @viewHelpers.govukButton(Button(
           attributes = Map(
+            "data-prevent-double-click"->"true",
             "id" -> "accessAccountOrPayIn",
             "data-ga-event-category" -> "buttons",
             "data-ga-event-action" -> "Continue",

@@ -126,6 +126,7 @@
 
     @viewHelpers.govukButton(Button(
       attributes = Map(
+        "data-prevent-double-click"->"true",
         "id" -> "bankDetailsSubmit",
         "data-ga-event-category" -> "buttons",
         "data-ga-event-action" -> "Applicant submitted bank account details",

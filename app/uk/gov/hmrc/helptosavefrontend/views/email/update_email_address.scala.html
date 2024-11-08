@@ -75,6 +75,7 @@
     ))
     @viewHelpers.govukButton(Button(
       attributes = Map(
+        "data-prevent-double-click"->"true",
         "id" -> "apply-button",
         "data-ga-event-category" -> "buttons",
         "data-ga-event-action" -> "Account holder confirmed update",

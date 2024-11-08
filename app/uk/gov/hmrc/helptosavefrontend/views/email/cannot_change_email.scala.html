@@ -76,7 +76,7 @@
     )
 
     @viewHelpers.govukButton(Button(
-      attributes = Map("id" -> "email-error-continue"),
+      attributes = Map("id" -> "email-error-continue", "data-prevent-double-click"->"true"),
       content = Text(messages("hts.cannot-change-email.continue-button"))
     ))
   }
