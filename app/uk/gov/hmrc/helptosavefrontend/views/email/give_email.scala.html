@@ -45,7 +45,7 @@
         classes = "govuk-label--l"
       ),
       hint = Some(Hint(
-        content = HtmlContent(messages("hts.give-email-address.p")))),
+        content = Text(messages("hts.give-email-address.p")))),
       errorMessage = errorHelpers.emailErrorTypesToString(form, key).map(e => ErrorMessage(
         content = Text(e),
         visuallyHiddenText = Some(messages("hts.global.error.prefix"))
