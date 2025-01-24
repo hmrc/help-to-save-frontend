@@ -11,8 +11,7 @@ object AppDependencies {
   val compile: Seq[ModuleID] = Seq(
     s"$hmrc.mongo"      %% s"hmrc-mongo-$playVersion"         % mongoVersion,
     hmrc                %% s"bootstrap-frontend-$playVersion" % bootstrapBackendVersion,
-    "com.github.kxbmap" %% "configs"                          % "0.6.1",
-    "org.typelevel"     %% "cats-core"                        % "2.12.0",
+    "org.typelevel"     %% "cats-core"                        % "2.13.0",
     hmrc                %% s"domain-$playVersion"                           % s"9.0.0",
     hmrc                %% s"play-frontend-hmrc-$playVersion"               % "8.5.0"
   )
