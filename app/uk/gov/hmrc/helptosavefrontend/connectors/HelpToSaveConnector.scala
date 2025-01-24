@@ -144,7 +144,7 @@ class HelpToSaveConnectorImpl @Inject() (http: HttpClientV2)(implicit frontendAp
     handleGet(setITMPFlagURL, emptyQueryParameters, _ => Right(()), "set ITMP flag and update mongo", identity)
 
   def storeEmail(email: Email)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit] =
-    handleGet(storeEmailURL, Seq("email" ->  new String(base64Encode(email))), _ => Right(()), "store email", identity)
+    handleGet(storeEmailURL, Seq("email" -> new String(base64Encode(email))), _ => Right(()), "store email", identity)
 
   def getEmail()(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Option[String]] =
     handleGet(getEmailURL, emptyQueryParameters, _.parseJSON[GetEmailResponse]().map(_.email), "get email", identity)
@@ -180,7 +180,7 @@ class HelpToSaveConnectorImpl @Inject() (http: HttpClientV2)(implicit frontendAp
     handle(
       http
         .get(url"$url")
-        .transform(_.withQueryStringParameters(queryParameters:_*))
+        .transform(_.withQueryStringParameters(queryParameters: _*))
         .execute[HttpResponse],
       ifHTTP200,
       description,
