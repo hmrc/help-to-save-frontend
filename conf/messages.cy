@@ -482,8 +482,7 @@ hts.privacy.ul3-3=eich cyfeiriad e-bost
 hts.privacy.ul3-4=manylion eich cyfrif banc
 
 hts.privacy.h2-4=Pam yr ydym yn casglu’ch data personol
-hts.privacy.p4-1=Rydym yn casglu data a gwybodaeth bersonol gennych chi, o gronfeydd data mewnol CThEF ac o’r Adran Gwaith a Phensiynau (DWP), i wirio’r canlynol:
-hts.privacy.ul4-1=a ydych yn cael taliadau ar gyfer Credyd Treth Gwaith, Credyd Treth Plant neu Gredyd Cynhwysola
+hts.privacy.p4-1=Rydym yn casglu data a gwybodaeth bersonol gennych chi, o gronfeydd data mewnol CThEF ac o’r Adran Gwaith a Phensiynau (DWP), i wirio a ydych yn cael taliadau Credyd Cynhwysol.
 hts.privacy.p4-2=Bydd y data a’r wybodaeth a gasglwn yn cadarnhau a ydych yn gymwys i agor cyfrif Cymorth i Gynilo. Mae hyn yn cynnwys gwneud penderfyniadau awtomataidd, gweler adran berthnasol <a class="govuk-link" href="https://www.gov.uk/government/publications/data-protection-act-dpa-information-hm-revenue-and-customs-hold-about-you/data-protection-act-dpa-information-hm-revenue-and-customs-hold-about-you" rel="noreferrer noopener" target="_blank">Hysbysiad Preifatrwydd CThEF (yn Saesneg)</a>. Os oes unrhyw un wedi rhoi gwybod i chi nad ydych yn gymwys ar gyfer cyfrif Cymorth i Gynilo, dylech fynd i GOV.UK i wirio’r <a class="govuk-link" href="https://www.gov.uk/get-help-savings-low-income/eligibility" rel="noreferrer noopener" target="_blank">meini prawf cymhwystra (yn Saesneg)</a>. Os ydych eisoes wedi gwneud hyn a’ch bod yn dal o’r farn eich bod yn gymwys, gallwch gysylltu â Gwasanaeth Cwsmeriaid Cymraeg CThEF ar 0300 200 1900.
 
 hts.privacy.h2-5=Os ydych yn cysylltu â Gwasanaeth Cwsmeriaid Cymraeg CThEF dros y ffôn

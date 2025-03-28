@@ -482,8 +482,7 @@ hts.privacy.ul3-3=your email address
 hts.privacy.ul3-4=your bank account details
 
 hts.privacy.h2-4=Why we collect your personal data
-hts.privacy.p4-1=We collect personal data and information from you, from HMRC internal databases and the Department of Work and Pensions (DWP) to check if:
-hts.privacy.ul4-1=you are receiving payments for Working Tax Credit or Child Tax Credit or Universal Credit
+hts.privacy.p4-1=We collect personal data and information from you, from HMRC internal databases and the Department of Work and Pensions (DWP) to check if you are receiving payments for Universal Credit.
 hts.privacy.p4-2=The data and information we collect will confirm whether you’re eligible to open a Help to Save account. This involves automated decision making, see the relevant section of the <a class="govuk-link" href="https://www.gov.uk/government/publications/data-protection-act-dpa-information-hm-revenue-and-customs-hold-about-you/data-protection-act-dpa-information-hm-revenue-and-customs-hold-about-you" rel="noreferrer noopener" target="_blank">HMRC Privacy Notice</a>. If you have been told you’re not eligible for a Help to Save account, you should go to GOV.UK to check the <a class="govuk-link" href="https://www.gov.uk/get-help-savings-low-income/eligibility" rel="noreferrer noopener" target="_blank">eligibility criteria</a>. If you have done this and you still think you’re eligible, you can contact the Help to Save service on 0300 322 7093.
 
 hts.privacy.h2-5=If you call the Help to Save service
