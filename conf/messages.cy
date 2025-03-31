@@ -27,38 +27,15 @@ hts.nav.title=Cymorth i Gynilo
 hts.sign-out=Allgofnodi
 hts.sign-in=Mewngofnodwch i’r cyfrif Cymorth i Gynilo
 
-hts.core.not-eligible.title.h1=Nid ydych yn gymwys ar gyfer cyfrif Cymorth i Gynilo
-hts.core.not-eligible.h=Os ydych o’r farn eich bod yn gymwys am gyfrif
-hts.core.not-eligible.p=Dysgwch beth i’w wneud os ydych wedi gwirio’r meini prawf cymhwystra ar gyfer cyfrif Cymorth i Gynilo ac yn <a class="govuk-link" href={0} rel="noreferrer noopener" target="_blank">parhau i fod o’r farn eich bod yn gymwys (yn agor tab newydd).</a>
+hts.not-eligible.title.h1=Nid ydych yn gymwys ar gyfer cyfrif Cymorth i Gynilo
+hts.not-eligible.h=Os ydych o’r farn eich bod yn gymwys am gyfrif
+hts.not-eligible.p=Dysgwch beth i’w wneud os ydych wedi gwirio’r meini prawf cymhwystra ar gyfer cyfrif Cymorth i Gynilo ac yn <a class="govuk-link" href={0} rel="noreferrer noopener" target="_blank">parhau i fod o’r farn eich bod yn gymwys (yn agor tab newydd).</a>
 
-hts.core.not-eligible.wtc.p-1=Dim ond os oes gennych hawl i Gredyd Treth Gwaith a hefyd yn cael taliadau am Gredyd Treth Gwaith neu Gredyd Treth Plant y gallwch agor cyfrif Cymorth i Gynilo.
-hts.core.not-eligible.wtc.p-2=Ewch i GOV.UK i gael gwybod am
-hts.core.not-eligible.wtc.link-1=gymhwystra ar gyfer Cymorth i Gynilo
-hts.core.not-eligible.wtc.p-2-2=.
-hts.core.not-eligible.wtc.h2-1=Os ydych wedi gwneud cais yn ddiweddar am Gredyd Treth Gwaith
-hts.core.not-eligible.wtc.p-3=Dylech aros nes eich bod wedi cael llythyr gan Gyllid a Thollau EF yn cadarnhau bod gennych hawl i Gredyd Treth Gwaith. Unwaith eich bod wedi cael y llythyr cewch geisio eto am gyfrif Cymorth i Gynilo.
+hts.not-eligible.p4=Os yw eich sefyllfa’n newid, cewch geisio eto am gyfrif Cymorth i Gynilo.
 
-hts.core.not-eligible.uc.p-1=Mae hyn oherwydd bod incwm eich aelwyd - yn ystod eich cyfnod asesu misol diwethaf
-hts.core.not-eligible.uc.p-1b=Mae hyn oherwydd bod incwm eich aelwyd yn ystod eich cyfnod asesu misol diwethaf
-hts.core.not-eligible.uc.p-1-2a=- yn llai na £
-hts.core.not-eligible.uc.p-1-2b=yn annigonol.
-
-hts.core.not-eligible.uc.p-1-3=Nid yw eich taliadau Credyd Cynhwysol yn cael eu hystyried fel incwm.
-hts.core.not-eligible.uc.p-2=Ewch i GOV.UK i gael gwybod am
-hts.core.not-eligible.uc.link-1=gymhwystra ar gyfer Cymorth i Gynilo
-hts.core.not-eligible.uc.p-2-2=.
-hts.core.not-eligible.uc.p-3=Os yw eich sefyllfa’n newid, cewch geisio eto am gyfrif Cymorth i Gynilo.
-
-hts.core.not-eligible.wtc.uc.p1=Dim ond os yw un o’r canlynol yn berthnasol i chi y cewch agor cyfrif Cymorth i Gynilo. Rydych:
-hts.core.not-eligible.wtc.uc.ul1-li1=yn unigolyn sydd â hawl i Gredyd Treth Gwaith ac yn cael taliadau am Gredyd Treth Gwaith neu Gredyd Treth Plant
-hts.core.not-eligible.wtc.uc.ul1-li2-1=yn hawlio Credyd Cynhwysol ac roedd incwm eich aelwyd - yn ystod eich cyfnod asesu misol diwethaf - oedd
-hts.core.not-eligible.wtc.uc.ul1-li2-2a=£
-hts.core.not-eligible.wtc.uc.ul1-li2-2b=uwchlaw swm penodol
-hts.core.not-eligible.wtc.uc.ul1-li2-3=neu fwy.
-hts.core.not-eligible.wtc.uc.p2=Nid yw taliadau’r Credyd Cynhwysol yn cael eu hystyried fel incwm.
-hts.core.not-eligible.wtc.uc.p3=Ewch i GOV.UK i gael gwybod am
-hts.core.not-eligible.wtc.uc.p3-link=gymhwystra ar gyfer Cymorth i Gynilo
-hts.core.not-eligible.wtc.uc.p3-2=.
+hts.not-eligible.p1=Mae hyn oherwydd bod incwm eich aelwyd – yn ystod eich cyfnod asesu misol diwethaf – yn llai nag £1.00. Nid yw eich taliadau Credyd Cynhwysol yn cael eu hystyried fel incwm.
+hts.not-eligible.p3=Ewch i GOV.UK i gael gwybod am
+hts.not-eligible.p3-link=gymhwystra ar gyfer Cymorth i Gynilo
 
 # Bank Details
 hts.register.bank-details.title.h1=Nodwch fanylion cyfrif banc y DU yr ydych am i ni dalu eich taliadau bonws a thyniadau trosglwyddo i mewn iddo
