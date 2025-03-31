@@ -418,7 +418,6 @@ hts.register.create_account.tandc-ul1-li1=your details, email address and bank d
 hts.register.create_account.tandc-ul1-li2=you have read and understood the <a class="govuk-link" href={0}>eligibility criteria</a> on GOV.UK and are eligible for a Help to Save account
 hts.register.create_account.tandc-ul1-li3=you are creating a Help to Save account for the first time
 hts.register.create_account.tandc-ul1-li4=if you get Universal Credit, you will tell us each time you leave the UK for 4 weeks or more
-hts.register.create_account.tandc-ul1-li5=if you get tax credits, you will tell us each time you leave the UK for 8 weeks or more
 hts.register.create_account.agree-continue=Agree and continue
 
 # Push to App

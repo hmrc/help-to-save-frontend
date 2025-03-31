@@ -313,7 +313,7 @@ class RegisterControllerSpec
 
         val result = doRequest()
         status(result) shouldBe OK
-        contentAsString(result) should include("you will tell us each time you leave the UK for 8 weeks or more")
+        contentAsString(result) should include("you will tell us each time you leave the UK for 4 weeks or more")
       }
 
       "show the appropriate page content for when user is eligible with reason code 8: UCClaimantAndWTC" in {
