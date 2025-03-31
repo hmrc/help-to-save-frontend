@@ -60,9 +60,6 @@ hts.core.not-eligible.wtc.uc.p3=Ewch i GOV.UK i gael gwybod am
 hts.core.not-eligible.wtc.uc.p3-link=gymhwystra ar gyfer Cymorth i Gynilo
 hts.core.not-eligible.wtc.uc.p3-2=.
 
-hts.core.not-eligible.sidebar.h2=Mewn mannau eraill ar GOV.UK
-hts.core.not-eligible.sidebar.p=Credyd Treth Gwaith
-
 # Bank Details
 hts.register.bank-details.title.h1=Nodwch fanylion cyfrif banc y DU yr ydych am i ni dalu eich taliadau bonws a thyniadau trosglwyddo i mewn iddo
 hts.register.bank-details.sort-code.label=Cod didoli

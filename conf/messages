@@ -62,9 +62,6 @@ hts.core.not-eligible.wtc.uc.p3=Go to GOV.UK to find out about
 hts.core.not-eligible.wtc.uc.p3-link=eligibility for Help to Save
 hts.core.not-eligible.wtc.uc.p3-2=.
 
-hts.core.not-eligible.sidebar.h2=Elsewhere on GOV.UK
-hts.core.not-eligible.sidebar.p=Working Tax Credit
-
 # Bank Details
 hts.register.bank-details.title.h1=Enter the UK bank account details you want us to pay your bonuses and transfer withdrawals into
 hts.register.bank-details.sort-code.label=Sort code
