@@ -6,7 +6,7 @@ object AppDependencies {
   val playVersion = "play-30"
   val bootstrapBackendVersion = "8.6.0"
   val mockitoScalaVersion = "1.17.37"
-  val mongoVersion = "1.7.0"
+  val mongoVersion = "1.9.0"
 
   val compile: Seq[ModuleID] = Seq(
     s"$hmrc.mongo"      %% s"hmrc-mongo-$playVersion"         % mongoVersion,
