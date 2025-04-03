@@ -35,7 +35,7 @@ hts.not-eligible.p=Find out what to do if you have checked the eligibility crite
 
 hts.not-eligible.p4=If your situation changes, you can apply for a Help to Save account again.
 
-hts.not-eligible.p1=This is because your household income - in your last monthly assessment period - was less than £1.00. Your Universal Credit payments are not considered to be income.
+hts.not-eligible.p1=This is because your household income - in your last monthly assessment period - was less than £{0}. Your Universal Credit payments are not considered to be income.
 hts.not-eligible.p3=Go to GOV.UK to find out about
 hts.not-eligible.p3-link=eligibility for Help to Save
 

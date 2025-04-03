@@ -17,18 +17,17 @@
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 @import uk.gov.hmrc.helptosavefrontend.controllers.routes
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
-@import uk.gov.hmrc.helptosavefrontend.models.eligibility.IneligibilityReason
 
 @this(layout: uk.gov.hmrc.helptosavefrontend.views.html.layout)
 
-@(ineligibilityReason: IneligibilityReason, threshold: Option[Double])(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
+@(threshold: Double)(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 
 @title = @{messages("hts.not-eligible.title.h1")}
 
 @layout(title) {
     <h1 class="govuk-heading-l" id="hts-not-eligible-title">@title</h1>
 
-    <p class="govuk-body">@messages("hts.not-eligible.p1")</p>
+    <p class="govuk-body">@messages("hts.not-eligible.p1", "%.2f".format(threshold))</p>
     <p class="govuk-body">@messages("hts.not-eligible.p3")
         <a class="govuk-link ga-track-event"
         data-ga-event-category="links"

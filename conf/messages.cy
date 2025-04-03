@@ -33,7 +33,7 @@ hts.not-eligible.p=Dysgwch beth i’w wneud os ydych wedi gwirio’r meini prawf
 
 hts.not-eligible.p4=Os yw eich sefyllfa’n newid, cewch geisio eto am gyfrif Cymorth i Gynilo.
 
-hts.not-eligible.p1=Mae hyn oherwydd bod incwm eich aelwyd – yn ystod eich cyfnod asesu misol diwethaf – yn llai nag £1.00. Nid yw eich taliadau Credyd Cynhwysol yn cael eu hystyried fel incwm.
+hts.not-eligible.p1=Mae hyn oherwydd bod incwm eich aelwyd – yn ystod eich cyfnod asesu misol diwethaf – yn llai nag £{0}. Nid yw eich taliadau Credyd Cynhwysol yn cael eu hystyried fel incwm.
 hts.not-eligible.p3=Ewch i GOV.UK i gael gwybod am
 hts.not-eligible.p3-link=gymhwystra ar gyfer Cymorth i Gynilo
 

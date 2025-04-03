@@ -131,6 +131,16 @@ class EligibilityCheckControllerSpec
 
       behave like commonEnrolmentAndSessionBehaviour(() => getIsNotEligible)
 
+      "throw an exception if threshold is absent" in {
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
+        mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
+        mockSessionStoreGet(Right(Some(HTSSession(Some(Left(notEntitledToWTCAndUCInsufficientWithNoThreshold())), None, None))))
+
+        val exception = intercept[IllegalStateException](await(getIsNotEligible))
+
+        exception.getMessage shouldBe "Threshold must have a value"
+      }
+
       "show the you are not eligible page if session data indicates that they are not eligible" in {
         mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
         mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
@@ -211,7 +221,7 @@ class EligibilityCheckControllerSpec
         val result = getIsNotEligible
         status(result) shouldBe OK
         contentAsString(result) should include(
-          "This is because your household income - in your last monthly assessment period - was less than £1.00"
+          "This is because your household income - in your last monthly assessment period - was less than £123.45"
         )
       }
     }
