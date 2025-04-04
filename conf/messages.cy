@@ -27,41 +27,15 @@ hts.nav.title=Cymorth i Gynilo
 hts.sign-out=Allgofnodi
 hts.sign-in=Mewngofnodwch i’r cyfrif Cymorth i Gynilo
 
-hts.core.not-eligible.title.h1=Nid ydych yn gymwys ar gyfer cyfrif Cymorth i Gynilo
-hts.core.not-eligible.h=Os ydych o’r farn eich bod yn gymwys am gyfrif
-hts.core.not-eligible.p=Dysgwch beth i’w wneud os ydych wedi gwirio’r meini prawf cymhwystra ar gyfer cyfrif Cymorth i Gynilo ac yn <a class="govuk-link" href={0} rel="noreferrer noopener" target="_blank">parhau i fod o’r farn eich bod yn gymwys (yn agor tab newydd).</a>
+hts.not-eligible.title.h1=Nid ydych yn gymwys ar gyfer cyfrif Cymorth i Gynilo
+hts.not-eligible.h=Os ydych o’r farn eich bod yn gymwys am gyfrif
+hts.not-eligible.p=Dysgwch beth i’w wneud os ydych wedi gwirio’r meini prawf cymhwystra ar gyfer cyfrif Cymorth i Gynilo ac yn <a class="govuk-link" href={0} rel="noreferrer noopener" target="_blank">parhau i fod o’r farn eich bod yn gymwys (yn agor tab newydd).</a>
 
-hts.core.not-eligible.wtc.p-1=Dim ond os oes gennych hawl i Gredyd Treth Gwaith a hefyd yn cael taliadau am Gredyd Treth Gwaith neu Gredyd Treth Plant y gallwch agor cyfrif Cymorth i Gynilo.
-hts.core.not-eligible.wtc.p-2=Ewch i GOV.UK i gael gwybod am
-hts.core.not-eligible.wtc.link-1=gymhwystra ar gyfer Cymorth i Gynilo
-hts.core.not-eligible.wtc.p-2-2=.
-hts.core.not-eligible.wtc.h2-1=Os ydych wedi gwneud cais yn ddiweddar am Gredyd Treth Gwaith
-hts.core.not-eligible.wtc.p-3=Dylech aros nes eich bod wedi cael llythyr gan Gyllid a Thollau EF yn cadarnhau bod gennych hawl i Gredyd Treth Gwaith. Unwaith eich bod wedi cael y llythyr cewch geisio eto am gyfrif Cymorth i Gynilo.
+hts.not-eligible.p4=Os yw eich sefyllfa’n newid, cewch geisio eto am gyfrif Cymorth i Gynilo.
 
-hts.core.not-eligible.uc.p-1=Mae hyn oherwydd bod incwm eich aelwyd - yn ystod eich cyfnod asesu misol diwethaf
-hts.core.not-eligible.uc.p-1b=Mae hyn oherwydd bod incwm eich aelwyd yn ystod eich cyfnod asesu misol diwethaf
-hts.core.not-eligible.uc.p-1-2a=- yn llai na £
-hts.core.not-eligible.uc.p-1-2b=yn annigonol.
-
-hts.core.not-eligible.uc.p-1-3=Nid yw eich taliadau Credyd Cynhwysol yn cael eu hystyried fel incwm.
-hts.core.not-eligible.uc.p-2=Ewch i GOV.UK i gael gwybod am
-hts.core.not-eligible.uc.link-1=gymhwystra ar gyfer Cymorth i Gynilo
-hts.core.not-eligible.uc.p-2-2=.
-hts.core.not-eligible.uc.p-3=Os yw eich sefyllfa’n newid, cewch geisio eto am gyfrif Cymorth i Gynilo.
-
-hts.core.not-eligible.wtc.uc.p1=Dim ond os yw un o’r canlynol yn berthnasol i chi y cewch agor cyfrif Cymorth i Gynilo. Rydych:
-hts.core.not-eligible.wtc.uc.ul1-li1=yn unigolyn sydd â hawl i Gredyd Treth Gwaith ac yn cael taliadau am Gredyd Treth Gwaith neu Gredyd Treth Plant
-hts.core.not-eligible.wtc.uc.ul1-li2-1=yn hawlio Credyd Cynhwysol ac roedd incwm eich aelwyd - yn ystod eich cyfnod asesu misol diwethaf - oedd
-hts.core.not-eligible.wtc.uc.ul1-li2-2a=£
-hts.core.not-eligible.wtc.uc.ul1-li2-2b=uwchlaw swm penodol
-hts.core.not-eligible.wtc.uc.ul1-li2-3=neu fwy.
-hts.core.not-eligible.wtc.uc.p2=Nid yw taliadau’r Credyd Cynhwysol yn cael eu hystyried fel incwm.
-hts.core.not-eligible.wtc.uc.p3=Ewch i GOV.UK i gael gwybod am
-hts.core.not-eligible.wtc.uc.p3-link=gymhwystra ar gyfer Cymorth i Gynilo
-hts.core.not-eligible.wtc.uc.p3-2=.
-
-hts.core.not-eligible.sidebar.h2=Mewn mannau eraill ar GOV.UK
-hts.core.not-eligible.sidebar.p=Credyd Treth Gwaith
+hts.not-eligible.p1=Mae hyn oherwydd bod incwm eich aelwyd – yn ystod eich cyfnod asesu misol diwethaf – yn llai nag £{0}. Nid yw eich taliadau Credyd Cynhwysol yn cael eu hystyried fel incwm.
+hts.not-eligible.p3=Ewch i GOV.UK i gael gwybod am
+hts.not-eligible.p3-link=gymhwystra ar gyfer Cymorth i Gynilo
 
 # Bank Details
 hts.register.bank-details.title.h1=Nodwch fanylion cyfrif banc y DU yr ydych am i ni dalu eich taliadau bonws a thyniadau trosglwyddo i mewn iddo
@@ -418,7 +392,6 @@ hts.register.create_account.tandc-ul1-li1=fod eich manylion, cyfeiriad ebost a m
 hts.register.create_account.tandc-ul1-li2=eich bod wedi darllen a deall y <a class="govuk-link" href={0}>meini prawf cymhwystra</a> ar GOV.UK ac yn gymwys i gael cyfrif Cymorth i Gynilo
 hts.register.create_account.tandc-ul1-li3=eich bod yn creu cyfrif Cymorth i Gynilo am y tro cyntaf
 hts.register.create_account.tandc-ul1-li4=os ydych yn cael Credyd Cynhwysol, byddwch yn rhoi gwybod i ni bob tro y byddwch yn gadael y DU am 4 wythnos neu fwy
-hts.register.create_account.tandc-ul1-li5=os ydych yn cael credydau treth, byddwch yn rhoi gwybod i ni bob tro y byddwch yn gadael y DU am 8 wythnos neu fwy
 hts.register.create_account.agree-continue=Cytuno ac yn eich blaen
 
 # Push to App
@@ -482,8 +455,7 @@ hts.privacy.ul3-3=eich cyfeiriad e-bost
 hts.privacy.ul3-4=manylion eich cyfrif banc
 
 hts.privacy.h2-4=Pam yr ydym yn casglu’ch data personol
-hts.privacy.p4-1=Rydym yn casglu data a gwybodaeth bersonol gennych chi, o gronfeydd data mewnol CThEF ac o’r Adran Gwaith a Phensiynau (DWP), i wirio’r canlynol:
-hts.privacy.ul4-1=a ydych yn cael taliadau ar gyfer Credyd Treth Gwaith, Credyd Treth Plant neu Gredyd Cynhwysola
+hts.privacy.p4-1=Rydym yn casglu data a gwybodaeth bersonol gennych chi, o gronfeydd data mewnol CThEF ac o’r Adran Gwaith a Phensiynau (DWP), i wirio a ydych yn cael taliadau Credyd Cynhwysol.
 hts.privacy.p4-2=Bydd y data a’r wybodaeth a gasglwn yn cadarnhau a ydych yn gymwys i agor cyfrif Cymorth i Gynilo. Mae hyn yn cynnwys gwneud penderfyniadau awtomataidd, gweler adran berthnasol <a class="govuk-link" href="https://www.gov.uk/government/publications/data-protection-act-dpa-information-hm-revenue-and-customs-hold-about-you/data-protection-act-dpa-information-hm-revenue-and-customs-hold-about-you" rel="noreferrer noopener" target="_blank">Hysbysiad Preifatrwydd CThEF (yn Saesneg)</a>. Os oes unrhyw un wedi rhoi gwybod i chi nad ydych yn gymwys ar gyfer cyfrif Cymorth i Gynilo, dylech fynd i GOV.UK i wirio’r <a class="govuk-link" href="https://www.gov.uk/get-help-savings-low-income/eligibility" rel="noreferrer noopener" target="_blank">meini prawf cymhwystra (yn Saesneg)</a>. Os ydych eisoes wedi gwneud hyn a’ch bod yn dal o’r farn eich bod yn gymwys, gallwch gysylltu â Gwasanaeth Cwsmeriaid Cymraeg CThEF ar 0300 200 1900.
 
 hts.privacy.h2-5=Os ydych yn cysylltu â Gwasanaeth Cwsmeriaid Cymraeg CThEF dros y ffôn

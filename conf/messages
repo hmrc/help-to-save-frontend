@@ -29,41 +29,15 @@ hts.sign-out=Sign out
 hts.sign-in=Sign in to Help to Save account.
 
 # Not eligible
-hts.core.not-eligible.title.h1=You’re not eligible for a Help to Save account
-hts.core.not-eligible.h=If you think you’re eligible for an account
-hts.core.not-eligible.p=Find out what to do if you have checked the eligibility criteria for a Help to Save account and <a class="govuk-link" href={0} rel="noreferrer noopener" target="_blank">still think you’re eligible (opens in a new tab).</a>
+hts.not-eligible.title.h1=You’re not eligible for a Help to Save account
+hts.not-eligible.h=If you think you’re eligible for an account
+hts.not-eligible.p=Find out what to do if you have checked the eligibility criteria for a Help to Save account and <a class="govuk-link" href={0} rel="noreferrer noopener" target="_blank">still think you’re eligible (opens in a new tab).</a>
 
-hts.core.not-eligible.wtc.p-1=You can only open a Help to Save account if you are entitled to Working Tax Credit and also receiving payments for Working Tax Credit or Child Tax Credit.
-hts.core.not-eligible.wtc.p-2=Go to GOV.UK to find out about
-hts.core.not-eligible.wtc.link-1=eligibility for Help to Save
-hts.core.not-eligible.wtc.p-2-2=.
-hts.core.not-eligible.wtc.h2-1=If you’ve recently applied for Working Tax Credit
-hts.core.not-eligible.wtc.p-3=You should wait until you’ve received a letter from HM Revenue and Customs confirming that you’re entitled to Working Tax Credit. Once you’ve received this you can apply for a Help to Save account again.
+hts.not-eligible.p4=If your situation changes, you can apply for a Help to Save account again.
 
-hts.core.not-eligible.uc.p-1=This is because your household income - in your last monthly assessment period
-hts.core.not-eligible.uc.p-1b=This is because your household income in your last monthly assessment period
-hts.core.not-eligible.uc.p-1-2a=- was less than £
-hts.core.not-eligible.uc.p-1-2b=was not enough.
-
-hts.core.not-eligible.uc.p-1-3=Your Universal Credit payments are not considered to be income.
-hts.core.not-eligible.uc.p-2=Go to GOV.UK to find out about
-hts.core.not-eligible.uc.link-1=eligibility for Help to Save
-hts.core.not-eligible.uc.p-2-2=.
-hts.core.not-eligible.uc.p-3=If your situation changes, you can apply for a Help to Save account again.
-
-hts.core.not-eligible.wtc.uc.p1=You can only open a Help to Save account if one of the following applies to you. You are:
-hts.core.not-eligible.wtc.uc.ul1-li1=entitled to Working Tax Credit and receiving payments for Working Tax Credit or Child Tax Credit
-hts.core.not-eligible.wtc.uc.ul1-li2-1=claiming Universal Credit and your household income - in your last monthly assessment period - was
-hts.core.not-eligible.wtc.uc.ul1-li2-2a=£
-hts.core.not-eligible.wtc.uc.ul1-li2-2b=above a certain amount
-hts.core.not-eligible.wtc.uc.ul1-li2-3=or more
-hts.core.not-eligible.wtc.uc.p2=Payments from Universal Credit are not considered to be income.
-hts.core.not-eligible.wtc.uc.p3=Go to GOV.UK to find out about
-hts.core.not-eligible.wtc.uc.p3-link=eligibility for Help to Save
-hts.core.not-eligible.wtc.uc.p3-2=.
-
-hts.core.not-eligible.sidebar.h2=Elsewhere on GOV.UK
-hts.core.not-eligible.sidebar.p=Working Tax Credit
+hts.not-eligible.p1=This is because your household income - in your last monthly assessment period - was less than £{0}. Your Universal Credit payments are not considered to be income.
+hts.not-eligible.p3=Go to GOV.UK to find out about
+hts.not-eligible.p3-link=eligibility for Help to Save
 
 # Bank Details
 hts.register.bank-details.title.h1=Enter the UK bank account details you want us to pay your bonuses and transfer withdrawals into
@@ -418,7 +392,6 @@ hts.register.create_account.tandc-ul1-li1=your details, email address and bank d
 hts.register.create_account.tandc-ul1-li2=you have read and understood the <a class="govuk-link" href={0}>eligibility criteria</a> on GOV.UK and are eligible for a Help to Save account
 hts.register.create_account.tandc-ul1-li3=you are creating a Help to Save account for the first time
 hts.register.create_account.tandc-ul1-li4=if you get Universal Credit, you will tell us each time you leave the UK for 4 weeks or more
-hts.register.create_account.tandc-ul1-li5=if you get tax credits, you will tell us each time you leave the UK for 8 weeks or more
 hts.register.create_account.agree-continue=Agree and continue
 
 # Push to App
@@ -482,8 +455,7 @@ hts.privacy.ul3-3=your email address
 hts.privacy.ul3-4=your bank account details
 
 hts.privacy.h2-4=Why we collect your personal data
-hts.privacy.p4-1=We collect personal data and information from you, from HMRC internal databases and the Department of Work and Pensions (DWP) to check if:
-hts.privacy.ul4-1=you are receiving payments for Working Tax Credit or Child Tax Credit or Universal Credit
+hts.privacy.p4-1=We collect personal data and information from you, from HMRC internal databases and the Department of Work and Pensions (DWP) to check if you are receiving payments for Universal Credit.
 hts.privacy.p4-2=The data and information we collect will confirm whether you’re eligible to open a Help to Save account. This involves automated decision making, see the relevant section of the <a class="govuk-link" href="https://www.gov.uk/government/publications/data-protection-act-dpa-information-hm-revenue-and-customs-hold-about-you/data-protection-act-dpa-information-hm-revenue-and-customs-hold-about-you" rel="noreferrer noopener" target="_blank">HMRC Privacy Notice</a>. If you have been told you’re not eligible for a Help to Save account, you should go to GOV.UK to check the <a class="govuk-link" href="https://www.gov.uk/get-help-savings-low-income/eligibility" rel="noreferrer noopener" target="_blank">eligibility criteria</a>. If you have done this and you still think you’re eligible, you can contact the Help to Save service on 0300 322 7093.
 
 hts.privacy.h2-5=If you call the Help to Save service

@@ -42,7 +42,6 @@ import scala.concurrent.{Await, Future}
 class EligibilityCheckControllerSpec
     extends ControllerSpecWithGuiceApp with CSRFSupport with AuthSupport with EnrolmentAndEligibilityCheckBehaviour
     with SessionStoreBehaviourSupport {
-
   def newController(earlyCapCheck: Boolean): EligibilityCheckController = {
 
     implicit lazy val appConfig: FrontendAppConfig =
@@ -76,12 +75,10 @@ class EligibilityCheckControllerSpec
     mockHelpToSaveService.isAccountCreationAllowed()(*, *) returns EitherT.fromEither[Future](result)
 
   "The EligibilityCheckController" when {
-
     "displaying the you are eligible page" must {
+      def getIsEligible: Future[PlayResult] = csrfAddToken(controller.getIsEligible)(fakeRequest)
 
-      def getIsEligible(): Future[PlayResult] = csrfAddToken(controller.getIsEligible)(fakeRequest)
-
-      behave like commonEnrolmentAndSessionBehaviour(() => getIsEligible())
+      behave like commonEnrolmentAndSessionBehaviour(() => getIsEligible)
 
       "show the you are eligible page if session data indicates that they are eligible" in {
         mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
@@ -98,7 +95,7 @@ class EligibilityCheckControllerSpec
           )
         )
 
-        val result = getIsEligible()
+        val result = getIsEligible
         status(result) shouldBe OK
 
         val content = contentAsString(result)
@@ -113,7 +110,7 @@ class EligibilityCheckControllerSpec
         mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
         mockSessionStoreGet(Right(Some(HTSSession(Some(Left(randomIneligibility())), None, None))))
 
-        val result = getIsEligible()
+        val result = getIsEligible
         status(result) shouldBe SEE_OTHER
         redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getIsNotEligible.url)
       }
@@ -123,24 +120,33 @@ class EligibilityCheckControllerSpec
         mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
         mockSessionStoreGet(Right(Some(HTSSession(None, None, None))))
 
-        val result = getIsEligible()
+        val result = getIsEligible
         status(result) shouldBe SEE_OTHER
         redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility.url)
       }
     }
 
     "displaying the you are not eligible page" must {
+      def getIsNotEligible: Future[PlayResult] = controller.getIsNotEligible(FakeRequest())
 
-      def getIsNotEligible(): Future[PlayResult] = controller.getIsNotEligible(FakeRequest())
+      behave like commonEnrolmentAndSessionBehaviour(() => getIsNotEligible)
 
-      behave like commonEnrolmentAndSessionBehaviour(() => getIsNotEligible())
+      "throw an exception if threshold is absent" in {
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
+        mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
+        mockSessionStoreGet(Right(Some(HTSSession(Some(Left(notEntitledToWTCAndUCInsufficientWithNoThreshold())), None, None))))
+
+        val exception = intercept[IllegalStateException](await(getIsNotEligible))
+
+        exception.getMessage shouldBe "Threshold must have a value"
+      }
 
       "show the you are not eligible page if session data indicates that they are not eligible" in {
         mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
         mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
         mockSessionStoreGet(Right(Some(HTSSession(Some(Left(randomIneligibility())), None, None))))
 
-        val result = getIsNotEligible()
+        val result = getIsNotEligible
         status(result) shouldBe OK
         contentAsString(result) should include("not eligible")
       }
@@ -152,7 +158,7 @@ class EligibilityCheckControllerSpec
           Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo))), None, None)))
         )
 
-        val result = getIsNotEligible()
+        val result = getIsNotEligible
         status(result) shouldBe SEE_OTHER
         redirectLocation(result) shouldBe Some(routes.CheckYourDetailsController.checkYourDetails.url)
       }
@@ -162,7 +168,7 @@ class EligibilityCheckControllerSpec
         mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
         mockSessionStoreGet(Right(Some(HTSSession(None, None, None))))
 
-        val result = getIsNotEligible()
+        val result = getIsNotEligible
         status(result) shouldBe SEE_OTHER
         redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility.url)
       }
@@ -189,7 +195,7 @@ class EligibilityCheckControllerSpec
           )
         )
 
-        val result = getIsNotEligible()
+        val result = getIsNotEligible
         checkIsTechnicalErrorPage(result)
       }
 
@@ -199,28 +205,11 @@ class EligibilityCheckControllerSpec
         mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
         mockSessionStoreGet(Right(Some(HTSSession(Some(Left(notEntitledToWTCAndUCInsufficient())), None, None))))
 
-        val result = getIsNotEligible()
+        val result = getIsNotEligible
         status(result) shouldBe OK
         contentAsString(result) should include(
           "This is because your household income - in your last monthly assessment period - was less than £"
         )
-
-      }
-
-      "not display the uc threshold amount when it cannot be obtained from DES when the user is not eligible due to " +
-        "reason: NotEntitledToWTCAndUCInsufficient (code 5)" in {
-        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
-        mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-        mockSessionStoreGet(
-          Right(Some(HTSSession(Some(Left(notEntitledToWTCAndUCInsufficientWithNoThreshold())), None, None)))
-        )
-
-        val result = getIsNotEligible()
-        status(result) shouldBe OK
-        contentAsString(result) should include(
-          "This is because your household income in your last monthly assessment period was not enough."
-        )
-
       }
 
       "display the uc threshold amount when it can be obtained from DES via the BE when the user is not eligible due to " +
@@ -229,31 +218,15 @@ class EligibilityCheckControllerSpec
         mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
         mockSessionStoreGet(Right(Some(HTSSession(Some(Left(ineligibilityReason4or9())), None, None))))
 
-        val result = getIsNotEligible()
+        val result = getIsNotEligible
         status(result) shouldBe OK
         contentAsString(result) should include(
-          "claiming Universal Credit and your household income - in your last monthly assessment period - was £123.45 or more"
+          "This is because your household income - in your last monthly assessment period - was less than £123.45"
         )
-
-      }
-
-      "not display the uc threshold amount when it cannot be obtained from DES when the user is not eligible due to " +
-        "reason: EntitledToWTCNoTCAndInsufficientUC | NotEntitledToWTCAndNoUC (code 4 | 9)" in {
-        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
-        mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-        mockSessionStoreGet(Right(Some(HTSSession(Some(Left(ineligibilityReason4or9WithNoThreshold())), None, None))))
-
-        val result = getIsNotEligible()
-        status(result) shouldBe OK
-        contentAsString(result) should include(
-          "claiming Universal Credit and your household income - in your last monthly assessment period - was above a certain amount"
-        )
-
       }
     }
 
     "displaying the you think you're eligible page" must {
-
       "redirect to the eligibility check if there is no session data" in {
         mockAuthWithNINORetrievalWithSuccess(uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200)(
           Some(nino) and enrolmentsWithMatchingNino
@@ -263,7 +236,6 @@ class EligibilityCheckControllerSpec
         val result = controller.getThinkYouAreEligiblePage(FakeRequest())
         status(result) shouldBe SEE_OTHER
         redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility.url)
-
       }
 
       "show the you're eligible page if the session data indicates that the user is eligible" in {

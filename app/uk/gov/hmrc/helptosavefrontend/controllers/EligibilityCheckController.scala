@@ -66,7 +66,7 @@ class EligibilityCheckController @Inject() (
 ) extends BaseController(cpd, mcc, errorHandler, maintenanceSchedule) with HelpToSaveAuth with EnrolmentCheckBehaviour
     with SessionBehaviour with CapCheckBehaviour {
 
-  val earlyCapCheckOn: Boolean = frontendAppConfig.earlyCapCheckOn
+  private val earlyCapCheckOn: Boolean = frontendAppConfig.earlyCapCheckOn
 
   def getCheckEligibility: Action[AnyContent] =
     authorisedForHtsWithInfo { implicit request => implicit htsContext => // scalastyle:ignore
@@ -136,11 +136,15 @@ class EligibilityCheckController @Inject() (
             { ineligibleReason =>
               val ineligibilityType = IneligibilityReason.fromIneligible(ineligibleReason)
               val threshold = ineligibleReason.value.threshold
+              val th = threshold.fold {
+                logger.error("Threshold must have a value")
+                throw new IllegalStateException("Threshold must have a value")
+              }(identity)
               ineligibilityType.fold {
                 logger.warn(s"Could not parse ineligibility reason: $ineligibleReason", htsContext.nino)
                 internalServerError()
-              } { i =>
-                Ok(notEligible(i, threshold))
+              } { _ =>
+                Ok(notEligible(th))
               }
             },
             _ => SeeOther(routes.CheckYourDetailsController.checkYourDetails.url)

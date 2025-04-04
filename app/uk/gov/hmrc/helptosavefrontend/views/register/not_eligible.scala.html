@@ -17,91 +17,27 @@
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 @import uk.gov.hmrc.helptosavefrontend.controllers.routes
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
-@import uk.gov.hmrc.helptosavefrontend.models.eligibility.IneligibilityReason
-@import uk.gov.hmrc.helptosavefrontend.models.eligibility.IneligibilityReason._
 
 @this(layout: uk.gov.hmrc.helptosavefrontend.views.html.layout)
 
-@(ineligibilityReason: IneligibilityReason, threshold: Option[Double])(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
+@(threshold: Double)(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 
-@title = @{messages("hts.core.not-eligible.title.h1")}
+@title = @{messages("hts.not-eligible.title.h1")}
 
 @layout(title) {
-
     <h1 class="govuk-heading-l" id="hts-not-eligible-title">@title</h1>
 
-    @ineligibilityReason match {
+    <p class="govuk-body">@messages("hts.not-eligible.p1", "%.2f".format(threshold))</p>
+    <p class="govuk-body">@messages("hts.not-eligible.p3")
+        <a class="govuk-link ga-track-event"
+        data-ga-event-category="links"
+        data-ga-event-action="Help to Save"
+        data-ga-event-label="Not eligible page"
+        href=@appConfig.govUkEligibilityInfoUrl>@messages("hts.not-eligible.p3-link")</a></p>
 
-        case NotEntitledToWTCAndUCInsufficient => {
+    <p class="govuk-body">@messages("hts.not-eligible.p4")</p>
 
-            @threshold match {
+    <h2 class="govuk-heading-m">@Html(messages("hts.not-eligible.h"))</h2>
 
-                case Some(threshold) => { <p class="govuk-body">@messages("hts.core.not-eligible.uc.p-1") @messages("hts.core.not-eligible.uc.p-1-2a")@threshold@messages("hts.core.not-eligible.uc.p-2-2") @messages("hts.core.not-eligible.uc.p-1-3")</p> }
-
-                case None => { <p class="govuk-body">@messages("hts.core.not-eligible.uc.p-1b") @messages("hts.core.not-eligible.uc.p-1-2b") @messages("hts.core.not-eligible.uc.p-1-3")</p> }
-            }
-
-            <p class="govuk-body">@messages("hts.core.not-eligible.uc.p-2")
-            <a
-              class="govuk-link ga-track-event"
-              data-ga-event-category="links"
-              data-ga-event-action="Help to Save"
-              data-ga-event-label="Not eligible page"
-              href=@appConfig.govUkEligibilityInfoUrl
-            >@messages("hts.core.not-eligible.uc.link-1")</a>@messages("hts.core.not-eligible.uc.p-2-2")</p>
-
-            <p class="govuk-body">@messages("hts.core.not-eligible.uc.p-3")</p>
-
-            <h2 class="govuk-heading-m">@Html(messages("hts.core.not-eligible.h"))</h2>
-
-            <p class="govuk-body">@Html(messages("hts.core.not-eligible.p", routes.EligibilityCheckController.getThinkYouAreEligiblePage.url))</p>
-        }
-
-        case EntitledToWTCNoTCAndInsufficientUC | NotEntitledToWTCAndNoUC => {
-            <p class="govuk-body">@messages("hts.core.not-eligible.wtc.uc.p1")</p>
-
-            <ul class="govuk-list govuk-list--bullet">
-                <li>@messages("hts.core.not-eligible.wtc.uc.ul1-li1")</li>
-
-                @threshold match {
-
-                    case Some(threshold) => { <li>@messages("hts.core.not-eligible.wtc.uc.ul1-li2-1") @messages("hts.core.not-eligible.wtc.uc.ul1-li2-2a")@threshold @messages("hts.core.not-eligible.wtc.uc.ul1-li2-3")</li> }
-
-                    case None => { <li>@messages("hts.core.not-eligible.wtc.uc.ul1-li2-1") @messages("hts.core.not-eligible.wtc.uc.ul1-li2-2b")</li> }
-
-                }
-            </ul>
-
-            <p class="govuk-body">@messages("hts.core.not-eligible.wtc.uc.p2")</p>
-            <p class="govuk-body">@messages("hts.core.not-eligible.wtc.uc.p3")
-            <a
-            class="govuk-link ga-track-event"
-            data-ga-event-category="links"
-            data-ga-event-action="Help to Save"
-            data-ga-event-label="Not eligible page"
-            href=@appConfig.govUkEligibilityInfoUrl>@messages("hts.core.not-eligible.wtc.uc.p3-link")</a>@messages("hts.core.not-eligible.wtc.uc.p3-2")</p>
-
-            <h2 class="govuk-heading-m">@Html(messages("hts.core.not-eligible.h"))</h2>
-
-            <p class="govuk-body">@Html(messages("hts.core.not-eligible.p", routes.EligibilityCheckController.getThinkYouAreEligiblePage.url))</p>
-        }
-
-        case EntitledToWTCNoTCAndNoUC => {
-            <p class="govuk-body">@Messages("hts.core.not-eligible.wtc.p-1")</p>
-
-            <p class="govuk-body">@Messages("hts.core.not-eligible.wtc.p-2")
-            <a class="govuk-link ga-track-event"
-            data-ga-event-category="links"
-            data-ga-event-action="Help to Save"
-            data-ga-event-label="Not eligible page"
-            href=@appConfig.govUkEligibilityInfoUrl>@messages("hts.core.not-eligible.wtc.link-1")</a>@Messages("hts.core.not-eligible.wtc.p-2-2")</p>
-
-            <h2 class="govuk-heading-m">@Html(messages("hts.core.not-eligible.wtc.h2-1"))</h2>
-            <p class="govuk-body">@Html(messages("hts.core.not-eligible.wtc.p-3"))</p>
-
-            <h2 class="govuk-heading-m">@Html(messages("hts.core.not-eligible.h"))</h2>
-
-            <p class="govuk-body">@Html(messages("hts.core.not-eligible.p", routes.EligibilityCheckController.getThinkYouAreEligiblePage.url))</p>
-        }
-    }
+    <p class="govuk-body">@Html(messages("hts.not-eligible.p", routes.EligibilityCheckController.getThinkYouAreEligiblePage.url))</p>
 }
