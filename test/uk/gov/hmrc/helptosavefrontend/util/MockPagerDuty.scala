@@ -15,13 +15,14 @@
  */
 
 package uk.gov.hmrc.helptosavefrontend.util
-import org.mockito.IdiomaticMockito
+import org.scalatestplus.mockito.MockitoSugar
+import org.mockito.Mockito.doNothing
 
-trait MockPagerDuty { this: IdiomaticMockito =>
+trait MockPagerDuty { this: MockitoSugar =>
 
   val mockPagerDuty: PagerDutyAlerting = mock[PagerDutyAlerting]
 
   def mockPagerDutyAlert(expectedMessage: String): Unit =
-    mockPagerDuty.alert(expectedMessage).doesNothing()
+    doNothing().when(mockPagerDuty.alert(expectedMessage))
 
 }

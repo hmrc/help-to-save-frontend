@@ -29,7 +29,7 @@ object BankDetails {
       "sortCode"      -> of(validation.sortCodeFormatter),
       "accountNumber" -> of(validation.accountNumberFormatter),
       "rollNumber"    -> of(validation.rollNumberFormatter)
-    )(BankDetails.apply)(BankDetails.unapply)
+    )(BankDetails.apply)(o => Some(o.accountName, o.sortCode, o.accountNumber, o.rollNumber))
   )
 
   implicit val bankDetailsFormat: Format[BankDetails] = Json.format[BankDetails]

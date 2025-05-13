@@ -29,13 +29,15 @@ class HttpResponseOpsSpec extends UnitSpec {
   implicit val test2Format: Format[Test2] = Json.format[Test2]
 
   case class ThrowingHttpResponse() extends HttpResponse {
-    override def allHeaders: Map[String, Seq[String]] = Map.empty
+//    override def allHeaders: Map[String, Seq[String]] = Map.empty
 
     override def status: Int = 0
 
     override def json: JsValue = sys.error("Oh no!")
 
     override def body: String = ""
+
+    override def headers: Map[String, Seq[String]] = Map.empty
   }
 
   "HttpResponseOps" must {

@@ -16,20 +16,16 @@
 
 package uk.gov.hmrc.helptosavefrontend.controllers
 
-import play.api.Configuration
 import play.api.i18n.{I18nSupport, Lang}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import uk.gov.hmrc.helptosavefrontend.config.{ErrorHandler, FrontendAppConfig}
+import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 import uk.gov.hmrc.play.language.{LanguageController, LanguageUtils}
 
 import javax.inject.Inject
 
 class CustomLanguageController @Inject() (
-  configuration: Configuration,
   languageUtils: LanguageUtils,
-  cpd: CommonPlayDependencies,
-  mcc: MessagesControllerComponents,
-  errorHandler: ErrorHandler
+  mcc: MessagesControllerComponents
 )(
   implicit
   val frontendAppConfig: FrontendAppConfig

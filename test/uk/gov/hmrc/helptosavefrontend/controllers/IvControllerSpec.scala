@@ -16,7 +16,9 @@
 
 package uk.gov.hmrc.helptosavefrontend.controllers
 
-import org.mockito.ArgumentMatchersSugar.*
+import org.mockito.ArgumentMatchers
+import org.mockito.ArgumentMatchers.{any, eq => eqTo}
+import org.mockito.Mockito.when
 import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -64,8 +66,10 @@ class IvControllerSpec extends ControllerSpecWithGuiceApp with SessionStoreBehav
     mockSessionStorePut(HTSSession(None, None, None, Some(appConfig.ivUrl(continueURL)), None))(Right(()))
 
   def mockIvConnector(journeyId: JourneyId, ivServiceResponse: String): Unit =
-    ivConnector.getJourneyStatus(journeyId)(*, *) returns Future.successful(
-      IvSuccessResponse.fromString(ivServiceResponse)
+    when(ivConnector.getJourneyStatus(JourneyId(eqTo(journeyId.Id)))(any(), any())).thenReturn(
+      Future.successful(
+        IvSuccessResponse.fromString(ivServiceResponse)
+      )
     )
 
   private def doRequest() =

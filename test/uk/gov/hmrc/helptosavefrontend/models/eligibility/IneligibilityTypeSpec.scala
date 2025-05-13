@@ -36,7 +36,7 @@ class IneligibilityTypeSpec extends AnyWordSpec with Matchers with ScalaCheckDri
       IneligibilityReason.fromIneligible(ineligible(5)) shouldBe Some(NotEntitledToWTCAndUCInsufficient)
       IneligibilityReason.fromIneligible(ineligible(9)) shouldBe Some(NotEntitledToWTCAndNoUC)
 
-      forAll { reasonCode: Int =>
+      forAll { (reasonCode: Int) =>
         whenever(!Set(2, 3, 4, 5, -1, 9).contains(reasonCode)) {
           IneligibilityReason.fromIneligible(ineligible(reasonCode)) shouldBe None
         }

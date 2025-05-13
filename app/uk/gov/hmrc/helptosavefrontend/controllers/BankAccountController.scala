@@ -23,14 +23,13 @@ import play.api.{Configuration, Environment}
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.helptosavefrontend.auth.HelpToSaveAuth
 import uk.gov.hmrc.helptosavefrontend.config.{ErrorHandler, FrontendAppConfig}
-import uk.gov.hmrc.helptosavefrontend.controllers.BaseController
 import uk.gov.hmrc.helptosavefrontend.forms.{BankDetails, BankDetailsValidation}
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.models.{HTSSession, ValidateBankDetailsRequest}
 import uk.gov.hmrc.helptosavefrontend.repo.SessionStore
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
 import uk.gov.hmrc.helptosavefrontend.util._
-import uk.gov.hmrc.helptosavefrontend.views.html.register.{bank_account_details, not_eligible}
+import uk.gov.hmrc.helptosavefrontend.views.html.register.bank_account_details
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -44,8 +43,7 @@ class BankAccountController @Inject() (
   mcc: MessagesControllerComponents,
   errorHandler: ErrorHandler,
   maintenanceSchedule: MaintenanceSchedule,
-  bankAccountDetails: bank_account_details,
-  notEligible: not_eligible
+  bankAccountDetails: bank_account_details
 )(
   implicit val transformer: NINOLogMessageTransformer,
   val frontendAppConfig: FrontendAppConfig,

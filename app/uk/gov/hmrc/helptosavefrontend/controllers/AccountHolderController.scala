@@ -28,7 +28,6 @@ import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
 import uk.gov.hmrc.helptosavefrontend.auth.HelpToSaveAuth
 import uk.gov.hmrc.helptosavefrontend.config.{ErrorHandler, FrontendAppConfig}
 import uk.gov.hmrc.helptosavefrontend.connectors.EmailVerificationConnector
-import uk.gov.hmrc.helptosavefrontend.controllers.BaseController
 import uk.gov.hmrc.helptosavefrontend.forms.{EmailValidation, UpdateEmail, UpdateEmailForm}
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.models._
@@ -101,7 +100,7 @@ class AccountHolderController @Inject() (
                   emailValidation.validate(details.email).toEither match {
                     case Right(validEmail) =>
                       sessionStore
-                        .store(HTSSession(None, None, Some(validEmail)))
+                        .store(HTSSession(None, None, Some(validEmail: String)))
                         .semiflatMap(
                           _ =>
                             sendEmailVerificationRequest(
@@ -248,10 +247,10 @@ class AccountHolderController @Inject() (
                       frontendAppConfig.systemId
                     )
                   )
-                  .leftMap(UpdateEmailError.NSIError)
+                  .leftMap(UpdateEmailError.NSIError.apply)
             _ <- helpToSaveService
                   .storeConfirmedEmail(emailVerificationParams.email)
-                  .leftMap(UpdateEmailError.EmailMongoError)
+                  .leftMap(UpdateEmailError.EmailMongoError.apply)
             _ <- helpToSaveReminderService
                   .updateReminderEmail(
                     UpdateReminderEmail(
@@ -261,10 +260,10 @@ class AccountHolderController @Inject() (
                       lastName = userInfo.surname
                     )
                   )
-                  .leftMap(UpdateEmailError.RemindersError)
+                  .leftMap(UpdateEmailError.RemindersError.apply)
             _ <- sessionStore
                   .store(HTSSession(None, Some(emailVerificationParams.email), None))
-                  .leftMap[UpdateEmailError](UpdateEmailError.SessionCacheError)
+                  .leftMap[UpdateEmailError](UpdateEmailError.SessionCacheError.apply)
           } yield ()
 
           lazy val auditEvent =

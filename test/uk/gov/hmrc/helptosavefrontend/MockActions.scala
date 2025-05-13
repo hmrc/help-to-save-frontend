@@ -17,12 +17,12 @@
 package uk.gov.hmrc.helptosavefrontend
 
 import com.codahale.metrics.{Counter, MetricRegistry, Timer}
-import org.mockito.IdiomaticMockito
+import org.scalatestplus.mockito.MockitoSugar
 import play.api.Configuration
 import uk.gov.hmrc.helptosavefrontend.forms.EmailValidation
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 
-trait MockActions extends IdiomaticMockito {
+trait MockActions extends MockitoSugar {
 
   val mockMetrics: Metrics = new Metrics(mock[MetricRegistry]) {
     override def timer(name: String): Timer = new Timer()

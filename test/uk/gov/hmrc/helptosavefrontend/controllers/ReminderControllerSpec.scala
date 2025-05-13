@@ -17,12 +17,14 @@
 package uk.gov.hmrc.helptosavefrontend.controllers
 
 import cats.data.EitherT
-import cats.instances.future._
-import org.mockito.ArgumentMatchersSugar.*
+import cats.instances.future.*
+import org.mockito.ArgumentMatchers
+import org.mockito.ArgumentMatchers.{any, eq => eqTo}
+import org.mockito.Mockito.{doNothing, when}
 import play.api.http.Status
 import play.api.mvc.Result
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import uk.gov.hmrc.auth.core.syntax.retrieved.authSyntaxForRetrieved
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
@@ -31,7 +33,7 @@ import uk.gov.hmrc.helptosavefrontend.models.EnrolmentStatus.{Enrolled, NotEnrol
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
 import uk.gov.hmrc.helptosavefrontend.models.TestData.Eligibility.{randomEligibility, randomEligibleWithUserInfo, randomIneligibility}
 import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.validUserInfo
-import uk.gov.hmrc.helptosavefrontend.models._
+import uk.gov.hmrc.helptosavefrontend.models.*
 import uk.gov.hmrc.helptosavefrontend.models.account.Account
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResponse
 import uk.gov.hmrc.helptosavefrontend.models.reminder.{CancelHtsUserReminder, HtsUserSchedule}
@@ -39,7 +41,7 @@ import uk.gov.hmrc.helptosavefrontend.services.{HelpToSaveReminderService, HelpT
 import uk.gov.hmrc.helptosavefrontend.util.Crypto
 import uk.gov.hmrc.helptosavefrontend.views.html.closeaccount.account_closed
 import uk.gov.hmrc.helptosavefrontend.views.html.register.not_eligible
-import uk.gov.hmrc.helptosavefrontend.views.html.reminder._
+import uk.gov.hmrc.helptosavefrontend.views.html.reminder.*
 
 import java.time.LocalDate
 import scala.concurrent.Future
@@ -57,40 +59,49 @@ class ReminderControllerSpec
   val mockHelpToSaveService = mock[HelpToSaveService]
 
   def mockUpdateHtsUserPost(htsUser: HtsUserSchedule)(result: Either[String, HtsUserSchedule]): Unit =
-    mockHelpToSaveReminderService.updateHtsUser(htsUser)(*, *) returns EitherT.fromEither[Future](result)
+    when(mockHelpToSaveReminderService.updateHtsUser(eqTo(htsUser))(any(), any()))
+      .thenReturn(EitherT.fromEither[Future](result))
 
   val mockedFeatureEnabled: Boolean = false
 
   def mockCancelRemindersAuditEvent(nino: String, emailAddress: String): Unit =
-    mockAuditor
-      .sendEvent(HtsReminderCancelledEvent(HtsReminderCancelled(nino, emailAddress), "/"), nino)(*)
-      .doesNothing()
+    doNothing()
+      .when(mockAuditor)
+      .sendEvent(eqTo(HtsReminderCancelledEvent(HtsReminderCancelled(nino, emailAddress), "/")), eqTo(nino))(any())
 
   def mockUpdateRemindersAuditEvent(user: HTSReminderAccount): Unit =
-    mockAuditor.sendEvent(HtsReminderUpdatedEvent(HtsReminderUpdated(user), "/"), nino)(*).doesNothing()
+    doNothing()
+      .when(mockAuditor)
+      .sendEvent(eqTo(HtsReminderUpdatedEvent(HtsReminderUpdated(user), "/")), eqTo(nino))(any())
 
   def mockCreateRemindersAuditEvent(user: HTSReminderAccount): Unit =
-    mockAuditor.sendEvent(HtsReminderCreatedEvent(HtsReminderCreated(user), "/"), nino)(*).doesNothing()
+    doNothing()
+      .when(mockAuditor)
+      .sendEvent(eqTo(HtsReminderCreatedEvent(HtsReminderCreated(user), "/")), eqTo(nino))(any())
 
   def mockCancelHtsUserReminderPost(cancelHtsUserReminder: CancelHtsUserReminder)(result: Either[String, Unit]): Unit =
-    mockHelpToSaveReminderService.cancelHtsUserReminders(cancelHtsUserReminder)(*, *) returns EitherT
-      .fromEither[Future](result)
+    when(mockHelpToSaveReminderService.cancelHtsUserReminders(eqTo(cancelHtsUserReminder))(any(), any())).thenReturn(
+      EitherT
+        .fromEither[Future](result)
+    )
 
   def mockGetHtsUser(nino: String)(result: Either[String, HtsUserSchedule]): Unit =
-    mockHelpToSaveReminderService.getHtsUser(nino)(*, *) returns EitherT.fromEither[Future](result)
+    when(mockHelpToSaveReminderService.getHtsUser(eqTo(nino))(any(), any()))
+      .thenReturn(EitherT.fromEither[Future](result))
 
   def mockEnrolmentCheck()(result: Either[String, EnrolmentStatus]): Unit =
-    mockHelpToSaveService.getUserEnrolmentStatus()(*, *) returns EitherT.fromEither[Future](result)
+    when(mockHelpToSaveService.getUserEnrolmentStatus()(any(), any())).thenReturn(EitherT.fromEither[Future](result))
 
   def mockEmailGet()(result: Either[String, Option[String]]): Unit =
-    mockHelpToSaveService.getConfirmedEmail()(*, *) returns EitherT.fromEither[Future](result)
+    when(mockHelpToSaveService.getConfirmedEmail()(any(), any())).thenReturn(EitherT.fromEither[Future](result))
 
-  def mockEncrypt(p: String)(result: String): Unit = crypto.encrypt(p) returns result
+  def mockEncrypt(p: String)(result: String): Unit = when(crypto.encrypt(p)).thenReturn(result)
 
   def mockGetAccount(nino: String)(result: Either[String, Account]): Unit =
-    mockHelpToSaveService.getAccount(nino, *)(*, *) returns EitherT.fromEither[Future](result)
+    when(mockHelpToSaveService.getAccount(eqTo(nino), any())(any(), any()))
+      .thenReturn(EitherT.fromEither[Future](result))
 
-  def mockDecrypt(p: String)(result: String): Unit = crypto.decrypt(p) returns Try(result)
+  def mockDecrypt(p: String)(result: String): Unit = when(crypto.decrypt(p)).thenReturn(Try(result))
 
   def newController()(implicit crypto: Crypto, reminderFrequencyValidation: ReminderFrequencyValidation) =
     new ReminderController(
@@ -110,8 +121,7 @@ class ReminderControllerSpec
       injector.instanceOf[reminder_cancel_confirmation],
       injector.instanceOf[reminder_dashboard],
       injector.instanceOf[apply_savings_reminders],
-      injector.instanceOf[account_closed],
-      injector.instanceOf[not_eligible]
+      injector.instanceOf[account_closed]
     ) {}
   lazy val controller = newController()
 
@@ -503,7 +513,8 @@ class ReminderControllerSpec
               false,
               None,
               false,
-              true
+              true,
+              None
             )
           )
         )

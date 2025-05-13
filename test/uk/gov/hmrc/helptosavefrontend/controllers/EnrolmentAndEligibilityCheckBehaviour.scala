@@ -18,7 +18,9 @@ package uk.gov.hmrc.helptosavefrontend.controllers
 
 import cats.data.EitherT
 import cats.instances.future._
-import org.mockito.ArgumentMatchersSugar.*
+import org.mockito.ArgumentMatchers
+import org.mockito.ArgumentMatchers.{any, eq => eqTo}
+import org.mockito.Mockito.when
 import play.api.mvc.Result
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.syntax.retrieved.authSyntaxForRetrieved
@@ -65,14 +67,17 @@ trait EnrolmentAndEligibilityCheckBehaviour {
   val cancelHtsUserReminder = CancelHtsUserReminder(nino2)
 
   def mockEnrolmentCheck()(result: Either[String, EnrolmentStatus]): Unit =
-    mockHelpToSaveService.getUserEnrolmentStatus()(*, *) returns (EitherT.fromEither[Future](result))
+    when(mockHelpToSaveService.getUserEnrolmentStatus()(any(), any())).thenReturn(EitherT.fromEither[Future](result))
 
   def mockWriteITMPFlag(result: Option[Either[String, Unit]]): Unit =
-    mockHelpToSaveService.setITMPFlagAndUpdateMongo()(*, *) returns result
-      .fold(EitherT.liftF[Future, String, Unit](Future.failed(new Exception)))(r => EitherT.fromEither[Future](r))
+    when(mockHelpToSaveService.setITMPFlagAndUpdateMongo()(any(), any())).thenReturn(
+      result
+        .fold(EitherT.liftF[Future, String, Unit](Future.failed(new Exception)))(r => EitherT.fromEither[Future](r))
+    )
 
   def mockGetAccount()(result: Either[String, Account]): Unit =
-    mockHelpToSaveService.getAccount(nino, *)(*, *) returns EitherT.fromEither[Future](result)
+    when(mockHelpToSaveService.getAccount(eqTo(nino), any())(any(), any()))
+      .thenReturn(EitherT.fromEither[Future](result))
 
   def mockWriteITMPFlag(result: Either[String, Unit]): Unit =
     mockWriteITMPFlag(Some(result))
@@ -80,20 +85,24 @@ trait EnrolmentAndEligibilityCheckBehaviour {
   def mockCreateAccount(
     createAccountRequest: CreateAccountRequest
   )(response: Either[SubmissionFailure, SubmissionSuccess]): Unit =
-    mockHelpToSaveService.createAccount(createAccountRequest)(*, *) returns EitherT.fromEither[Future](response)
+    when(mockHelpToSaveService.createAccount(eqTo(createAccountRequest))(any(), any()))
+      .thenReturn(EitherT.fromEither[Future](response))
 
   def mockGetAccountNumber()(result: Either[String, AccountNumber]): Unit =
-    mockHelpToSaveConnector.getAccountNumber()(*, *) returns (EitherT.fromEither[Future](result))
+    when(mockHelpToSaveConnector.getAccountNumber()(any(), any())).thenReturn(EitherT.fromEither[Future](result))
 
   def mockGetAccountNumberFromService()(result: Either[String, AccountNumber]): Unit =
-    mockHelpToSaveService.getAccountNumber()(*, *) returns EitherT.fromEither[Future](result)
+    when(mockHelpToSaveService.getAccountNumber()(any(), any())).thenReturn(EitherT.fromEither[Future](result))
 
   def mockGetHtsUserReminders(nino: String)(result: Either[String, HtsUserSchedule]): Unit =
-    mockHelpToSaveReminderConnector.getHtsUser(nino)(*, *) returns EitherT.fromEither[Future](result)
+    when(mockHelpToSaveReminderConnector.getHtsUser(eqTo(nino))(any(), any()))
+      .thenReturn(EitherT.fromEither[Future](result))
 
   def mockCancelHtsUserReminders(cancelHtsUserReminder: CancelHtsUserReminder)(result: Either[String, Unit]): Unit =
-    mockHelpToSaveReminderConnector.cancelHtsUserReminders(cancelHtsUserReminder)(*, *) returns EitherT
-      .fromEither[Future](result)
+    when(mockHelpToSaveReminderConnector.cancelHtsUserReminders(eqTo(cancelHtsUserReminder))(any(), any())).thenReturn(
+      EitherT
+        .fromEither[Future](result)
+    )
 
   def commonEnrolmentAndSessionBehaviour(
     getResult: () => Future[Result], // scalastyle:ignore method.length

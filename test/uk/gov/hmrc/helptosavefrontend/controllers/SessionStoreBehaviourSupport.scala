@@ -17,21 +17,24 @@
 package uk.gov.hmrc.helptosavefrontend.controllers
 
 import cats.data.EitherT
-import cats.instances.future._
-import org.mockito.ArgumentMatchersSugar.*
-import org.mockito.IdiomaticMockito
+import cats.instances.future.*
+import org.mockito.ArgumentMatchers
+import org.mockito.ArgumentMatchers.{any, eq => eqTo}
+import org.mockito.Mockito.when
+import org.scalatestplus.mockito.MockitoSugar
 import uk.gov.hmrc.helptosavefrontend.models.HTSSession
 import uk.gov.hmrc.helptosavefrontend.repo.SessionStore
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-trait SessionStoreBehaviourSupport { this: IdiomaticMockito =>
+trait SessionStoreBehaviourSupport { this: MockitoSugar =>
   val mockSessionStore: SessionStore = mock[SessionStore]
 
   def mockSessionStorePut(expectedSession: HTSSession)(result: Either[String, Unit]): Unit =
-    mockSessionStore.store(expectedSession)(*) returns EitherT.fromEither[Future](result.map(_ => ()))
+    when(mockSessionStore.store(eqTo(expectedSession))(any()))
+      .thenReturn(EitherT.fromEither[Future](result.map(_ => ())))
 
   def mockSessionStoreGet(result: Either[String, Option[HTSSession]]): Unit =
-    mockSessionStore.get(*) returns EitherT.fromEither[Future](result)
+    when(mockSessionStore.get(any())).thenReturn(EitherT.fromEither[Future](result))
 }

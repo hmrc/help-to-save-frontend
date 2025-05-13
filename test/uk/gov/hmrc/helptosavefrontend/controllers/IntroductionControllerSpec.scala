@@ -17,7 +17,9 @@
 package uk.gov.hmrc.helptosavefrontend.controllers
 
 import cats.data.EitherT
-import org.mockito.ArgumentMatchersSugar.*
+import org.mockito.ArgumentMatchers
+import org.mockito.ArgumentMatchers.{any, eq => eqTo}
+import org.mockito.Mockito.when
 import play.api.http.Status
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -65,11 +67,14 @@ class IntroductionControllerSpec
   )
 
   def mockGetAccount(nino: String)(result: Either[String, Account]): Unit =
-    mockHelpToSaveService.getAccount(nino, *)(*, *) returns EitherT.fromEither[Future](result)
+    when(mockHelpToSaveService.getAccount(eqTo(nino), any())(any(), any()))
+      .thenReturn(EitherT.fromEither[Future](result))
 
   def mockAuthorise(loggedIn: Boolean) =
-    mockAuthConnector.authorise(EmptyPredicate, EmptyRetrieval)(*, *) returns (if (loggedIn) Future.successful(())
-                                                                               else Future.failed(new Exception("")))
+    when(mockAuthConnector.authorise(eqTo(EmptyPredicate), eqTo(EmptyRetrieval))(any(), any())).thenReturn(
+      if (loggedIn) Future.successful(())
+      else Future.failed(new Exception(""))
+    )
 
   "the about help to save page" should {
     "redirect to correct GOV.UK page" in {

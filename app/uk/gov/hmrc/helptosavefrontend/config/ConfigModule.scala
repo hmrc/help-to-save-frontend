@@ -17,12 +17,12 @@
 package uk.gov.hmrc.helptosavefrontend.config
 
 import com.google.inject.Provider
-import play.api.{Configuration, Environment}
+import play.api.Configuration
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 import javax.inject.Inject
 
-class ConfigModule @Inject() (configuration: Configuration, environment: Environment) extends Provider[ServicesConfig] {
+class ConfigModule @Inject() (configuration: Configuration) extends Provider[ServicesConfig] {
 
   override def get(): ServicesConfig = new ServicesConfig(configuration)
 }

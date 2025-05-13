@@ -28,7 +28,7 @@ object TestForm {
   val testForm: Form[TestData] = Form(
     mapping(
       key -> text
-    )(TestData.apply)(TestData.unapply)
+    )(TestData.apply)(o => Some(o.s))
   )
 
   def testFormWithErrorMessage(message: String): Form[TestData] =

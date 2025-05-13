@@ -45,7 +45,7 @@ object SelectEmailForm {
       mapping(
         "email"     -> text.verifying(l => l === "UserInfo" || l === "Newer" || l === "Change"),
         "new-email" -> of(emailFormatter)
-      )(SelectEmail.apply)(SelectEmail.unapply)
+      )(SelectEmail.apply)(o => Some(o.checked, o.newestEmail))
     )
   }
 }

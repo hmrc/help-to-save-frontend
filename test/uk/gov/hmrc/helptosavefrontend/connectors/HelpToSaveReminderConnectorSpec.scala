@@ -17,11 +17,11 @@
 package uk.gov.hmrc.helptosavefrontend.connectors
 
 import com.typesafe.config.ConfigFactory
-import org.mockito.IdiomaticMockito
 import org.scalatest.EitherValues
+import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.libs.json._
+import play.api.libs.json.*
 import play.api.{Application, Configuration}
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.helptosavefrontend.controllers.ControllerSpecBase
@@ -35,7 +35,7 @@ import scala.concurrent.ExecutionContext
 
 // scalastyle:off magic.number
 class HelpToSaveReminderConnectorSpec
-    extends ControllerSpecBase with IdiomaticMockito with WireMockSupport with WireMockMethods with GuiceOneAppPerSuite
+    extends ControllerSpecBase with MockitoSugar with WireMockSupport with WireMockMethods with GuiceOneAppPerSuite
     with EitherValues {
 
   private val config = Configuration(

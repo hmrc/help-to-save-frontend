@@ -23,7 +23,6 @@ import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.helptosavefrontend.auth.HelpToSaveAuth
 import uk.gov.hmrc.helptosavefrontend.config.{ErrorHandler, FrontendAppConfig}
 import uk.gov.hmrc.helptosavefrontend.connectors.HelpToSaveReminderConnector
-import uk.gov.hmrc.helptosavefrontend.controllers.BaseController
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.models.reminder.CancelHtsUserReminder
 import uk.gov.hmrc.helptosavefrontend.models.{HTSSession, HtsContextWithNINO}
@@ -31,7 +30,7 @@ import uk.gov.hmrc.helptosavefrontend.repo.SessionStore
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
 import uk.gov.hmrc.helptosavefrontend.util.Logging._
 import uk.gov.hmrc.helptosavefrontend.util.{Logging, MaintenanceSchedule, NINOLogMessageTransformer, toFuture}
-import uk.gov.hmrc.helptosavefrontend.views.html.core.{confirm_check_eligibility, error_template}
+import uk.gov.hmrc.helptosavefrontend.views.html.core.confirm_check_eligibility
 import uk.gov.hmrc.http.HeaderCarrier
 
 import java.time.LocalDate
@@ -49,8 +48,7 @@ class AccessAccountController @Inject() (
   mcc: MessagesControllerComponents,
   errorHandler: ErrorHandler,
   maintenanceSchedule: MaintenanceSchedule,
-  confirmCheckEligibility: confirm_check_eligibility,
-  errorTemplate: error_template
+  confirmCheckEligibility: confirm_check_eligibility
 )(
   implicit val transformer: NINOLogMessageTransformer,
   val frontendAppConfig: FrontendAppConfig,

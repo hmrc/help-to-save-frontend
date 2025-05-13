@@ -24,7 +24,6 @@ import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.helptosavefrontend.auth.HelpToSaveAuth
 import uk.gov.hmrc.helptosavefrontend.config.{ErrorHandler, FrontendAppConfig}
 import uk.gov.hmrc.helptosavefrontend.connectors.IvConnector
-import uk.gov.hmrc.helptosavefrontend.controllers.BaseController
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.models.HTSSession
 import uk.gov.hmrc.helptosavefrontend.models.iv.IvSuccessResponse._
