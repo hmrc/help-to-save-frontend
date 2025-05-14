@@ -16,7 +16,9 @@
 
 package uk.gov.hmrc.helptosavefrontend.audit
 
-import org.mockito.ArgumentMatchersSugar.*
+import org.mockito.{ArgumentMatchers, Mockito}
+import org.mockito.Mockito.when
+import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import play.api.libs.json.Json
 import uk.gov.hmrc.helptosavefrontend.controllers.ControllerSpecWithGuiceApp
 import uk.gov.hmrc.helptosavefrontend.models.HTSEvent
@@ -49,8 +51,8 @@ class HTSAuditorSpec extends ControllerSpecWithGuiceApp {
           override val value = dataEvent
         }
 
-        mockAuditConnector
-          .sendExtendedEvent(dataEvent)(*, *) returns Future.failed(new Exception)
+        when(mockAuditConnector.sendExtendedEvent(eqTo(dataEvent))(any(), any()))
+          .thenReturn(Future.failed(new Exception))
         auditor.sendEvent(htsEvent, "nino")
       }
 

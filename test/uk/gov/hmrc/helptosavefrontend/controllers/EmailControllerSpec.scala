@@ -17,11 +17,13 @@
 package uk.gov.hmrc.helptosavefrontend.controllers
 
 import cats.data.EitherT
-import cats.instances.future._
-import org.mockito.ArgumentMatchersSugar.*
+import cats.instances.future.*
+import org.mockito.ArgumentMatchers
+import org.mockito.ArgumentMatchers.{any, eq => eqTo}
+import org.mockito.Mockito.{doNothing, when}
 import play.api.mvc.Result
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import uk.gov.hmrc.auth.core.syntax.retrieved.authSyntaxForRetrieved
 import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
 import uk.gov.hmrc.helptosavefrontend.connectors.EmailVerificationConnector
@@ -30,16 +32,16 @@ import uk.gov.hmrc.helptosavefrontend.forms.{BankDetails, SortCode}
 import uk.gov.hmrc.helptosavefrontend.models.EnrolmentStatus.{Enrolled, NotEnrolled}
 import uk.gov.hmrc.helptosavefrontend.models.HTSSession.EligibleWithUserInfo
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
-import uk.gov.hmrc.helptosavefrontend.models.TestData.Eligibility._
+import uk.gov.hmrc.helptosavefrontend.models.TestData.Eligibility.*
 import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.validUserInfo
-import uk.gov.hmrc.helptosavefrontend.models._
+import uk.gov.hmrc.helptosavefrontend.models.*
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResultType
 import uk.gov.hmrc.helptosavefrontend.models.email.VerifyEmailError
 import uk.gov.hmrc.helptosavefrontend.models.email.VerifyEmailError.AlreadyVerified
 import uk.gov.hmrc.helptosavefrontend.models.reminder.UpdateReminderEmail
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIPayload
 import uk.gov.hmrc.helptosavefrontend.util.Crypto
-import uk.gov.hmrc.helptosavefrontend.views.html.email._
+import uk.gov.hmrc.helptosavefrontend.views.html.email.*
 import uk.gov.hmrc.helptosavefrontend.views.html.link_expired
 
 import java.util.Base64
@@ -88,31 +90,33 @@ class EmailControllerSpec
   val eligibleWithValidUserInfo = randomEligibleWithUserInfo(validUserInfo)
 
   def mockEmailVerification(nino: String, email: String, firstName: String)(result: Either[VerifyEmailError, Unit]) =
-    mockEmailVerificationConnector.verifyEmail(nino, email, firstName, true)(*, *) returns Future.successful(result)
+    when(mockEmailVerificationConnector.verifyEmail(eqTo(nino), eqTo(email), eqTo(firstName), eqTo(true))(any(), any()))
+      .thenReturn(Future.successful(result))
 
   def mockAudit(expectedEvent: HTSEvent) =
-    mockAuditor.sendEvent(expectedEvent, *)(*).doesNothing()
+    doNothing().when(mockAuditor).sendEvent(eqTo(expectedEvent), any())(any())
 
   def mockStoreConfirmedEmail(email: String)(result: Either[String, Unit]): Unit =
-    mockHelpToSaveService.storeConfirmedEmail(email)(*, *) returns EitherT.fromEither[Future](result)
+    when(mockHelpToSaveService.storeConfirmedEmail(eqTo(email))(any(), any()))
+      .thenReturn(EitherT.fromEither[Future](result))
 
   def mockStoreConfirmedEmailInReminders(updateReminderEmail: UpdateReminderEmail)(result: Either[String, Unit]): Unit =
-    mockHelpToSaveReminderService.updateReminderEmail(updateReminderEmail)(*, *) returns EitherT.fromEither[Future](
-      result
-    )
+    when(mockHelpToSaveReminderService.updateReminderEmail(eqTo(updateReminderEmail))(any(), any()))
+      .thenReturn(EitherT.fromEither[Future](result))
 
   def mockGetConfirmedEmail()(result: Either[String, Option[String]]): Unit =
-    mockHelpToSaveService.getConfirmedEmail()(*, *) returns EitherT.fromEither[Future](result)
+    when(mockHelpToSaveService.getConfirmedEmail()(any(), any())).thenReturn(EitherT.fromEither[Future](result))
 
   def mockEligibilityResult()(result: Either[String, EligibilityCheckResultType]): Unit =
-    mockHelpToSaveService.checkEligibility()(*, *) returns EitherT.fromEither[Future](result)
+    when(mockHelpToSaveService.checkEligibility()(any(), any())).thenReturn(EitherT.fromEither[Future](result))
 
   def mockUpdateEmail(nsiPayload: NSIPayload)(result: Either[String, Unit]): Unit =
-    mockHelpToSaveService.updateEmail(nsiPayload)(*, *) returns EitherT.fromEither[Future](result)
+    when(mockHelpToSaveService.updateEmail(eqTo(nsiPayload))(any(), any()))
+      .thenReturn(EitherT.fromEither[Future](result))
 
-  def mockEncrypt(p: String)(result: String): Unit = crypto.encrypt(p) returns result
+  def mockEncrypt(p: String)(result: String): Unit = when(crypto.encrypt(p)).thenReturn(result)
 
-  def mockDecrypt(p: String)(result: String): Unit = crypto.decrypt(p) returns Try(result)
+  def mockDecrypt(p: String)(result: String): Unit = when(crypto.decrypt(p)).thenReturn(Try(result))
 
   "The EmailController" when {
 

@@ -21,7 +21,7 @@ import play.api.mvc.Request
 import play.twirl.api.Html
 import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 import uk.gov.hmrc.helptosavefrontend.views.html.core.error_template
-import uk.gov.hmrc.play.bootstrap.frontend.http.FrontendErrorHandler
+import uk.gov.hmrc.play.bootstrap.frontend.http.LegacyFrontendErrorHandler
 
 import javax.inject.{Inject, Singleton}
 
@@ -30,7 +30,7 @@ class ErrorHandler @Inject() (
   implicit val messagesApi: MessagesApi,
   val appConfig: FrontendAppConfig,
   errorTemplateView: error_template
-) extends FrontendErrorHandler {
+) extends LegacyFrontendErrorHandler {
 
   override def standardErrorTemplate(pageTitle: String, heading: String, message: String)(
     implicit request: Request[_]

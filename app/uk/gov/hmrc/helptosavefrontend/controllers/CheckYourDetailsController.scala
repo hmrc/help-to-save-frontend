@@ -38,7 +38,7 @@ class CheckYourDetailsController @Inject() (
   mcc: MessagesControllerComponents,
   errorHandler: ErrorHandler,
   maintenanceSchedule: MaintenanceSchedule,
-  checkYourDetails: check_your_details
+  checkYourDetailsView: check_your_details
 )(
   implicit
   val transformer: NINOLogMessageTransformer,
@@ -59,7 +59,7 @@ class CheckYourDetailsController @Inject() (
               case None => SeeOther(routes.EligibilityCheckController.getMissingInfoPage.url)
               case Some(postcode) =>
                 val formattedDateOfBirth = userInfo.dateOfBirth.format(ofLocalizedDate(FormatStyle.MEDIUM))
-                Ok(checkYourDetails(userInfo, postcode, formattedDateOfBirth, userInfo.address.lines))
+                Ok(checkYourDetailsView(userInfo, postcode, formattedDateOfBirth, userInfo.address.lines))
             }
         }
       }

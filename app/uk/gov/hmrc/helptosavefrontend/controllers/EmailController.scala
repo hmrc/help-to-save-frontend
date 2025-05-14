@@ -29,7 +29,6 @@ import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
 import uk.gov.hmrc.helptosavefrontend.auth.HelpToSaveAuth
 import uk.gov.hmrc.helptosavefrontend.config.{ErrorHandler, FrontendAppConfig}
 import uk.gov.hmrc.helptosavefrontend.connectors.EmailVerificationConnector
-import uk.gov.hmrc.helptosavefrontend.controllers.BaseController
 import uk.gov.hmrc.helptosavefrontend.controllers.EmailController.CannotCreateAccountReason
 import uk.gov.hmrc.helptosavefrontend.controllers.EmailController.EligibleInfo.{EligibleWithEmail, EligibleWithNoEmail}
 import uk.gov.hmrc.helptosavefrontend.forms._
@@ -92,7 +91,7 @@ class EmailController @Inject() (
 
   def getSelectEmailPage: Action[AnyContent] =
     authorisedForHtsWithInfo { implicit request => implicit htsContext =>
-      def ifDigitalNewApplicant = { session: Option[HTSSession] =>
+      def ifDigitalNewApplicant = { (session: Option[HTSSession]) =>
         withEligibleSession(
           (s, eligibleWithEmail) => {
             val emailFormWithData =
@@ -112,7 +111,7 @@ class EmailController @Inject() (
         )(session)
       }
 
-      def ifDE = { _: Option[HTSSession] =>
+      def ifDE = { (_: Option[HTSSession]) =>
         htsContext.userDetails.fold[Future[Result]](
           _ => SeeOther(routes.EmailController.getGiveEmailPage.url),
           userInfo =>
@@ -172,7 +171,7 @@ class EmailController @Inject() (
             }
           )
 
-      def ifDigitalNewApplicant = { maybeSession: Option[HTSSession] =>
+      def ifDigitalNewApplicant = { (maybeSession: Option[HTSSession]) =>
         withEligibleSession(
           (session, eligibleWithEmail) => {
             val backLink = backLinkFromSession(session)
@@ -182,7 +181,7 @@ class EmailController @Inject() (
         )(maybeSession)
       }
 
-      def ifDE = { maybeSession: Option[HTSSession] =>
+      def ifDE = { (maybeSession: Option[HTSSession]) =>
         maybeSession.fold[Future[Result]](
           SeeOther(routes.EligibilityCheckController.getCheckEligibility.url)
         ) { session =>
@@ -199,14 +198,14 @@ class EmailController @Inject() (
 
   def getGiveEmailPage: Action[AnyContent] =
     authorisedForHtsWithInfo { implicit request => implicit htsContext =>
-      def ifDigitalNewApplicant = { session: Option[HTSSession] =>
+      def ifDigitalNewApplicant = { (session: Option[HTSSession]) =>
         withEligibleSession(
           (_, _) => SeeOther(routes.EmailController.getSelectEmailPage.url),
           (s, _) => Ok(giveEmail(GiveEmailForm.giveEmailForm, Some(backLinkFromSession(s))))
         )(session)
       }
 
-      def ifDE = { _: Option[HTSSession] =>
+      def ifDE = { (_: Option[HTSSession]) =>
         htsContext.userDetails.toOption
           .flatMap(_.email)
           .fold {
@@ -252,7 +251,7 @@ class EmailController @Inject() (
           (s, _) => handleForm(s)
         )(session)
 
-      def ifDE = { htsSession: Option[HTSSession] =>
+      def ifDE = { (htsSession: Option[HTSSession]) =>
         htsSession.fold[Future[Result]](
           SeeOther(routes.EligibilityCheckController.getCheckEligibility.url)
         ) { _ =>
@@ -311,7 +310,7 @@ class EmailController @Inject() (
           (_, _) => SeeOther(routes.EmailController.getGiveEmailPage.url)
         )(session)
 
-      def ifDE = { session: Option[HTSSession] =>
+      def ifDE = { (session: Option[HTSSession]) =>
         withSession(session) { _ =>
           doUpdate(HTSSession(None, None, None)) {
             htsContext.userDetails.fold[Future[Result]](
@@ -594,7 +593,7 @@ class EmailController @Inject() (
             }
         )(session)
 
-      def ifDE = { session: Option[HTSSession] =>
+      def ifDE = { (session: Option[HTSSession]) =>
         {
           session
             .flatMap(_.pendingEmail)
@@ -636,7 +635,7 @@ class EmailController @Inject() (
             )
         )(session)
 
-      def ifDE = { _: Option[HTSSession] =>
+      def ifDE = { (_: Option[HTSSession]) =>
         {
           htsContext.userDetails.toOption
             .flatMap(_.email)

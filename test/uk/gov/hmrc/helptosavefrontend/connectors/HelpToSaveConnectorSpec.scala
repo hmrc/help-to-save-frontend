@@ -17,18 +17,18 @@
 package uk.gov.hmrc.helptosavefrontend.connectors
 
 import com.typesafe.config.ConfigFactory
-import org.mockito.IdiomaticMockito
 import org.scalacheck.Gen
 import org.scalatest.EitherValues
+import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.libs.json._
+import play.api.libs.json.*
 import play.api.{Application, Configuration}
 import uk.gov.hmrc.helptosavefrontend.connectors.HelpToSaveConnectorImpl.GetEmailResponse
 import uk.gov.hmrc.helptosavefrontend.controllers.ControllerSpecBase
 import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.validNSIPayload
-import uk.gov.hmrc.helptosavefrontend.models._
+import uk.gov.hmrc.helptosavefrontend.models.*
 import uk.gov.hmrc.helptosavefrontend.models.account.{Account, AccountNumber}
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResultType.{AlreadyHasAccount, Eligible, Ineligible}
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.{EligibilityCheckResponse, EligibilityCheckResult}
@@ -44,7 +44,7 @@ import scala.concurrent.ExecutionContext
 
 // scalastyle:off magic.number
 class HelpToSaveConnectorSpec
-    extends ControllerSpecBase with IdiomaticMockito with WireMockSupport with WireMockMethods with GuiceOneAppPerSuite
+    extends ControllerSpecBase with MockitoSugar with WireMockSupport with WireMockMethods with GuiceOneAppPerSuite
     with EitherValues with ScalaCheckDrivenPropertyChecks {
 
   private val config = Configuration(
@@ -179,7 +179,7 @@ class HelpToSaveConnectorSpec
         }
 
         "the call comes back with a 200 and an unknown result code" in {
-          forAll { resultCode: Int =>
+          forAll { (resultCode: Int) =>
             whenever(!(1 to 3).contains(resultCode)) {
               testError(resultCode)
             }

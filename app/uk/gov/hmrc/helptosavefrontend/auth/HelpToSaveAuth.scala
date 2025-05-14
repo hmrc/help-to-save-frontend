@@ -145,7 +145,11 @@ trait HelpToSaveAuth extends AuthorisedFunctions with Logging {
           val time = timer.stop()
           maintenanceSchedule.endOfMaintenance() match {
             case Some(endMaintenance) => Future.failed(MaintenancePeriodException(endMaintenance))
-            case None                 => toResult(a, request, time)
+            case None =>
+              retrieval match {
+                case EmptyRetrieval => toResult((), request, time)
+                case _              => toResult(a, request, time)
+              }
           }
         }
         .recover {

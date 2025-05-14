@@ -26,7 +26,6 @@ import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
 import uk.gov.hmrc.helptosavefrontend.auth.HelpToSaveAuth
 import uk.gov.hmrc.helptosavefrontend.config.{ErrorHandler, FrontendAppConfig}
-import uk.gov.hmrc.helptosavefrontend.controllers.BaseController
 import uk.gov.hmrc.helptosavefrontend.forms.{ReminderForm, ReminderFrequencyValidation}
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.models._
@@ -61,12 +60,11 @@ class ReminderController @Inject() (
   reminderCancelConfirmation: reminder_cancel_confirmation,
   reminderDashboard: reminder_dashboard,
   applySavingsReminders: apply_savings_reminders,
-  accountClosed: account_closed,
-  notEligible: not_eligible
+  accountClosed: account_closed
 )(
   implicit val crypto: Crypto,
-  implicit val transformer: NINOLogMessageTransformer,
-  implicit val reminderFrequencyValidation: ReminderFrequencyValidation,
+  val transformer: NINOLogMessageTransformer,
+  val reminderFrequencyValidation: ReminderFrequencyValidation,
   val frontendAppConfig: FrontendAppConfig,
   val config: Configuration,
   val env: Environment,

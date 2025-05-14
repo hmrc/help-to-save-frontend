@@ -19,7 +19,6 @@ package uk.gov.hmrc.helptosavefrontend.views.helpers
 import play.api.data.{Form, FormError}
 import play.api.i18n.Messages
 import play.twirl.api._
-import uk.gov.hmrc.govukfrontend.views.Aliases.Text
 import uk.gov.hmrc.govukfrontend.views.html.components._
 import uk.gov.hmrc.govukfrontend.views.viewmodels.errormessage.ErrorMessage
 import uk.gov.hmrc.helptosavefrontend.forms.EmailValidation.FormOps

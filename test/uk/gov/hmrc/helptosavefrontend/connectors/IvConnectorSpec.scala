@@ -17,10 +17,10 @@
 package uk.gov.hmrc.helptosavefrontend.connectors
 
 import com.typesafe.config.ConfigFactory
-import org.mockito.IdiomaticMockito
 import org.scalatest.EitherValues
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.matchers.should.Matchers
+import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
@@ -37,7 +37,7 @@ import scala.concurrent.ExecutionContext
 
 // scalastyle:off magic.number
 class IvConnectorSpec
-    extends ControllerSpecBase with Matchers with ScalaFutures with IdiomaticMockito with WireMockSupport
+    extends ControllerSpecBase with Matchers with ScalaFutures with MockitoSugar with WireMockSupport
     with WireMockMethods with GuiceOneAppPerSuite with EitherValues {
 
   private val config = Configuration(

@@ -16,7 +16,9 @@
 
 package uk.gov.hmrc.helptosavefrontend.controllers
 
-import org.mockito.ArgumentMatchersSugar.*
+import org.mockito.ArgumentMatchers
+import org.mockito.Mockito.when
+import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -28,7 +30,7 @@ import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
 import uk.gov.hmrc.helptosavefrontend.models.account.{Account, BonusTerm}
 import uk.gov.hmrc.helptosavefrontend.models.reminder.HtsUserSchedule
 import uk.gov.hmrc.helptosavefrontend.models.{EnrolmentStatus, HTSSession}
-import uk.gov.hmrc.helptosavefrontend.views.html.core.{confirm_check_eligibility, error_template}
+import uk.gov.hmrc.helptosavefrontend.views.html.core.confirm_check_eligibility
 
 import java.time.LocalDate
 import scala.concurrent.Future
@@ -47,8 +49,7 @@ class AccessAccountControllerSpec
     testMcc,
     testErrorHandler,
     testMaintenanceSchedule,
-    injector.instanceOf[confirm_check_eligibility],
-    injector.instanceOf[error_template]
+    injector.instanceOf[confirm_check_eligibility]
   )
 
   "The AccessAccountController" when {
@@ -56,7 +57,8 @@ class AccessAccountControllerSpec
     "handling getSignInPage" must {
 
       "redirect to the govuk sign in page" in {
-        mockAuthConnector.authorise(EmptyPredicate, EmptyRetrieval)(*, *) returns Future.successful(())
+        when(mockAuthConnector.authorise(eqTo(EmptyPredicate), eqTo(EmptyRetrieval))(any(), any()))
+          .thenReturn(Future.successful(()))
 
         val result = controller.getSignInPage()(FakeRequest())
         status(result) shouldBe SEE_OTHER

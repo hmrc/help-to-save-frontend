@@ -21,7 +21,7 @@ import play.api.data._
 
 object GiveEmailForm {
   def giveEmailForm(implicit emailValidation: EmailValidation): Form[GiveEmail] = Form(
-    mapping("email" -> of(emailValidation.emailFormatter))(GiveEmail.apply)(GiveEmail.unapply)
+    mapping("email" -> of(emailValidation.emailFormatter))(GiveEmail.apply)(o => Some(o.email))
   )
 }
 

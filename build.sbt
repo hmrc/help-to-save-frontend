@@ -7,14 +7,21 @@ lazy val microservice = Project(appName, file("."))
   .disablePlugins(JUnitXmlReportPlugin) //Required to prevent https://github.com/scalatest/scalatest/issues/1427
   .settings(onLoadMessage := "")
   .settings(PlayKeys.playDefaultPort := 7000)
-  .settings(scalaVersion := "2.13.16")
+  .settings(scalaVersion := "3.3.5")
   .settings(
     RoutesKeys.routesImport += "uk.gov.hmrc.play.bootstrap.binders.RedirectUrl",
     majorVersion := 2,
     libraryDependencies ++= AppDependencies.compile ++ AppDependencies.test()
   )
-  .settings(scalacOptions += "-Wconf:src=routes/.*:s")
-  .settings(scalacOptions += "-Wconf:src=html/.*:s")
+  .settings(scalacOptions += "-Wconf:src=routes/.*:s,src=txt/.*:s")
+  .settings(scalacOptions ++=Seq("-source:3.0-migration", "-rewrite"))
+  // silence authprovider warnings - we need to use the deprecated authprovider
+  .settings(
+    scalacOptions ++= Seq(
+      "-feature",
+      "-Wconf:cat=deprecation:w,cat=feature:w,src=target/.*:s,msg=Flag.*repeatedly:s"
+    )
+  )
   .settings(CodeCoverageSettings.settings *)
   .settings(scalafmtOnCompile := true)
   // Disable default sbt Test options (might change with new versions of bootstrap)

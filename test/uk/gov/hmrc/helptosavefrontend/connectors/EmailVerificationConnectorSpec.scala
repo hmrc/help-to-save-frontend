@@ -16,13 +16,14 @@
 
 package uk.gov.hmrc.helptosavefrontend.connectors
 import com.typesafe.config.ConfigFactory
-import org.mockito.IdiomaticMockito
+import org.mockito.Mockito
 import org.scalatest.EitherValues
+import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.http.Status
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.libs.json._
+import play.api.libs.json.*
 import play.api.{Application, Configuration}
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 import uk.gov.hmrc.helptosavefrontend.controllers.ControllerSpecBase
@@ -36,7 +37,7 @@ import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import scala.concurrent.ExecutionContext
 
 class EmailVerificationConnectorSpec
-    extends ControllerSpecBase with IdiomaticMockito with WireMockSupport with WireMockMethods with GuiceOneAppPerSuite
+    extends ControllerSpecBase with MockitoSugar with WireMockSupport with WireMockMethods with GuiceOneAppPerSuite
     with EitherValues with ScalaCheckDrivenPropertyChecks {
 
   val nino: NINO = "AE123XXXX"
@@ -83,7 +84,7 @@ class EmailVerificationConnectorSpec
     )
 
   val verifyEmailUrl = "/email-verification/verification-requests"
-  def mockEncrypt(expected: String)(result: String): Unit = crypto.encrypt(expected) returns result
+  def mockEncrypt(expected: String)(result: String): Unit = Mockito.when(crypto.encrypt(expected)).thenReturn(result)
 
   "verifyEmail" when {
 
@@ -149,7 +150,7 @@ class EmailVerificationConnectorSpec
           val allOtherStatuses = Set(Status.INTERNAL_SERVER_ERROR)
           val statuses = Set(Status.OK, Status.CREATED, Status.BAD_REQUEST, Status.CONFLICT, Status.SERVICE_UNAVAILABLE)
 
-          allOtherStatuses.foreach { status: Int =>
+          allOtherStatuses.foreach { (status: Int) =>
             whenever(!statuses.contains(status)) {
               mockEncrypt(nino + "#" + email)("")
               when(POST, verifyEmailUrl, body = Some(Json.toJson(verificationRequest).toString()))

@@ -17,22 +17,21 @@
 package uk.gov.hmrc.helptosavefrontend.forms
 
 import cats.data.{NonEmptyList, Validated}
-import cats.instances.char._
-import cats.instances.string._
-import cats.syntax.apply._
-import cats.syntax.either._
-import cats.syntax.eq._
-import com.google.inject.{Inject, Singleton}
+import cats.instances.char.*
+import cats.instances.string.*
+import cats.syntax.apply.*
+import cats.syntax.either.*
+import cats.syntax.eq.*
+import com.google.inject.Inject
 import play.api.Configuration
 import play.api.data.Forms.text
 import play.api.data.format.Formatter
 import play.api.data.{Form, FormError}
-import uk.gov.hmrc.helptosavefrontend.forms.EmailValidation._
-import uk.gov.hmrc.helptosavefrontend.util.Validation._
+import uk.gov.hmrc.helptosavefrontend.forms.EmailValidation.*
+import uk.gov.hmrc.helptosavefrontend.util.Validation.{ValidOrErrorStrings, invalid, validatedFromBoolean}
 
 import scala.annotation.tailrec
 
-@Singleton
 class EmailValidation @Inject() (configuration: Configuration) {
 
   private val emailMaxTotalLength: Int = configuration.underlying.getInt("email-validation.max-total-length")

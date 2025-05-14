@@ -36,7 +36,7 @@ object EmailVerificationErrorContinueForm {
   }
 
   val continueForm: Form[Continue] = Form(
-    mapping("radio-inline-group" -> of(booleanFormat))(Continue.apply)(Continue.unapply)
+    mapping("radio-inline-group" -> of(booleanFormat))(Continue.apply)(o => Some(o.value))
   )
 }
 

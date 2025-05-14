@@ -18,7 +18,9 @@ package uk.gov.hmrc.helptosavefrontend.controllers
 
 import cats.data.EitherT
 import cats.instances.future._
-import org.mockito.ArgumentMatchersSugar.*
+import org.mockito.ArgumentMatchers
+import org.mockito.ArgumentMatchers.{any, eq => eqTo}
+import org.mockito.Mockito.when
 import play.api.Configuration
 import play.api.http.Status
 import play.api.mvc.{Result => PlayResult}
@@ -89,16 +91,18 @@ class RegisterControllerSpec
   def govukBackLink(url: String): String = s"""<a href="$url" class="govuk-back-link" id="back">Back</a>"""
 
   def mockEmailUpdate(email: String)(result: Either[String, Unit]): Unit =
-    mockHelpToSaveService.storeConfirmedEmail(email)(*, *) returns EitherT.fromEither[Future](result)
+    when(mockHelpToSaveService.storeConfirmedEmail(eqTo(email))(any(), any()))
+      .thenReturn(EitherT.fromEither[Future](result))
 
   def mockAccountCreationAllowed(result: Either[String, UserCapResponse]): Unit =
-    mockHelpToSaveService.isAccountCreationAllowed()(*, *) returns EitherT.fromEither[Future](result)
+    when(mockHelpToSaveService.isAccountCreationAllowed()(any(), any())).thenReturn(EitherT.fromEither[Future](result))
 
   def mockDecrypt(expected: String)(result: Option[String]) =
-    crypto.decrypt(expected) returns result.fold[Try[String]](Failure(new Exception))(Success.apply)
+    when(crypto.decrypt(expected)).thenReturn(result.fold[Try[String]](Failure(new Exception))(Success.apply))
 
   def mockUpdateHtsUserPost(htsUser: HtsUserSchedule)(result: Either[String, HtsUserSchedule]): Unit =
-    mockHelpToSaveReminderService.updateHtsUser(htsUser)(*, *) returns EitherT.fromEither[Future](result)
+    when(mockHelpToSaveReminderService.updateHtsUser(eqTo(htsUser))(any(), any()))
+      .thenReturn(EitherT.fromEither[Future](result))
 
   def checkRedirectIfNoEmailInSession(doRequest: => Future[PlayResult]): Unit =
     "redirect to the give email page if the session data does not contain an email for the user" in {

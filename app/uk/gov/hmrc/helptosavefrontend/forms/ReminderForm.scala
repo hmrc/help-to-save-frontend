@@ -23,7 +23,7 @@ object ReminderForm {
   def giveRemindersDetailsForm()(implicit validation: ReminderFrequencyValidation): Form[ReminderForm] = Form(
     mapping(
       "reminderFrequency" -> of(validation.reminderFrequencyFormatter)
-    )(ReminderForm.apply)(ReminderForm.unapply)
+    )(ReminderForm.apply)(o => Some(o.reminderFrequency))
   )
 }
 

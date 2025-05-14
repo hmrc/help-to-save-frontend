@@ -18,7 +18,9 @@ package uk.gov.hmrc.helptosavefrontend.services
 
 import cats.data.EitherT
 import cats.instances.future._
-import org.mockito.ArgumentMatchersSugar.*
+import org.mockito.ArgumentMatchers
+import org.mockito.ArgumentMatchers.{any, eq => eqTo}
+import org.mockito.Mockito.when
 import org.scalatest.concurrent.ScalaFutures
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.helptosavefrontend.connectors.HelpToSaveReminderConnector
@@ -44,7 +46,8 @@ class HelpToSaveReminderServiceSpec extends ControllerSpecWithGuiceApp with Scal
         HtsUserSchedule(nino, "user@gmail.com", "Tyrion", "Lannister", true, Seq(1), LocalDate.parse("2000-01-01"))
 
       def mockupdateUser(htsUser: HtsUserSchedule)(result: Either[String, HtsUserSchedule]): Unit =
-        htsReminderConnector.updateHtsUser(htsUser)(*, *) returns EitherT.fromEither[Future](result)
+        when(htsReminderConnector.updateHtsUser(eqTo(htsUser))(any(), any()))
+          .thenReturn(EitherT.fromEither[Future](result))
 
       "return a successful response" in {
         mockupdateUser(htsUser)(Right(htsUser))
@@ -61,7 +64,8 @@ class HelpToSaveReminderServiceSpec extends ControllerSpecWithGuiceApp with Scal
         HtsUserSchedule(nino, "user@gmail.com", "Tyrion", "Lannister", true, Seq(1), LocalDate.parse("2000-01-01"))
 
       def mockGetHtsUser(result: Either[String, HtsUserSchedule]): Unit =
-        htsReminderConnector.getHtsUser(ninoNew)(*, *) returns EitherT.fromEither[Future](result)
+        when(htsReminderConnector.getHtsUser(eqTo(ninoNew))(any(), any()))
+          .thenReturn(EitherT.fromEither[Future](result))
 
       "return a successful response" in {
         mockGetHtsUser(Right(htsUser))
@@ -77,8 +81,10 @@ class HelpToSaveReminderServiceSpec extends ControllerSpecWithGuiceApp with Scal
       val cancelHtsUserReminder = CancelHtsUserReminder(ninoNew)
 
       def mockCancelHtsUserReminder(cancelHtsUserReminder: CancelHtsUserReminder)(result: Either[String, Unit]): Unit =
-        htsReminderConnector.cancelHtsUserReminders(cancelHtsUserReminder)(*, *) returns EitherT.fromEither[Future](
-          (result)
+        when(htsReminderConnector.cancelHtsUserReminders(eqTo(cancelHtsUserReminder))(any(), any())).thenReturn(
+          EitherT.fromEither[Future](
+            result
+          )
         )
 
       "return a successful response" in {
@@ -94,7 +100,8 @@ class HelpToSaveReminderServiceSpec extends ControllerSpecWithGuiceApp with Scal
         val updateReminderEmail = UpdateReminderEmail(ninoNew, email, "Tyrion", "Lannister")
 
         def mockUpdateReminderEmail(updateReminderEmail: UpdateReminderEmail)(result: Either[String, Unit]): Unit =
-          htsReminderConnector.updateReminderEmail(updateReminderEmail)(*, *) returns EitherT.fromEither[Future](result)
+          when(htsReminderConnector.updateReminderEmail(eqTo(updateReminderEmail))(any(), any()))
+            .thenReturn(EitherT.fromEither[Future](result))
 
         "return a successful response" in {
           mockUpdateReminderEmail(updateReminderEmail)(Right(()))

@@ -18,7 +18,9 @@ package uk.gov.hmrc.helptosavefrontend.controllers
 
 import cats.data.EitherT
 import cats.instances.future._
-import org.mockito.ArgumentMatchersSugar.*
+import org.mockito.ArgumentMatchers
+import org.mockito.ArgumentMatchers.any
+import org.mockito.Mockito.when
 import play.api.Configuration
 import play.api.http.Status
 import play.api.mvc.{Result => PlayResult}
@@ -69,10 +71,10 @@ class EligibilityCheckControllerSpec
   private val fakeRequest = FakeRequest("GET", "/")
 
   def mockEligibilityResult()(result: Either[String, EligibilityCheckResultType]): Unit =
-    mockHelpToSaveService.checkEligibility()(*, *) returns EitherT.fromEither[Future](result)
+    when(mockHelpToSaveService.checkEligibility()(any(), any())).thenReturn(EitherT.fromEither[Future](result))
 
   def mockAccountCreationAllowed(result: Either[String, UserCapResponse]): Unit =
-    mockHelpToSaveService.isAccountCreationAllowed()(*, *) returns EitherT.fromEither[Future](result)
+    when(mockHelpToSaveService.isAccountCreationAllowed()(any(), any())).thenReturn(EitherT.fromEither[Future](result))
 
   "The EligibilityCheckController" when {
     "displaying the you are eligible page" must {
@@ -134,7 +136,9 @@ class EligibilityCheckControllerSpec
       "throw an exception if threshold is absent" in {
         mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
         mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-        mockSessionStoreGet(Right(Some(HTSSession(Some(Left(notEntitledToWTCAndUCInsufficientWithNoThreshold())), None, None))))
+        mockSessionStoreGet(
+          Right(Some(HTSSession(Some(Left(notEntitledToWTCAndUCInsufficientWithNoThreshold())), None, None)))
+        )
 
         val exception = intercept[IllegalStateException](await(getIsNotEligible))
 

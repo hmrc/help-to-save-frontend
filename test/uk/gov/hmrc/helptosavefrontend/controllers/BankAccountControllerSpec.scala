@@ -18,7 +18,9 @@ package uk.gov.hmrc.helptosavefrontend.controllers
 
 import cats.data.EitherT
 import cats.instances.future._
-import org.mockito.ArgumentMatchersSugar.*
+import org.mockito.ArgumentMatchers
+import org.mockito.ArgumentMatchers.{any, eq => eqTo}
+import org.mockito.Mockito.when
 import play.api.http.Status
 import play.api.mvc.Result
 import play.api.test.FakeRequest
@@ -29,7 +31,7 @@ import uk.gov.hmrc.helptosavefrontend.models.TestData.Eligibility.{randomEligibi
 import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.validUserInfo
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResponse
 import uk.gov.hmrc.helptosavefrontend.models.{EnrolmentStatus, HTSSession, ValidateBankDetailsRequest, ValidateBankDetailsResult}
-import uk.gov.hmrc.helptosavefrontend.views.html.register.{bank_account_details, not_eligible}
+import uk.gov.hmrc.helptosavefrontend.views.html.register.bank_account_details
 
 import scala.concurrent.Future
 
@@ -42,7 +44,8 @@ class BankAccountControllerSpec
   def mockValidateBankDetails(
     request: ValidateBankDetailsRequest
   )(response: Either[String, ValidateBankDetailsResult]) =
-    mockHelpToSaveService.validateBankDetails(request)(*, *) returns EitherT.fromEither[Future](response)
+    when(mockHelpToSaveService.validateBankDetails(eqTo(request))(any(), any()))
+      .thenReturn(EitherT.fromEither[Future](response))
 
   val controller = new BankAccountController(
     mockHelpToSaveService,
@@ -53,8 +56,7 @@ class BankAccountControllerSpec
     testMcc,
     testErrorHandler,
     testMaintenanceSchedule,
-    injector.instanceOf[bank_account_details],
-    injector.instanceOf[not_eligible]
+    injector.instanceOf[bank_account_details]
   )
 
   private val fakeRequest = FakeRequest("GET", "/")

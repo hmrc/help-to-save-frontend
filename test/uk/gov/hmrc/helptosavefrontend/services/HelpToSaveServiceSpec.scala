@@ -18,7 +18,9 @@ package uk.gov.hmrc.helptosavefrontend.services
 
 import cats.data.EitherT
 import cats.instances.future._
-import org.mockito.ArgumentMatchersSugar.*
+import org.mockito.ArgumentMatchers
+import org.mockito.ArgumentMatchers.{any, eq => eqTo}
+import org.mockito.Mockito.when
 import org.scalatest.concurrent.ScalaFutures
 import play.api.libs.json.Json
 import uk.gov.hmrc.helptosavefrontend.connectors.HelpToSaveConnector
@@ -50,7 +52,8 @@ class HelpToSaveServiceSpec extends ControllerSpecWithGuiceApp with ScalaFutures
 
       "return a successful response" in {
 
-        htsConnector.getUserEnrolmentStatus()(*, *) returns EitherT.pure(EnrolmentStatus.Enrolled(true))
+        when(htsConnector.getUserEnrolmentStatus()(any(), any()))
+          .thenReturn(EitherT.pure(EnrolmentStatus.Enrolled(true)))
 
         val result = htsService.getUserEnrolmentStatus()
         result.value.futureValue should be(Right(EnrolmentStatus.Enrolled(true)))
@@ -61,7 +64,7 @@ class HelpToSaveServiceSpec extends ControllerSpecWithGuiceApp with ScalaFutures
 
       "return a successful response" in {
 
-        htsConnector.setITMPFlagAndUpdateMongo()(*, *) returns EitherT.pure(())
+        when(htsConnector.setITMPFlagAndUpdateMongo()(any(), any())).thenReturn(EitherT.pure(()))
 
         val result = htsService.setITMPFlagAndUpdateMongo()
         result.value.futureValue.isRight should be(true)
@@ -74,7 +77,7 @@ class HelpToSaveServiceSpec extends ControllerSpecWithGuiceApp with ScalaFutures
 
       "return a successful response" in {
 
-        htsConnector.storeEmail(email)(*, *) returns EitherT.pure(())
+        when(htsConnector.storeEmail(eqTo(email))(any(), any())).thenReturn(EitherT.pure(()))
 
         val result = htsService.storeConfirmedEmail(email)
         result.value.futureValue.isRight should be(true)
@@ -85,7 +88,7 @@ class HelpToSaveServiceSpec extends ControllerSpecWithGuiceApp with ScalaFutures
 
       "return a successful response" in {
 
-        htsConnector.getEmail()(*, *) returns EitherT.pure(None)
+        when(htsConnector.getEmail()(any(), any())).thenReturn(EitherT.pure(None))
 
         val result = htsService.getConfirmedEmail()
         result.value.futureValue.isRight should be(true)
@@ -98,14 +101,14 @@ class HelpToSaveServiceSpec extends ControllerSpecWithGuiceApp with ScalaFutures
 
         val eligibilityCheckResult = randomEligibility()
 
-        htsConnector.getEligibility()(*, *) returns EitherT.pure(eligibilityCheckResult)
+        when(htsConnector.getEligibility()(any(), any())).thenReturn(EitherT.pure(eligibilityCheckResult))
 
         val result = htsService.checkEligibility()
         result.value.futureValue should be(Right(eligibilityCheckResult))
       }
 
       "return an unsuccessful response if the connector returns an unsuccessful response" in {
-        htsConnector.getEligibility()(*, *) returns EitherT.fromEither[Future](Left("uh oh"))
+        when(htsConnector.getEligibility()(any(), any())).thenReturn(EitherT.fromEither[Future](Left("uh oh")))
 
         val result = htsService.checkEligibility()
         result.value.futureValue should be(Left("uh oh"))
@@ -117,8 +120,9 @@ class HelpToSaveServiceSpec extends ControllerSpecWithGuiceApp with ScalaFutures
       val createAccountRequest = CreateAccountRequest(validNSIPayload, 7)
 
       def mockCreateAccount(response: Option[HttpResponse]) =
-        htsConnector.createAccount(createAccountRequest)(*, *) returns
+        when(htsConnector.createAccount(eqTo(createAccountRequest))(any(), any())).thenReturn(
           response.fold[Future[HttpResponse]](Future.failed(new Exception("oh no!")))(r => Future.successful(r))
+        )
 
       "return a CREATED response along with the account number when a new account has been created" in {
         mockCreateAccount(Some(HttpResponse(201, Json.parse("""{"accountNumber" : "1234567890123"}"""), emptyHeaders)))
@@ -171,9 +175,11 @@ class HelpToSaveServiceSpec extends ControllerSpecWithGuiceApp with ScalaFutures
       val nsiPayload = validNSIPayload
 
       def mockUpdateEmail(response: Option[HttpResponse]) =
-        htsConnector.updateEmail(nsiPayload)(*, *) returns response.fold[Future[HttpResponse]](
-          Future.failed(new Exception("oh no!"))
-        )(r => Future.successful(r))
+        when(htsConnector.updateEmail(eqTo(nsiPayload))(any(), any())).thenReturn(
+          response.fold[Future[HttpResponse]](
+            Future.failed(new Exception("oh no!"))
+          )(r => Future.successful(r))
+        )
 
       "return a success response" in {
 
@@ -203,7 +209,7 @@ class HelpToSaveServiceSpec extends ControllerSpecWithGuiceApp with ScalaFutures
 
     "checking if isAccountCreationAllowed" must {
       "return user cap response" in {
-        htsConnector.isAccountCreationAllowed()(*, *) returns EitherT.pure(UserCapResponse())
+        when(htsConnector.isAccountCreationAllowed()(any(), any())).thenReturn(EitherT.pure(UserCapResponse()))
 
         val result = htsService.isAccountCreationAllowed()
         result.value.futureValue should be(Right(UserCapResponse()))
@@ -217,7 +223,7 @@ class HelpToSaveServiceSpec extends ControllerSpecWithGuiceApp with ScalaFutures
         val account =
           Account(false, 123.45, 0, 0, 0, LocalDate.parse("1900-01-01"), List(), None, None)
 
-        htsConnector.getAccount(nino, correlationId)(*, *) returns EitherT.pure(account)
+        when(htsConnector.getAccount(eqTo(nino), eqTo(correlationId))(any(), any())).thenReturn(EitherT.pure(account))
 
         val result = htsService.getAccount(nino, correlationId)
         result.value.futureValue should be(Right(account))
@@ -228,7 +234,7 @@ class HelpToSaveServiceSpec extends ControllerSpecWithGuiceApp with ScalaFutures
       val request = ValidateBankDetailsRequest("AE123456C", "123456", "01023456")
 
       def mockValidateBankDetails(request: ValidateBankDetailsRequest)(response: HttpResponse) =
-        htsConnector.validateBankDetails(request)(*, *) returns Future.successful(response)
+        when(htsConnector.validateBankDetails(eqTo(request))(any(), any())).thenReturn(Future.successful(response))
 
       "return a successful response" in {
         mockValidateBankDetails(request)(

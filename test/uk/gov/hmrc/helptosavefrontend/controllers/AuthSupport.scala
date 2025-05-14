@@ -16,8 +16,10 @@
 
 package uk.gov.hmrc.helptosavefrontend.controllers
 
-import org.mockito.ArgumentMatchersSugar.*
-import org.mockito.IdiomaticMockito
+import org.mockito.ArgumentMatchers.{any, eq => eqTo}
+import org.mockito.ArgumentMatchers
+import org.mockito.Mockito.when
+import org.scalatestplus.mockito.MockitoSugar
 import uk.gov.hmrc.auth.core.AuthProvider.GovernmentGateway
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.authorise._
@@ -38,7 +40,7 @@ object AuthSupport {
 
 }
 
-trait AuthSupport extends IdiomaticMockito {
+trait AuthSupport extends MockitoSugar {
 
   import AuthSupport._
 
@@ -166,32 +168,45 @@ trait AuthSupport extends IdiomaticMockito {
     new ~(Some(name), email) and Option(dob) and Some(itmpName) and itmpDob and Some(itmpAddress) and None and noPersonalTaxEnrolment
 
   def mockAuthResultWithFail(ex: Throwable): Unit =
-    mockAuthConnector.authorise(AuthProviders(GovernmentGateway), *)(*, *) returns Future.failed(ex)
+    when(mockAuthConnector.authorise(eqTo(AuthProviders(GovernmentGateway)), any())(any(), any()))
+      .thenReturn(Future.failed(ex))
 
   def mockAuthWithRetrievalsWithFail(predicate: Predicate)(ex: Throwable): Unit =
-    mockAuthConnector.authorise(predicate, *)(*, *) returns Future.failed(ex)
+    when(mockAuthConnector.authorise(eqTo(predicate), any())(any(), any())).thenReturn(Future.failed(ex))
 
   def mockAuthWithNINORetrievalWithSuccess(predicate: Predicate)(result: ~[Option[String], Enrolments]): Unit =
-    mockAuthConnector.authorise(predicate, v2.Retrievals.nino and v2.Retrievals.allEnrolments)(*, *) returns Future
-      .successful(result)
+    when(
+      mockAuthConnector
+        .authorise(eqTo(predicate), eqTo(v2.Retrievals.nino and v2.Retrievals.allEnrolments))(any(), any())
+    ).thenReturn(Future.successful(result))
 
   def mockAuthWithNINOAndName(predicate: Predicate)(result: ~[NameRetrievalType, Enrolments]): Unit =
-    mockAuthConnector
-      .authorise(
-        predicate,
-        v2.Retrievals.name and v2.Retrievals.itmpName and v2.Retrievals.nino and v2.Retrievals.allEnrolments
-      )(*, *) returns Future
-      .successful(result)
+    when(
+      mockAuthConnector
+        .authorise(
+          eqTo(predicate),
+          eqTo(v2.Retrievals.name and v2.Retrievals.itmpName and v2.Retrievals.nino and v2.Retrievals.allEnrolments)
+        )(any(), any())
+    ).thenReturn(
+      Future
+        .successful(result)
+    )
 
   def mockAuthWithAllRetrievalsWithSuccess(predicate: Predicate)(result: ~[UserRetrievalType, Enrolments]): Unit =
-    mockAuthConnector.authorise(predicate, UserInfoRetrievals and v2.Retrievals.nino and v2.Retrievals.allEnrolments)(
-      *,
-      *
-    ) returns Future.successful(
-      result
+    when(
+      mockAuthConnector
+        .authorise(eqTo(predicate), eqTo(UserInfoRetrievals and v2.Retrievals.nino and v2.Retrievals.allEnrolments))(
+          any(),
+          any()
+        )
+    ).thenReturn(
+      Future.successful(
+        result
+      )
     )
 
   def mockAuthWithNoRetrievals(predicate: Predicate): Unit =
-    mockAuthConnector.authorise(predicate, EmptyRetrieval)(*, *) returns Future.successful(EmptyRetrieval)
+    when(mockAuthConnector.authorise(eqTo(predicate), eqTo(EmptyRetrieval))(any(), any()))
+      .thenReturn(Future.successful(EmptyRetrieval))
 
 }

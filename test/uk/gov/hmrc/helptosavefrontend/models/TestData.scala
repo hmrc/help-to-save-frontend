@@ -24,7 +24,7 @@ import uk.gov.hmrc.helptosavefrontend.models.eligibility.{EligibilityCheckRespon
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIPayload.ContactDetails
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.{Address, NSIPayload, UserInfo}
 import uk.gov.hmrc.helptosavefrontend.testutil._
-import uk.gov.hmrc.smartstub.{AdvGen, AutoGen, Enumerable}
+import uk.gov.hmrc.smartstub.{AdvGen, Enumerable}
 
 import java.time.LocalDate
 import scala.language.implicitConversions
@@ -33,11 +33,19 @@ object TestData {
 
   object Eligibility {
 
-    implicit val eligibilityCheckResponseGen: Gen[EligibilityCheckResponse] =
+    implicit val eligibilityCheckResponseGen: Gen[EligibilityCheckResponse] = {
+      val eligibleResponseGen: Gen[EligibilityCheckResult] =
+        for {
+          result     <- Gen.alphaStr
+          reasonCode <- Gen.choose(6, 8)
+          reason     <- Gen.alphaStr
+        } yield EligibilityCheckResult(result, 1, reason, reasonCode)
+
       for {
-        result    <- AutoGen[EligibilityCheckResult]
+        result    <- eligibleResponseGen
         threshold <- Gen.option(Gen.posNum[Double])
       } yield EligibilityCheckResponse(result, threshold)
+    }
 
     implicit val eligibilityGen: Gen[Eligible] = for {
       reasonCode <- Gen.oneOf(6, 7, 8)
