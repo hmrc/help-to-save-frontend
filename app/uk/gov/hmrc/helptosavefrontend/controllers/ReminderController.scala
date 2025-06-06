@@ -15,11 +15,11 @@
  */
 
 package uk.gov.hmrc.helptosavefrontend.controllers
-import cats.instances.future._
-import cats.instances.string._
-import cats.syntax.eq._
+import cats.instances.future.*
+import cats.instances.string.*
+import cats.syntax.eq.*
 import com.google.inject.{Inject, Singleton}
-import play.api.mvc._
+import play.api.mvc.*
 import play.api.{Configuration, Environment}
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.domain.Nino
@@ -28,14 +28,13 @@ import uk.gov.hmrc.helptosavefrontend.auth.HelpToSaveAuth
 import uk.gov.hmrc.helptosavefrontend.config.{ErrorHandler, FrontendAppConfig}
 import uk.gov.hmrc.helptosavefrontend.forms.{ReminderForm, ReminderFrequencyValidation}
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
-import uk.gov.hmrc.helptosavefrontend.models._
+import uk.gov.hmrc.helptosavefrontend.models.*
 import uk.gov.hmrc.helptosavefrontend.models.reminder.{CancelHtsUserReminder, DateToDaysMapper, DaysToDateMapper, HtsUserSchedule}
 import uk.gov.hmrc.helptosavefrontend.repo.SessionStore
 import uk.gov.hmrc.helptosavefrontend.services.{HelpToSaveReminderService, HelpToSaveService}
-import uk.gov.hmrc.helptosavefrontend.util._
+import uk.gov.hmrc.helptosavefrontend.util.*
 import uk.gov.hmrc.helptosavefrontend.views.html.closeaccount.account_closed
-import uk.gov.hmrc.helptosavefrontend.views.html.register.not_eligible
-import uk.gov.hmrc.helptosavefrontend.views.html.reminder._
+import uk.gov.hmrc.helptosavefrontend.views.html.reminder.*
 
 import java.time.LocalDate
 import java.util.UUID

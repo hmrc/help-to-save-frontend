@@ -17,16 +17,16 @@
 package uk.gov.hmrc.helptosavefrontend.config
 
 import com.google.inject.AbstractModule
-import uk.gov.hmrc.http.HttpClient
+import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.play.bootstrap.frontend.filters.crypto.{SessionCookieCrypto, SessionCookieCryptoProvider}
-import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
+import uk.gov.hmrc.play.bootstrap.http.HttpClientV2Provider
 
 class GuiceModule extends AbstractModule {
 
   override def configure(): Unit = {
     bind(classOf[ServicesConfig]).toProvider(classOf[ConfigModule])
-    bind(classOf[HttpClient]).to(classOf[DefaultHttpClient])
+    bind(classOf[HttpClientV2]).toProvider(classOf[HttpClientV2Provider])
     bind(classOf[SessionCookieCrypto]).toProvider(classOf[SessionCookieCryptoProvider])
   }
 

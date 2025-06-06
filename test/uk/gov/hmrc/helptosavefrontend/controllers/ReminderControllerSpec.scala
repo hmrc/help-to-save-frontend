@@ -40,7 +40,6 @@ import uk.gov.hmrc.helptosavefrontend.models.reminder.{CancelHtsUserReminder, Ht
 import uk.gov.hmrc.helptosavefrontend.services.{HelpToSaveReminderService, HelpToSaveService}
 import uk.gov.hmrc.helptosavefrontend.util.Crypto
 import uk.gov.hmrc.helptosavefrontend.views.html.closeaccount.account_closed
-import uk.gov.hmrc.helptosavefrontend.views.html.register.not_eligible
 import uk.gov.hmrc.helptosavefrontend.views.html.reminder.*
 
 import java.time.LocalDate
