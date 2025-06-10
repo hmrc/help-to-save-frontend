@@ -55,7 +55,7 @@ Running and Testing
 Running
 -------
 
-Run `sbt run` on the terminal to start the service. The service runs on port 7000 by default.
+Run `sbt run` on the terminal to start the service. The service runs on port 7003 by default.
 
 Unit tests
 ----------
