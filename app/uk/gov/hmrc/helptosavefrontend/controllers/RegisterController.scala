@@ -41,7 +41,7 @@ import uk.gov.hmrc.helptosavefrontend.models.register.CreateAccountRequest
 import uk.gov.hmrc.helptosavefrontend.models.reminder.{DateToDaysMapper, HtsUserSchedule}
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIPayload
 import uk.gov.hmrc.helptosavefrontend.repo.SessionStore
-import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveServiceImpl.SubmissionFailure
+import uk.gov.hmrc.helptosavefrontend.models.SubmissionResult.SubmissionFailure
 import uk.gov.hmrc.helptosavefrontend.services.{HelpToSaveReminderService, HelpToSaveService}
 import uk.gov.hmrc.helptosavefrontend.util
 import uk.gov.hmrc.helptosavefrontend.util.Logging._
@@ -444,7 +444,7 @@ class RegisterController @Inject() (
       )
     }
 
-  private def submissionFailureToString(failure: SubmissionFailure): String =
+  private def submissionFailureToString(failure: SubmissionResult.SubmissionFailure): String =
     s"Account creation failed. ErrorId: ${failure.errorMessageId.getOrElse("-")}, errorMessage: ${failure.errorMessage}, errorDetails: ${failure.errorDetail}"
 }
 
@@ -452,6 +452,6 @@ object RegisterController {
 
   case class EligibleWithInfo(userInfo: EligibleWithUserInfo, email: String, session: HTSSession)
 
-  private case class CreateAccountError(error: Either[SubmissionFailure, String])
+  private case class CreateAccountError(error: Either[SubmissionResult.SubmissionFailure, String])
 
 }

@@ -30,10 +30,10 @@ import uk.gov.hmrc.helptosavefrontend.models.iv.IvSuccessResponse.Success
 import uk.gov.hmrc.helptosavefrontend.models.iv.{IvErrorResponse, IvUnexpectedResponse, JourneyId}
 import uk.gov.hmrc.helptosavefrontend.util.WireMockMethods
 import uk.gov.hmrc.http.test.WireMockSupport
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, UpstreamErrorResponse}
 
 import java.util.UUID
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext}
 
 // scalastyle:off magic.number
 class IvConnectorSpec
@@ -110,6 +110,18 @@ class IvConnectorSpec
         wireMockServer.start()
       }
 
+      "handle upstreamErrorResponse failure scenarios" in new TestApparatus {
+        private val upstreamErrorResponse = UpstreamErrorResponse("error", 500, 500)
+
+        when(GET, url).thenReturn((upstreamErrorResponse.statusCode))
+
+        private val result = ivConnector.getJourneyStatus(journeyId)
+
+        result.futureValue match {
+          case Some(IvErrorResponse(e)) => ()
+          case other                    => fail(s"Expected IvErrorResponse but got $other")
+        }
+      }
     }
   }
 }
