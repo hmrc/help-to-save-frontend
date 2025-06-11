@@ -20,7 +20,7 @@ import play.api.i18n.Messages
 import play.api.mvc.Call
 import uk.gov.hmrc.govukfrontend.views.html.components._
 import uk.gov.hmrc.helptosavefrontend.controllers.routes
-import uk.gov.hmrc.helptosavefrontend.forms.BankDetails
+import uk.gov.hmrc.helptosavefrontend.models.BankDetails
 import uk.gov.hmrc.helptosavefrontend.models.HTSSession._
 
 class SummaryListRowsHelper {

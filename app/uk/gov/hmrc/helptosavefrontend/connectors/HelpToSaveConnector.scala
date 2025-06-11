@@ -136,10 +136,6 @@ class HelpToSaveConnectorImpl @Inject() (http: HttpClientV2)(implicit frontendAp
       "get user enrolment status",
       identity
     )
-
-  def enrolUser()(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit] =
-    handleGet(enrolUserURL, emptyQueryParameters, _ => Right(()), "enrol users", identity)
-
   def setITMPFlagAndUpdateMongo()(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit] =
     handleGet(setITMPFlagURL, emptyQueryParameters, _ => Right(()), "set ITMP flag and update mongo", identity)
 

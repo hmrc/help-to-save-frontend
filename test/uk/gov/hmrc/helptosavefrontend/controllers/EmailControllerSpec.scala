@@ -28,7 +28,6 @@ import uk.gov.hmrc.auth.core.syntax.retrieved.authSyntaxForRetrieved
 import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
 import uk.gov.hmrc.helptosavefrontend.connectors.EmailVerificationConnector
 import uk.gov.hmrc.helptosavefrontend.controllers.EmailControllerSpec.EligibleWithUserInfoOps
-import uk.gov.hmrc.helptosavefrontend.forms.{BankDetails, SortCode}
 import uk.gov.hmrc.helptosavefrontend.models.EnrolmentStatus.{Enrolled, NotEnrolled}
 import uk.gov.hmrc.helptosavefrontend.models.HTSSession.EligibleWithUserInfo
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
@@ -1584,6 +1583,16 @@ class EmailControllerSpec
         status(result) shouldBe OK
         contentAsString(result) should include("You have confirmed the email address")
 
+      }
+      "handle DE users and return the give email page" in {
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
+        mockSessionStoreGet(Right(Some(HTSSession(Some(Right(eligibleWithValidUserInfo)), Some("email"), None))))
+        mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(true)))
+        mockGetConfirmedEmail()(Right(None))
+
+        val result = getEmailUpdated()
+        status(result) shouldBe SEE_OTHER
+        redirectLocation(result) shouldBe Some("/help-to-save/enter-email")
       }
 
     }

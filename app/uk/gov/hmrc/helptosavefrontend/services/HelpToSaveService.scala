@@ -26,7 +26,6 @@ import uk.gov.hmrc.helptosavefrontend.models.account.{Account, AccountNumber}
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResultType
 import uk.gov.hmrc.helptosavefrontend.models.register.CreateAccountRequest
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIPayload
-import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveServiceImpl.{SubmissionFailure, SubmissionSuccess}
 import uk.gov.hmrc.helptosavefrontend.util.HttpResponseOps._
 import uk.gov.hmrc.helptosavefrontend.util.{Email, Logging, Result, maskNino}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
@@ -38,7 +37,7 @@ import scala.concurrent.{ExecutionContext, Future}
 @ImplementedBy(classOf[HelpToSaveServiceImpl])
 trait HelpToSaveService {
 
-  type CreateAccountResultType = EitherT[Future, SubmissionFailure, SubmissionSuccess]
+  type CreateAccountResultType = EitherT[Future, SubmissionResult.SubmissionFailure, SubmissionResult.SubmissionSuccess]
 
   def getUserEnrolmentStatus()(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[EnrolmentStatus]
 
@@ -93,18 +92,18 @@ class HelpToSaveServiceImpl @Inject() (helpToSaveConnector: HelpToSaveConnector)
     EitherT(
       helpToSaveConnector
         .createAccount(createAccountRequest)
-        .map[Either[SubmissionFailure, SubmissionSuccess]] { response =>
+        .map[Either[SubmissionResult.SubmissionFailure, SubmissionResult.SubmissionSuccess]] { response =>
           response.status match {
             case Status.CREATED =>
               response
                 .parseJSON[AccountNumber]()
-                .fold[Either[SubmissionFailure, SubmissionSuccess]](
-                  e => Left(SubmissionFailure(None, "Couldn't parse account number JSON", e)),
-                  account => Right(SubmissionSuccess(account))
+                .fold[Either[SubmissionResult.SubmissionFailure, SubmissionResult.SubmissionSuccess]](
+                  e => Left(SubmissionResult.SubmissionFailure(None, "Couldn't parse account number JSON", e)),
+                  account => Right(SubmissionResult.SubmissionSuccess(account))
                 )
 
             case Status.CONFLICT =>
-              Right(SubmissionSuccess(AccountNumber(None)))
+              Right(SubmissionResult.SubmissionSuccess(AccountNumber(None)))
 
             case _ =>
               Left(handleError(response))
@@ -112,7 +111,9 @@ class HelpToSaveServiceImpl @Inject() (helpToSaveConnector: HelpToSaveConnector)
         }
         .recover {
           case e =>
-            Left(SubmissionFailure(None, "Encountered error while trying to create account", e.getMessage))
+            Left(
+              SubmissionResult.SubmissionFailure(None, "Encountered error while trying to create account", e.getMessage)
+            )
         }
     )
 
@@ -161,23 +162,9 @@ class HelpToSaveServiceImpl @Inject() (helpToSaveConnector: HelpToSaveConnector)
   def getAccountNumber()(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[AccountNumber] =
     helpToSaveConnector.getAccountNumber()
 
-  private def handleError(response: HttpResponse): SubmissionFailure =
-    response.parseJSON[SubmissionFailure]() match {
+  private def handleError(response: HttpResponse): SubmissionResult.SubmissionFailure =
+    response.parseJSON[SubmissionResult.SubmissionFailure]() match {
       case Right(submissionFailure) => submissionFailure
-      case Left(error)              => SubmissionFailure(None, "", error)
+      case Left(error)              => SubmissionResult.SubmissionFailure(None, "", error)
     }
-}
-
-object HelpToSaveServiceImpl {
-
-  sealed trait SubmissionResult
-
-  case class SubmissionSuccess(accountNumber: AccountNumber) extends SubmissionResult
-
-  implicit val submissionSuccessFormat: Format[SubmissionSuccess] = Json.format[SubmissionSuccess]
-
-  case class SubmissionFailure(errorMessageId: Option[String], errorMessage: String, errorDetail: String)
-      extends SubmissionResult
-
-  implicit val submissionFailureFormat: Format[SubmissionFailure] = Json.format[SubmissionFailure]
 }

@@ -27,6 +27,7 @@ import play.api.data.format.Formatter
 import play.api.data.{Form, FormError}
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 import uk.gov.hmrc.helptosavefrontend.forms.BankDetailsValidation.{ErrorMessages, StringOps}
+import uk.gov.hmrc.helptosavefrontend.models.SortCode
 import uk.gov.hmrc.helptosavefrontend.util.Validation.{ValidOrErrorStrings, invalid, validatedFromBoolean}
 
 import java.util.regex.Matcher

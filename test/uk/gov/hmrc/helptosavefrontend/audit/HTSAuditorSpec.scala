@@ -17,7 +17,7 @@
 package uk.gov.hmrc.helptosavefrontend.audit
 
 import org.mockito.{ArgumentMatchers, Mockito}
-import org.mockito.Mockito.when
+import org.mockito.Mockito.{verify, when}
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import play.api.libs.json.Json
 import uk.gov.hmrc.helptosavefrontend.controllers.ControllerSpecWithGuiceApp
@@ -54,6 +54,27 @@ class HTSAuditorSpec extends ControllerSpecWithGuiceApp {
         when(mockAuditConnector.sendExtendedEvent(eqTo(dataEvent))(any(), any()))
           .thenReturn(Future.failed(new Exception))
         auditor.sendEvent(htsEvent, "nino")
+      }
+
+      "throw fatal use the audit connector fails" in {
+        val dataEvent: ExtendedDataEvent =
+          ExtendedDataEvent(
+            "source",
+            "type",
+            "id",
+            Map("tag" -> "value"),
+            Json.parse("""{ "detail": "value" }""")
+          )
+
+        val htsEvent: HTSEvent = new HTSEvent {
+          override val value = dataEvent
+        }
+        val fatal = new Throwable()
+        when(mockAuditConnector.sendExtendedEvent(eqTo(dataEvent))(any(), any()))
+          .thenReturn(Future.failed(fatal))
+
+        auditor.sendEvent(htsEvent, "nino")
+        verify(mockAuditConnector, Mockito.times(1)).sendExtendedEvent(eqTo(dataEvent))(any(), any())
       }
 
     }

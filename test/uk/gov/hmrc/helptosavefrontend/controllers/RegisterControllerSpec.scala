@@ -30,7 +30,6 @@ import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 import uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.EligibleWithInfo
-import uk.gov.hmrc.helptosavefrontend.forms.{BankDetails, SortCode}
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.{AuthProvider, AuthWithCL200}
 import uk.gov.hmrc.helptosavefrontend.models.TestData.Eligibility._
 import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.validUserInfo
@@ -39,7 +38,7 @@ import uk.gov.hmrc.helptosavefrontend.models.account.AccountNumber
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResponse
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResultType.Eligible
 import uk.gov.hmrc.helptosavefrontend.models.reminder.HtsUserSchedule
-import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveServiceImpl.{SubmissionFailure, SubmissionSuccess}
+import uk.gov.hmrc.helptosavefrontend.models.SubmissionResult.{SubmissionFailure, SubmissionSuccess}
 import uk.gov.hmrc.helptosavefrontend.util.Crypto
 import uk.gov.hmrc.helptosavefrontend.views.html.cannot_check_details
 import uk.gov.hmrc.helptosavefrontend.views.html.register._
@@ -394,7 +393,9 @@ class RegisterControllerSpec
         mockSessionStoreGet(
           Right(Some(HTSSession(Some(Right(userInfo)), Some(confirmedEmail), None, None, None, Some(bankDetails))))
         )
-        mockCreateAccount(createAccountRequest)(Right(SubmissionSuccess(AccountNumber(Some(accountNumber)))))
+        mockCreateAccount(createAccountRequest)(
+          Right(SubmissionResult.SubmissionSuccess(AccountNumber(Some(accountNumber))))
+        )
         mockSessionStorePut(
           HTSSession(
             Some(Right(userInfo)),
@@ -419,7 +420,9 @@ class RegisterControllerSpec
         mockSessionStoreGet(
           Right(Some(HTSSession(Some(Right(userInfo)), Some(confirmedEmail), None, None, None, Some(bankDetails))))
         )
-        mockCreateAccount(createAccountRequest)(Right(SubmissionSuccess(AccountNumber(Some(accountNumber)))))
+        mockCreateAccount(createAccountRequest)(
+          Right(SubmissionResult.SubmissionSuccess(AccountNumber(Some(accountNumber))))
+        )
         mockSessionStorePut(
           HTSSession(
             Some(Right(userInfo)),
@@ -443,7 +446,7 @@ class RegisterControllerSpec
         mockSessionStoreGet(
           Right(Some(HTSSession(Some(Right(userInfo)), Some(confirmedEmail), None, None, None, Some(bankDetails))))
         )
-        mockCreateAccount(createAccountRequest)(Right(SubmissionSuccess(AccountNumber(None))))
+        mockCreateAccount(createAccountRequest)(Right(SubmissionResult.SubmissionSuccess(AccountNumber(None))))
 
         val result = doCreateAccountRequest()
         status(result) shouldBe SEE_OTHER
@@ -456,7 +459,7 @@ class RegisterControllerSpec
         mockSessionStoreGet(
           Right(Some(HTSSession(Some(Right(userInfo)), Some(confirmedEmail), None, None, None, Some(bankDetails))))
         )
-        mockCreateAccount(createAccountRequest)(Right(SubmissionSuccess(AccountNumber(None))))
+        mockCreateAccount(createAccountRequest)(Right(SubmissionResult.SubmissionSuccess(AccountNumber(None))))
 
         val result = doCreateAccountRequest()
 
@@ -493,7 +496,7 @@ class RegisterControllerSpec
           mockSessionStoreGet(
             Right(Some(HTSSession(Some(Right(userInfo)), Some(confirmedEmail), None, None, None, Some(bankDetails))))
           )
-          mockCreateAccount(createAccountRequest)(Left(SubmissionFailure(None, "Uh oh", "Uh oh")))
+          mockCreateAccount(createAccountRequest)(Left(SubmissionResult.SubmissionFailure(None, "Uh oh", "Uh oh")))
 
           val result = doCreateAccountRequest()
           status(result) shouldBe SEE_OTHER
@@ -506,7 +509,9 @@ class RegisterControllerSpec
           mockSessionStoreGet(
             Right(Some(HTSSession(Some(Right(userInfo)), Some(confirmedEmail), None, None, None, Some(bankDetails))))
           )
-          mockCreateAccount(createAccountRequest)(Right(SubmissionSuccess(AccountNumber(Some(accountNumber)))))
+          mockCreateAccount(createAccountRequest)(
+            Right(SubmissionResult.SubmissionSuccess(AccountNumber(Some(accountNumber))))
+          )
           mockSessionStorePut(
             HTSSession(
               Some(Right(userInfo)),
@@ -532,7 +537,9 @@ class RegisterControllerSpec
           mockSessionStoreGet(
             Right(Some(HTSSession(Some(Right(userInfo)), Some(confirmedEmail), None, None, None, Some(bankDetails))))
           )
-          mockCreateAccount(createAccountRequest)(Left(SubmissionFailure(Some("ZYRC0703"), "Uh oh", "Uh oh")))
+          mockCreateAccount(createAccountRequest)(
+            Left(SubmissionResult.SubmissionFailure(Some("ZYRC0703"), "Uh oh", "Uh oh"))
+          )
 
           val result = doCreateAccountRequest()
           status(result) shouldBe SEE_OTHER
@@ -545,7 +552,9 @@ class RegisterControllerSpec
           mockSessionStoreGet(
             Right(Some(HTSSession(Some(Right(userInfo)), Some(confirmedEmail), None, None, None, Some(bankDetails))))
           )
-          mockCreateAccount(createAccountRequest)(Left(SubmissionFailure(Some("ZYRC0707"), "Uh oh", "Uh oh")))
+          mockCreateAccount(createAccountRequest)(
+            Left(SubmissionResult.SubmissionFailure(Some("ZYRC0707"), "Uh oh", "Uh oh"))
+          )
 
           val result = doCreateAccountRequest()
           status(result) shouldBe SEE_OTHER

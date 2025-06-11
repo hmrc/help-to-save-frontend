@@ -22,6 +22,7 @@ import play.api.data.{Form, FormError}
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 import uk.gov.hmrc.helptosavefrontend.controllers.ControllerSpecWithGuiceApp
 import uk.gov.hmrc.helptosavefrontend.forms.BankDetailsValidation.ErrorMessages
+import uk.gov.hmrc.helptosavefrontend.models.SortCode
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 class BankDetailsValidationSpec extends ControllerSpecWithGuiceApp {
