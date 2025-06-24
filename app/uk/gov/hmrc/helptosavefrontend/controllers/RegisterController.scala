@@ -41,7 +41,7 @@ import uk.gov.hmrc.helptosavefrontend.models.register.CreateAccountRequest
 import uk.gov.hmrc.helptosavefrontend.models.reminder.{DateToDaysMapper, HtsUserSchedule}
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIPayload
 import uk.gov.hmrc.helptosavefrontend.repo.SessionStore
-import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveServiceImpl.SubmissionFailure
+import uk.gov.hmrc.helptosavefrontend.models.SubmissionResult.SubmissionFailure
 import uk.gov.hmrc.helptosavefrontend.services.{HelpToSaveReminderService, HelpToSaveService}
 import uk.gov.hmrc.helptosavefrontend.util
 import uk.gov.hmrc.helptosavefrontend.util.Logging._
@@ -83,8 +83,8 @@ class RegisterController @Inject() (
   val config: Configuration,
   val env: Environment,
   ec: ExecutionContext
-) extends BaseController(cpd, mcc, errorHandler, maintenanceSchedule) with HelpToSaveAuth with EnrolmentCheckBehaviour
-    with SessionBehaviour with CapCheckBehaviour with Logging {
+) extends CustomBaseController(cpd, mcc, errorHandler, maintenanceSchedule) with HelpToSaveAuth
+    with EnrolmentCheckBehaviour with SessionBehaviour with CapCheckBehaviour with Logging {
 
   val clock: Clock = Clock.systemUTC()
 

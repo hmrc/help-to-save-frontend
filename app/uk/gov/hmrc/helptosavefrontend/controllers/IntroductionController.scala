@@ -53,7 +53,7 @@ class IntroductionController @Inject() (
   val config: Configuration,
   val env: Environment,
   ec: ExecutionContext
-) extends BaseController(cpd, mcc, errorHandler, maintenanceSchedule) with HelpToSaveAuth
+) extends CustomBaseController(cpd, mcc, errorHandler, maintenanceSchedule) with HelpToSaveAuth
     with EnrolmentCheckBehaviour {
 
   private val baseUrl: String = frontendAppConfig.govUkURL

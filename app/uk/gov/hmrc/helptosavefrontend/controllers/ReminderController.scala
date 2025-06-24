@@ -68,7 +68,7 @@ class ReminderController @Inject() (
   val config: Configuration,
   val env: Environment,
   ec: ExecutionContext
-) extends BaseController(cpd, mcc, errorHandler, maintenanceSchedule) with HelpToSaveAuth with SessionBehaviour
+) extends CustomBaseController(cpd, mcc, errorHandler, maintenanceSchedule) with HelpToSaveAuth with SessionBehaviour
     with Logging with EnrolmentCheckBehaviour with EnrollAndEligibilityCheck {
 
   val isFeatureEnabled: Boolean = frontendAppConfig.reminderServiceFeatureSwitch

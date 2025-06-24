@@ -17,12 +17,12 @@
 package uk.gov.hmrc.helptosavefrontend.controllers
 
 import cats.data.EitherT
-import cats.instances.future._
-import cats.instances.string._
-import cats.syntax.either._
-import cats.syntax.eq._
+import cats.instances.future.*
+import cats.instances.string.*
+import cats.syntax.either.*
+import cats.syntax.eq.*
 import com.google.inject.{Inject, Singleton}
-import play.api.mvc._
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Request, Result}
 import play.api.{Configuration, Environment}
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
@@ -31,10 +31,10 @@ import uk.gov.hmrc.helptosavefrontend.config.{ErrorHandler, FrontendAppConfig}
 import uk.gov.hmrc.helptosavefrontend.connectors.EmailVerificationConnector
 import uk.gov.hmrc.helptosavefrontend.controllers.EmailController.CannotCreateAccountReason
 import uk.gov.hmrc.helptosavefrontend.controllers.EmailController.EligibleInfo.{EligibleWithEmail, EligibleWithNoEmail}
-import uk.gov.hmrc.helptosavefrontend.forms._
+import uk.gov.hmrc.helptosavefrontend.forms.*
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.models.HTSSession.EligibleWithUserInfo
-import uk.gov.hmrc.helptosavefrontend.models._
+import uk.gov.hmrc.helptosavefrontend.models.*
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResultType.{AlreadyHasAccount, Eligible, Ineligible}
 import uk.gov.hmrc.helptosavefrontend.models.reminder.UpdateReminderEmail
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.{NSIPayload, UserInfo}
@@ -42,7 +42,7 @@ import uk.gov.hmrc.helptosavefrontend.repo.SessionStore
 import uk.gov.hmrc.helptosavefrontend.services.{HelpToSaveReminderService, HelpToSaveService}
 import uk.gov.hmrc.helptosavefrontend.util.Logging.LoggerOps
 import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Email, EmailVerificationParams, MaintenanceSchedule, NINOLogMessageTransformer, toFuture, Result => EitherTResult}
-import uk.gov.hmrc.helptosavefrontend.views.html.email._
+import uk.gov.hmrc.helptosavefrontend.views.html.email.*
 import uk.gov.hmrc.helptosavefrontend.views.html.link_expired
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -77,8 +77,8 @@ class EmailController @Inject() (
   val config: Configuration,
   val env: Environment,
   ec: ExecutionContext
-) extends BaseController(cpd, mcc, errorHandler, maintenanceSchedule) with HelpToSaveAuth with EnrolmentCheckBehaviour
-    with SessionBehaviour with VerifyEmailBehaviour {
+) extends CustomBaseController(cpd, mcc, errorHandler, maintenanceSchedule) with HelpToSaveAuth
+    with EnrolmentCheckBehaviour with SessionBehaviour with VerifyEmailBehaviour {
 
   val isFeatureEnabled: Boolean = frontendAppConfig.reminderServiceFeatureSwitch
 

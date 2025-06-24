@@ -17,11 +17,11 @@
 package uk.gov.hmrc.helptosavefrontend.controllers
 
 import cats.data.EitherT
-import cats.instances.future._
-import cats.instances.string._
-import cats.syntax.eq._
+import cats.instances.future.*
+import cats.instances.string.*
+import cats.syntax.eq.*
 import com.google.inject.{Inject, Singleton}
-import play.api.mvc._
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Request, Result}
 import play.api.{Configuration, Environment}
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
@@ -30,12 +30,12 @@ import uk.gov.hmrc.helptosavefrontend.config.{ErrorHandler, FrontendAppConfig}
 import uk.gov.hmrc.helptosavefrontend.connectors.EmailVerificationConnector
 import uk.gov.hmrc.helptosavefrontend.forms.{EmailValidation, UpdateEmail, UpdateEmailForm}
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
-import uk.gov.hmrc.helptosavefrontend.models._
+import uk.gov.hmrc.helptosavefrontend.models.*
 import uk.gov.hmrc.helptosavefrontend.models.reminder.UpdateReminderEmail
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIPayload
 import uk.gov.hmrc.helptosavefrontend.repo.SessionStore
 import uk.gov.hmrc.helptosavefrontend.services.{HelpToSaveReminderService, HelpToSaveService}
-import uk.gov.hmrc.helptosavefrontend.util.Logging._
+import uk.gov.hmrc.helptosavefrontend.util.Logging.*
 import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Email, EmailVerificationParams, Logging, MaintenanceSchedule, NINOLogMessageTransformer, toFuture}
 import uk.gov.hmrc.helptosavefrontend.views.html.closeaccount.close_account_are_you_sure
 import uk.gov.hmrc.helptosavefrontend.views.html.email.accountholder.check_your_email
@@ -70,8 +70,8 @@ class AccountHolderController @Inject() (
   val config: Configuration,
   val env: Environment,
   ec: ExecutionContext
-) extends BaseController(cpd, mcc, errorHandler, maintenanceSchedule) with HelpToSaveAuth with VerifyEmailBehaviour
-    with EnrolmentCheckBehaviour with Logging {
+) extends CustomBaseController(cpd, mcc, errorHandler, maintenanceSchedule) with HelpToSaveAuth
+    with VerifyEmailBehaviour with EnrolmentCheckBehaviour with Logging {
 
   import AccountHolderController._
 

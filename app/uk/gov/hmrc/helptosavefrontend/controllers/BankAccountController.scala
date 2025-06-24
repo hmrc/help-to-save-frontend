@@ -23,7 +23,7 @@ import play.api.{Configuration, Environment}
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.helptosavefrontend.auth.HelpToSaveAuth
 import uk.gov.hmrc.helptosavefrontend.config.{ErrorHandler, FrontendAppConfig}
-import uk.gov.hmrc.helptosavefrontend.forms.{BankDetails, BankDetailsValidation}
+import uk.gov.hmrc.helptosavefrontend.forms.{BankDetailsForm, BankDetailsValidation}
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.models.{HTSSession, ValidateBankDetailsRequest}
 import uk.gov.hmrc.helptosavefrontend.repo.SessionStore
@@ -51,8 +51,8 @@ class BankAccountController @Inject() (
   val env: Environment,
   bankDetailsValidation: BankDetailsValidation,
   ec: ExecutionContext
-) extends BaseController(cpd, mcc, errorHandler, maintenanceSchedule) with HelpToSaveAuth with EnrolmentCheckBehaviour
-    with SessionBehaviour with EnrollAndEligibilityCheck {
+) extends CustomBaseController(cpd, mcc, errorHandler, maintenanceSchedule) with HelpToSaveAuth
+    with EnrolmentCheckBehaviour with SessionBehaviour with EnrollAndEligibilityCheck {
   val isFeatureEnabled: Boolean = frontendAppConfig.reminderServiceFeatureSwitch
   private def backLinkFromSession(session: HTSSession): String =
     if (session.changingDetails) {
@@ -73,10 +73,10 @@ class BankAccountController @Inject() (
     authorisedForHtsWithNINO { implicit request => implicit htsContext =>
       checkIfAlreadyEnrolledAndDoneEligibilityChecks { s =>
         s.bankDetails.fold(
-          Ok(bankAccountDetails(BankDetails.giveBankDetailsForm(), backLinkFromSession(s)))
+          Ok(bankAccountDetails(BankDetailsForm.giveBankDetailsForm(), backLinkFromSession(s)))
         )(
           bankDetails =>
-            Ok(bankAccountDetails(BankDetails.giveBankDetailsForm().fill(bankDetails), backLinkFromSession(s)))
+            Ok(bankAccountDetails(BankDetailsForm.giveBankDetailsForm().fill(bankDetails), backLinkFromSession(s)))
         )
       }
     }(loginContinueURL = routes.BankAccountController.getBankDetailsPage.url)
@@ -84,7 +84,7 @@ class BankAccountController @Inject() (
   def submitBankDetails(): Action[AnyContent] =
     authorisedForHtsWithNINO { implicit request => implicit htsContext =>
       checkIfAlreadyEnrolledAndDoneEligibilityChecks { session =>
-        BankDetails
+        BankDetailsForm
           .giveBankDetailsForm()
           .bindFromRequest()
           .fold(
@@ -110,12 +110,12 @@ class BankAccountController @Inject() (
                         )
                     } else {
                       val formWithErrors = if (result.isValid && !result.sortCodeExists) {
-                        BankDetails
+                        BankDetailsForm
                           .giveBankDetailsForm()
                           .fill(bankDetails)
                           .withError("sortCode", BankDetailsValidation.ErrorMessages.sortCodeBackendInvalid)
                       } else {
-                        BankDetails
+                        BankDetailsForm
                           .giveBankDetailsForm()
                           .fill(bankDetails)
                           .withError("sortCode", BankDetailsValidation.ErrorMessages.sortCodeBackendInvalid)

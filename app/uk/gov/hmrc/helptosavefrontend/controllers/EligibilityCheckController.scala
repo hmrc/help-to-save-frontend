@@ -63,8 +63,8 @@ class EligibilityCheckController @Inject() (
   val config: Configuration,
   val env: Environment,
   ec: ExecutionContext
-) extends BaseController(cpd, mcc, errorHandler, maintenanceSchedule) with HelpToSaveAuth with EnrolmentCheckBehaviour
-    with SessionBehaviour with CapCheckBehaviour {
+) extends CustomBaseController(cpd, mcc, errorHandler, maintenanceSchedule) with HelpToSaveAuth
+    with EnrolmentCheckBehaviour with SessionBehaviour with CapCheckBehaviour {
 
   private val earlyCapCheckOn: Boolean = frontendAppConfig.earlyCapCheckOn
 

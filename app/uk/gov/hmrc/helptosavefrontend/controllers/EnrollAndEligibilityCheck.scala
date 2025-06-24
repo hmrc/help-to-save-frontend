@@ -25,7 +25,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import scala.concurrent.{ExecutionContext, Future}
 
 trait EnrollAndEligibilityCheck extends SessionBehaviour with EnrolmentCheckBehaviour {
-  this: BaseController =>
+  this: CustomBaseController =>
 
   def checkIfAlreadyEnrolledAndDoneEligibilityChecks(ifNotEnrolled: HTSSession => Future[Result])(
     implicit htsContext: HtsContextWithNINO,

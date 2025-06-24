@@ -29,7 +29,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import scala.concurrent.{ExecutionContext, Future}
 
 trait SessionBehaviour {
-  this: BaseController with Logging =>
+  this: CustomBaseController with Logging =>
 
   val sessionStore: SessionStore
 

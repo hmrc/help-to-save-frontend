@@ -31,7 +31,7 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
 
 trait VerifyEmailBehaviour extends Logging {
-  this: BaseController =>
+  this: CustomBaseController =>
 
   val emailVerificationConnector: EmailVerificationConnector
 

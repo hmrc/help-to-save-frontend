@@ -61,7 +61,7 @@ class IvController @Inject() (
   val config: Configuration,
   val env: Environment,
   ec: ExecutionContext
-) extends BaseController(cpd, mcc, errorHandler, maintenanceSchedule) with HelpToSaveAuth {
+) extends CustomBaseController(cpd, mcc, errorHandler, maintenanceSchedule) with HelpToSaveAuth {
 
   val eligibilityUrl: String = routes.EligibilityCheckController.getCheckEligibility.url
 

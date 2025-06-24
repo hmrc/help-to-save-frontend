@@ -110,18 +110,6 @@ trait HelpToSaveAuth extends AuthorisedFunctions with Logging {
         action(request)(HtsContext(authorised = true))
     }(loginContinueURL)
 
-  def authorisedForHtsWithNINOAndNoCL(
-    action: HtsAction[HtsContextWithNINO]
-  )(
-    loginContinueURL: RelativeURL
-  )(implicit maintenanceSchedule: MaintenanceSchedule, ec: ExecutionContext): Action[AnyContent] =
-    authorised(V2Nino and allEnrolments, AuthProvider) {
-      case (mayBeNino ~ enrolments, request, time) =>
-        withNINO(mayBeNino, enrolments, time) { nino =>
-          action(request)(HtsContextWithNINO(authorised = true, nino))
-        }(request)
-    }(loginContinueURL)
-
   def unprotected(action: HtsAction[HtsContext])(implicit ec: ExecutionContext): Action[AnyContent] =
     Action.async { implicit request =>
       authorised() {

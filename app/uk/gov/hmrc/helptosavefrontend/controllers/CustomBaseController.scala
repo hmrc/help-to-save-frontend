@@ -26,7 +26,7 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
 
 @Singleton
-class BaseController @Inject() (
+class CustomBaseController @Inject() (
   cpd: CommonPlayDependencies,
   mcc: MessagesControllerComponents,
   errorHandler: ErrorHandler,

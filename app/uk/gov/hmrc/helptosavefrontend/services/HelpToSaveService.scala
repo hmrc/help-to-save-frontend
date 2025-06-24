@@ -19,15 +19,14 @@ package uk.gov.hmrc.helptosavefrontend.services
 import cats.data.EitherT
 import com.google.inject.{ImplementedBy, Inject}
 import play.api.http.Status
-import play.api.libs.json.{Format, Json}
 import uk.gov.hmrc.helptosavefrontend.connectors.HelpToSaveConnector
-import uk.gov.hmrc.helptosavefrontend.models._
+import uk.gov.hmrc.helptosavefrontend.models.*
+import uk.gov.hmrc.helptosavefrontend.models.SubmissionResult.{SubmissionFailure, SubmissionSuccess}
 import uk.gov.hmrc.helptosavefrontend.models.account.{Account, AccountNumber}
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResultType
 import uk.gov.hmrc.helptosavefrontend.models.register.CreateAccountRequest
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIPayload
-import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveServiceImpl.{SubmissionFailure, SubmissionSuccess}
-import uk.gov.hmrc.helptosavefrontend.util.HttpResponseOps._
+import uk.gov.hmrc.helptosavefrontend.util.HttpResponseOps.*
 import uk.gov.hmrc.helptosavefrontend.util.{Email, Logging, Result, maskNino}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
@@ -112,7 +111,9 @@ class HelpToSaveServiceImpl @Inject() (helpToSaveConnector: HelpToSaveConnector)
         }
         .recover {
           case e =>
-            Left(SubmissionFailure(None, "Encountered error while trying to create account", e.getMessage))
+            Left(
+              SubmissionFailure(None, "Encountered error while trying to create account", e.getMessage)
+            )
         }
     )
 
@@ -166,18 +167,4 @@ class HelpToSaveServiceImpl @Inject() (helpToSaveConnector: HelpToSaveConnector)
       case Right(submissionFailure) => submissionFailure
       case Left(error)              => SubmissionFailure(None, "", error)
     }
-}
-
-object HelpToSaveServiceImpl {
-
-  sealed trait SubmissionResult
-
-  case class SubmissionSuccess(accountNumber: AccountNumber) extends SubmissionResult
-
-  implicit val submissionSuccessFormat: Format[SubmissionSuccess] = Json.format[SubmissionSuccess]
-
-  case class SubmissionFailure(errorMessageId: Option[String], errorMessage: String, errorDetail: String)
-      extends SubmissionResult
-
-  implicit val submissionFailureFormat: Format[SubmissionFailure] = Json.format[SubmissionFailure]
 }

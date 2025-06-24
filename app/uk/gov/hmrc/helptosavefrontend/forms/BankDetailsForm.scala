@@ -17,12 +17,10 @@
 package uk.gov.hmrc.helptosavefrontend.forms
 
 import play.api.data.Form
-import play.api.data.Forms._
-import play.api.libs.json._
+import play.api.data.Forms.*
+import uk.gov.hmrc.helptosavefrontend.models.BankDetails
 
-import scala.util.Try
-
-object BankDetails {
+object BankDetailsForm {
   def giveBankDetailsForm()(implicit validation: BankDetailsValidation): Form[BankDetails] = Form(
     mapping(
       "accountName"   -> of(validation.accountNameFormatter),
@@ -31,28 +29,4 @@ object BankDetails {
       "rollNumber"    -> of(validation.rollNumberFormatter)
     )(BankDetails.apply)(o => Some(o.accountName, o.sortCode, o.accountNumber, o.rollNumber))
   )
-
-  implicit val bankDetailsFormat: Format[BankDetails] = Json.format[BankDetails]
-}
-
-case class BankDetails(accountName: String, sortCode: SortCode, accountNumber: String, rollNumber: Option[String])
-
-case class SortCode(digit1: Int, digit2: Int, digit3: Int, digit4: Int, digit5: Int, digit6: Int) {
-  override def toString: String = s"$digit1$digit2$digit3$digit4$digit5$digit6"
-}
-
-object SortCode {
-  def apply(digits: Seq[Int]): Option[SortCode] = digits.toList match {
-    case d1 :: d2 :: d3 :: d4 :: d5 :: d6 :: Nil => Some(SortCode(d1, d2, d3, d4, d5, d6))
-    case _                                       => None
-  }
-
-  implicit val writes: Writes[SortCode] = Writes[SortCode](s => JsString(s.toString))
-
-  implicit val reads: Reads[SortCode] = Reads[SortCode](s => {
-    Try(s.as[String].map(_.asDigit)).toOption.flatMap(SortCode(_)) match {
-      case Some(p) => JsSuccess(p)
-      case None    => JsError(s"couldn't read SortCode out of the json: $s")
-    }
-  })
 }
