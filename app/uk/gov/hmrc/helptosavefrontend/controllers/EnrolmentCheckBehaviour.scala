@@ -29,7 +29,7 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
 
 trait EnrolmentCheckBehaviour extends Logging {
-  this: BaseController =>
+  this: CustomBaseController =>
 
   val frontendAppConfig: FrontendAppConfig
   val helpToSaveService: HelpToSaveService

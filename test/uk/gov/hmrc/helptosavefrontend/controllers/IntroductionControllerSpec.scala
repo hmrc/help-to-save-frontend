@@ -85,6 +85,30 @@ class IntroductionControllerSpec
       redirectLocation(result) shouldBe Some("https://www.gov.uk/get-help-savings-low-income")
     }
 
+    "show keepAlive" in {
+      mockAuthorise(false)
+
+      val result = helpToSave.keepAlive(fakeRequest)
+      status(result) shouldBe Status.OK
+      contentAsString(result) shouldBe ("")
+    }
+
+    "display the timedOut page" in {
+      mockAuthorise(false)
+      val result = helpToSave.timedOut(fakeRequest)
+      status(result) shouldBe Status.OK
+      contentAsString(result).contains(messages("hts.timeout.signedOutMessage")) shouldBe true
+
+    }
+
+    "display the showPrivacy page" in {
+      mockAuthorise(false)
+      val result = helpToSave.showPrivacyPage(fakeRequest)
+      status(result) shouldBe Status.OK
+      contentAsString(result).contains(messages("hts.privacy.title.h1")) shouldBe true
+
+    }
+
     "the getEligibility should redirect to correct GOV.UK page" in {
       mockAuthorise(true)
 

@@ -33,7 +33,7 @@ import uk.gov.hmrc.helptosavefrontend.models.account.{Account, AccountNumber}
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResultType.{AlreadyHasAccount, Eligible, Ineligible}
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.{EligibilityCheckResponse, EligibilityCheckResult}
 import uk.gov.hmrc.helptosavefrontend.models.register.CreateAccountRequest
-import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveServiceImpl.SubmissionSuccess
+import uk.gov.hmrc.helptosavefrontend.models.SubmissionResult.SubmissionSuccess
 import uk.gov.hmrc.helptosavefrontend.util.WireMockMethods
 import uk.gov.hmrc.http.test.WireMockSupport
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
@@ -396,6 +396,30 @@ class HelpToSaveConnectorSpec
         await(connector.validateBankDetails(ValidateBankDetailsRequest(nino, "123456", "02012345"))).status shouldBe response.status
       }
     }
+
+    "getAccountNumber" must {
+      "should return a valid AccountNumber when successful" in {
+        val expectedAccountNumber = AccountNumber(Some("123456"))
+        val getAccountNumberURL = "path/to/account/number"
+        when(GET, getAccountNumberURL)
+          .thenReturn(200, Json.toJson(expectedAccountNumber).toString()) // Simulating the Result[AccountNumber]
+
+        connector.getAccountNumber().value.map { result =>
+          result shouldBe Right(expectedAccountNumber)
+        }
+      }
+
+      "should return an error if the service fails" in {
+        val getAccountNumberURL = "path/to/account/number"
+        when(GET, getAccountNumberURL)
+          .thenReturn(500, "Service failure")
+
+        connector.getAccountNumber().value.map { result =>
+          result shouldBe Left("Service failure")
+        }
+      }
+    }
+
   }
 
 }

@@ -531,6 +531,21 @@ class EligibilityCheckControllerSpec
           redirectLocation(result) shouldBe Some(routes.RegisterController.getDailyCapReachedPage.url)
         }
 
+        "show the ServiceUnavailable page when isTotalCapDisabled " +
+          "and isDailyCapDisabled" in {
+          val controller = newController(true)
+          val userCapResponse = new UserCapResponse(false, false, true, true)
+
+          mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+          mockSessionStoreGet(Right(None))
+          mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
+          mockAccountCreationAllowed(Right(userCapResponse))
+
+          val result = controller.getCheckEligibility(FakeRequest())
+          status(result) shouldBe Status.SEE_OTHER
+          redirectLocation(result) shouldBe Some(routes.RegisterController.getServiceUnavailablePage.url)
+        }
+
         "return an error" when {
 
           def isError(result: Future[PlayResult]): Boolean =

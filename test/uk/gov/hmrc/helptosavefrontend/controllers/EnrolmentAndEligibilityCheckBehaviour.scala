@@ -17,15 +17,15 @@
 package uk.gov.hmrc.helptosavefrontend.controllers
 
 import cats.data.EitherT
-import cats.instances.future._
+import cats.instances.future.*
 import org.mockito.ArgumentMatchers
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.when
 import play.api.mvc.Result
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import uk.gov.hmrc.auth.core.syntax.retrieved.authSyntaxForRetrieved
 import uk.gov.hmrc.helptosavefrontend.connectors.{HelpToSaveConnector, HelpToSaveReminderConnector}
-import uk.gov.hmrc.helptosavefrontend.forms.{BankDetails, SortCode}
+import uk.gov.hmrc.helptosavefrontend.models.{BankDetails, SortCode}
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
 import uk.gov.hmrc.helptosavefrontend.models.TestData.Eligibility.randomEligibleWithUserInfo
 import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.{validNSIPayload, validUserInfo}
@@ -33,7 +33,8 @@ import uk.gov.hmrc.helptosavefrontend.models.account.{Account, AccountNumber}
 import uk.gov.hmrc.helptosavefrontend.models.register.CreateAccountRequest
 import uk.gov.hmrc.helptosavefrontend.models.reminder.{CancelHtsUserReminder, HtsUserSchedule}
 import uk.gov.hmrc.helptosavefrontend.models.{EnrolmentStatus, HTSSession}
-import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveServiceImpl.{SubmissionFailure, SubmissionSuccess}
+import uk.gov.hmrc.helptosavefrontend.models.SubmissionResult
+import uk.gov.hmrc.helptosavefrontend.models.SubmissionResult.{SubmissionFailure, SubmissionSuccess}
 import uk.gov.hmrc.helptosavefrontend.services.{HelpToSaveReminderService, HelpToSaveService}
 
 import scala.concurrent.Future

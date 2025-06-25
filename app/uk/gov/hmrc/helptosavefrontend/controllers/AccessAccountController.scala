@@ -17,7 +17,7 @@
 package uk.gov.hmrc.helptosavefrontend.controllers
 
 import com.google.inject.{Inject, Singleton}
-import play.api.mvc._
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Request, Result}
 import play.api.{Configuration, Environment}
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.helptosavefrontend.auth.HelpToSaveAuth
@@ -28,7 +28,7 @@ import uk.gov.hmrc.helptosavefrontend.models.reminder.CancelHtsUserReminder
 import uk.gov.hmrc.helptosavefrontend.models.{HTSSession, HtsContextWithNINO}
 import uk.gov.hmrc.helptosavefrontend.repo.SessionStore
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
-import uk.gov.hmrc.helptosavefrontend.util.Logging._
+import uk.gov.hmrc.helptosavefrontend.util.Logging.*
 import uk.gov.hmrc.helptosavefrontend.util.{Logging, MaintenanceSchedule, NINOLogMessageTransformer, toFuture}
 import uk.gov.hmrc.helptosavefrontend.views.html.core.confirm_check_eligibility
 import uk.gov.hmrc.http.HeaderCarrier
@@ -55,8 +55,8 @@ class AccessAccountController @Inject() (
   val config: Configuration,
   val env: Environment,
   ec: ExecutionContext
-) extends BaseController(cpd, mcc, errorHandler, maintenanceSchedule) with HelpToSaveAuth with EnrolmentCheckBehaviour
-    with Logging {
+) extends CustomBaseController(cpd, mcc, errorHandler, maintenanceSchedule) with HelpToSaveAuth
+    with EnrolmentCheckBehaviour with Logging {
 
   def getSignInPage: Action[AnyContent] = unprotected { _ => _ =>
     SeeOther("https://www.gov.uk/sign-in-help-to-save")

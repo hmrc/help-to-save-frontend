@@ -20,17 +20,17 @@ import cats.data.EitherT
 import cats.instances.future._
 import org.mockito.ArgumentMatchers
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
-import org.mockito.Mockito.when
+import org.mockito.Mockito.{times, verify, when}
 import org.scalatest.concurrent.ScalaFutures
 import play.api.libs.json.Json
 import uk.gov.hmrc.helptosavefrontend.connectors.HelpToSaveConnector
 import uk.gov.hmrc.helptosavefrontend.controllers.ControllerSpecWithGuiceApp
 import uk.gov.hmrc.helptosavefrontend.models.TestData.Eligibility.randomEligibility
 import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.validNSIPayload
-import uk.gov.hmrc.helptosavefrontend.models._
+import uk.gov.hmrc.helptosavefrontend.models.*
 import uk.gov.hmrc.helptosavefrontend.models.account.{Account, AccountNumber}
 import uk.gov.hmrc.helptosavefrontend.models.register.CreateAccountRequest
-import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveServiceImpl.{SubmissionFailure, SubmissionSuccess}
+import uk.gov.hmrc.helptosavefrontend.models.SubmissionResult.{SubmissionFailure, SubmissionSuccess}
 import uk.gov.hmrc.http.HttpResponse
 
 import java.time.LocalDate
@@ -252,5 +252,31 @@ class HelpToSaveServiceSpec extends ControllerSpecWithGuiceApp with ScalaFutures
         result.value.futureValue.isLeft shouldBe true
       }
     }
+
+    "getAccountNumber" should {
+      "return the AccountNumber when the connector call is successful" in {
+        val accountNumber = AccountNumber(Some("12345678"))
+        when(htsConnector.getAccountNumber()(any(), any()))
+          .thenReturn(EitherT.rightT[Future, String](accountNumber))
+
+        val service = new HelpToSaveServiceImpl(htsConnector)
+        service.getAccountNumber().value.map { result =>
+          result shouldBe Right(accountNumber)
+          verify(htsConnector, times(1)).getAccountNumber()(headerCarrier, ec)
+        }
+      }
+
+      "return an error when the connector call fails" in {
+        val failureMessage = "An error occurred"
+        when(htsConnector.getAccountNumber()(any(), any()))
+          .thenReturn(EitherT.leftT[Future, AccountNumber](failureMessage))
+        val service = new HelpToSaveServiceImpl(htsConnector)
+        service.getAccountNumber().value.failed.map { exception =>
+          exception.getMessage shouldBe failureMessage
+          verify(htsConnector, times(1)).getAccountNumber()(headerCarrier, ec)
+        }
+      }
+    }
+
   }
 }

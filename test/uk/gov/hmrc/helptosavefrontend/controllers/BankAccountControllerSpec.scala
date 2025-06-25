@@ -17,7 +17,7 @@
 package uk.gov.hmrc.helptosavefrontend.controllers
 
 import cats.data.EitherT
-import cats.instances.future._
+import cats.instances.future.*
 import org.mockito.ArgumentMatchers
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.when
@@ -25,12 +25,12 @@ import play.api.http.Status
 import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import uk.gov.hmrc.helptosavefrontend.forms.{BankDetails, BankDetailsValidation, SortCode}
+import uk.gov.hmrc.helptosavefrontend.forms.BankDetailsValidation
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
 import uk.gov.hmrc.helptosavefrontend.models.TestData.Eligibility.{randomEligibility, randomEligibleWithUserInfo, randomIneligibility}
 import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.validUserInfo
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResponse
-import uk.gov.hmrc.helptosavefrontend.models.{EnrolmentStatus, HTSSession, ValidateBankDetailsRequest, ValidateBankDetailsResult}
+import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.views.html.register.bank_account_details
 
 import scala.concurrent.Future

@@ -44,8 +44,8 @@ class CheckYourDetailsController @Inject() (
   val transformer: NINOLogMessageTransformer,
   val frontendAppConfig: FrontendAppConfig,
   ec: ExecutionContext
-) extends BaseController(cpd, mcc, errorHandler, maintenanceSchedule) with HelpToSaveAuth with EnrolmentCheckBehaviour
-    with Logging {
+) extends CustomBaseController(cpd, mcc, errorHandler, maintenanceSchedule) with HelpToSaveAuth
+    with EnrolmentCheckBehaviour with Logging {
 
   def checkYourDetails: Action[AnyContent] =
     authorisedForHtsWithInfo { implicit request => implicit htsContext =>
