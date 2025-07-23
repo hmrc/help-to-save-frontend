@@ -44,10 +44,10 @@ trait AuthSupport extends MockitoSugar {
 
   import AuthSupport._
 
-  type NameRetrievalType = ~[~[Option[Name], Option[ItmpName]], Option[String]]
+  type NameRetrievalType = ~[Option[ItmpName], Option[String]]
 
   type UserRetrievalType =
-    Option[Name] ~ Option[String] ~ Option[LocalDate] ~ Option[ItmpName] ~ Option[LocalDate] ~ Option[ItmpAddress] ~ Option[
+    Option[String] ~ Option[LocalDate] ~ Option[ItmpName] ~ Option[LocalDate] ~ Option[ItmpAddress] ~ Option[
       String
     ]
 
@@ -57,14 +57,13 @@ trait AuthSupport extends MockitoSugar {
 
   val firstName = "Tyrion"
   val lastName = "Lannister"
-  val name = Name(Some(firstName), Some(lastName))
 
   val emailStr = "tyrion_lannister@gmail.com"
   val email: Option[String] = Some(emailStr)
 
   val dobStr = "1970-01-01"
   val dob: LocalDate = LocalDate.parse(dobStr)
-  val itmpName = ItmpName(Some(firstName), Some(lastName), Some(lastName))
+  val itmpName: ItmpName = ItmpName(Some(firstName), Some(lastName), Some(lastName))
   val itmpDob: Option[LocalDate] = Some(LocalDate.parse(dobStr))
 
   val line1 = "Casterly Rock"
@@ -72,7 +71,7 @@ trait AuthSupport extends MockitoSugar {
   val line3 = "Westeros"
   val postCode = "BA148FY"
   val countryCode = "GB"
-  val itmpAddress =
+  val itmpAddress: ItmpAddress =
     ItmpAddress(Some(line1), Some(line2), Some(line3), None, None, Some(postCode), Some(countryCode), Some(countryCode))
 
   val nsiPayload = NSIPayload(
@@ -117,55 +116,48 @@ trait AuthSupport extends MockitoSugar {
   val mockedNINORetrieval: Option[String] = Some(nino)
   val mockedNINORetrievalWithPTEnrolment: ~[Option[String], Enrolments] = Some(nino) and enrolmentsWithMatchingNino
 
-  val mockedNINOAndNameRetrieval: ~[~[~[Option[Name], Option[ItmpName]], Option[String]], Enrolments] = new ~(
-    Some(name),
-    Some(itmpName)
-  ) and mockedNINORetrieval and enrolmentsWithMatchingNino
+  val mockedNINOAndNameRetrieval: ~[~[Option[ItmpName], Option[String]], Enrolments] =
+    new ~(Some(itmpName), mockedNINORetrieval) and enrolmentsWithMatchingNino
 
-  val mockedNINOAndNameRetrievalMissingNino
-    : ~[~[~[Option[Name], Option[ItmpName]], Option[String]], Enrolments] = new ~(
-    Some(name),
-    Some(itmpName)
-  ) and None and noPersonalTaxEnrolment
+  val mockedNINOAndNameRetrievalMissingNino: ~[~[Option[ItmpName], Option[String]], Enrolments] =
+    new ~(Option(itmpName), None) and noPersonalTaxEnrolment
 
-  val mockedNINOAndNameRetrievalMissingName
-    : ~[~[~[Option[Name], Option[ItmpName]], Option[String]], Enrolments] = new ~(
-    Some(Name(None, None)),
-    Some(ItmpName(None, None, None))
-  ) and mockedNINORetrieval and enrolmentsWithMatchingNino
+  val mockedNINOAndNameRetrievalMissingName: ~[~[Option[ItmpName], Option[String]], Enrolments] = new ~(
+    Some(ItmpName(None, None, None)),
+    mockedNINORetrieval
+  ) and enrolmentsWithMatchingNino
 
-  val mockedRetrievals
-    : ~[~[~[~[~[~[~[Option[Name], Option[String]], Option[LocalDate]], Option[ItmpName]], Option[LocalDate]], Option[
-      ItmpAddress
-    ]], Option[String]], Enrolments] =
-    new ~(Some(name), email) and Option(dob) and Some(itmpName) and itmpDob and Some(itmpAddress) and mockedNINORetrieval and enrolmentsWithMatchingNino
+  val mockedRetrievals: ~[~[~[~[~[~[Option[String], Option[LocalDate]], Option[ItmpName]], Option[LocalDate]], Option[
+    ItmpAddress
+  ]], Option[String]], Enrolments] =
+    new ~(email, Option(dob)) and Some(itmpName) and itmpDob and Some(itmpAddress) and mockedNINORetrieval and enrolmentsWithMatchingNino
 
   def mockedRetrievalsWithEmail(
     email: Option[String]
-  ): ~[~[~[~[~[~[Option[Name], Option[String]], Option[LocalDate]], Option[ItmpName]], Option[LocalDate]], Option[
+  ): ~[~[~[~[~[Option[String], Option[LocalDate]], Option[ItmpName]], Option[LocalDate]], Option[
     ItmpAddress
   ]], Option[String]] =
-    new ~(Some(name), email) and Option(dob) and Some(itmpName) and itmpDob and Some(itmpAddress) and mockedNINORetrieval
+    new ~(email, Option(dob)) and Some(itmpName) and itmpDob and Some(itmpAddress) and mockedNINORetrieval
 
   val mockedRetrievalsMissingUserInfo
-    : ~[~[~[~[~[~[~[Option[Name], Option[String]], Option[LocalDate]], Option[ItmpName]], Option[LocalDate]], Option[
+    : ~[~[~[~[~[~[Option[String], Option[LocalDate]], Option[ItmpName]], Option[LocalDate]], Option[
       ItmpAddress
     ]], Option[String]], Enrolments] =
-    new ~(Some(Name(None, None)), email) and Option(dob) and Some(ItmpName(None, None, None)) and itmpDob and Some(
+    new ~(email, Option(dob)) and Some(ItmpName(None, None, None)) and itmpDob and Some(
       itmpAddress
     ) and mockedNINORetrieval and enrolmentsWithMatchingNino
 
   val mockedRetrievalsMissingPostcode
-    : ~[~[~[~[~[~[~[Option[Name], Option[String]], Option[LocalDate]], Option[ItmpName]], Option[LocalDate]], Option[
+    : ~[~[~[~[~[~[Option[String], Option[LocalDate]], Option[ItmpName]], Option[LocalDate]], Option[
       ItmpAddress
     ]], Option[String]], Enrolments] =
-    new ~(Some(name), email) and Option(dob) and Some(itmpName) and itmpDob and Some(itmpAddress.copy(postCode = None)) and mockedNINORetrieval and enrolmentsWithMatchingNino
+    new ~(email, Option(dob)) and Some(itmpName) and itmpDob and Some(itmpAddress.copy(postCode = None)) and mockedNINORetrieval and enrolmentsWithMatchingNino
 
   val mockedRetrievalsMissingNinoEnrolment
-    : ~[~[~[~[~[~[~[Option[Name], Option[String]], Option[LocalDate]], Option[ItmpName]], Option[LocalDate]], Option[
+    : ~[~[~[~[~[~[Option[String], Option[LocalDate]], Option[ItmpName]], Option[LocalDate]], Option[
       ItmpAddress
     ]], Option[String]], Enrolments] =
-    new ~(Some(name), email) and Option(dob) and Some(itmpName) and itmpDob and Some(itmpAddress) and None and noPersonalTaxEnrolment
+    new ~(email, Option(dob)) and Some(itmpName) and itmpDob and Some(itmpAddress) and None and noPersonalTaxEnrolment
 
   def mockAuthResultWithFail(ex: Throwable): Unit =
     when(mockAuthConnector.authorise(eqTo(AuthProviders(GovernmentGateway)), any())(any(), any()))
@@ -185,7 +177,7 @@ trait AuthSupport extends MockitoSugar {
       mockAuthConnector
         .authorise(
           eqTo(predicate),
-          eqTo(v2.Retrievals.name and v2.Retrievals.itmpName and v2.Retrievals.nino and v2.Retrievals.allEnrolments)
+          eqTo(v2.Retrievals.itmpName and v2.Retrievals.nino and v2.Retrievals.allEnrolments)
         )(any(), any())
     ).thenReturn(
       Future

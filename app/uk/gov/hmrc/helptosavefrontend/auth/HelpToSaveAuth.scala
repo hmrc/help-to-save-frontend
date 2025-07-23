@@ -24,7 +24,7 @@ import play.api.mvc.{Action, AnyContent, Request, Result}
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.authorise.Predicate
 import uk.gov.hmrc.auth.core.retrieve._
-import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals.{itmpName => V2ItmpName, name => V2Name, nino => V2Nino, allEnrolments}
+import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals.{itmpName => V2ItmpName, nino => V2Nino, allEnrolments}
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 import uk.gov.hmrc.helptosavefrontend.controllers.routes
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
@@ -65,10 +65,10 @@ trait HelpToSaveAuth extends AuthorisedFunctions with Logging {
   )(
     loginContinueURL: RelativeURL
   )(implicit maintenanceSchedule: MaintenanceSchedule, ec: ExecutionContext): Action[AnyContent] =
-    authorised(V2Name and V2ItmpName and V2Nino and allEnrolments) {
-      case (maybeName ~ maybeItmpName ~ mayBeNino ~ enrolments, request, time) =>
+    authorised(V2ItmpName and V2Nino and allEnrolments) {
+      case (maybeItmpName ~ mayBeNino ~ enrolments, request, time) =>
         withNINO(mayBeNino, enrolments, time) { nino =>
-          val name = maybeItmpName.flatMap(_.givenName).orElse(maybeName.flatMap(_.name))
+          val name = maybeItmpName.flatMap(_.givenName)
           action(request)(HtsContextWithNINOAndFirstName(authorised = true, nino, name))
         }(request)
     }(loginContinueURL)
@@ -80,12 +80,12 @@ trait HelpToSaveAuth extends AuthorisedFunctions with Logging {
   )(implicit maintenanceSchedule: MaintenanceSchedule, ec: ExecutionContext): Action[AnyContent] =
     authorised(UserInfoRetrievals and V2Nino and allEnrolments) {
       case (
-          name ~ email ~ dateOfBirth ~ itmpName ~ itmpDateOfBirth ~ itmpAddress ~ mayBeNino ~ enrolments,
+          email ~ dateOfBirth ~ itmpName ~ itmpDateOfBirth ~ itmpAddress ~ mayBeNino ~ enrolments,
           request,
           time
           ) =>
         withNINO(mayBeNino, enrolments, time) { nino =>
-          val userDetails = getUserInfo(nino, name, email, dateOfBirth, itmpName, itmpDateOfBirth, itmpAddress)
+          val userDetails = getUserInfo(nino, email, dateOfBirth, itmpName, itmpDateOfBirth, itmpAddress)
 
           userDetails.fold(
             m =>
@@ -171,7 +171,6 @@ trait HelpToSaveAuth extends AuthorisedFunctions with Logging {
 
   private def getUserInfo(
     nino: String,
-    name: Option[Name],
     email: Option[String],
     dob: Option[LocalDate],
     itmpName: Option[ItmpName],
@@ -182,14 +181,12 @@ trait HelpToSaveAuth extends AuthorisedFunctions with Logging {
     val givenNameValidation: ValidOrMissingUserInfo[String] =
       itmpName
         .flatMap(_.givenName)
-        .orElse(name.flatMap(_.name))
         .filter(_.nonEmpty)
         .toValidNel(MissingUserInfo.GivenName)
 
     val surnameValidation: ValidOrMissingUserInfo[String] =
       itmpName
         .flatMap(_.familyName)
-        .orElse(name.flatMap(_.lastName))
         .filter(_.nonEmpty)
         .toValidNel(MissingUserInfo.Surname)
 

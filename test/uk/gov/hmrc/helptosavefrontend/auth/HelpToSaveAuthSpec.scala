@@ -25,7 +25,7 @@ import play.api.test.Helpers._
 import play.api.{Configuration, Environment}
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.auth.core.AuthorisationException.fromString
-import uk.gov.hmrc.auth.core.retrieve.{ItmpAddress, ItmpName, Name, ~}
+import uk.gov.hmrc.auth.core.retrieve.{ItmpAddress, ItmpName, ~}
 import uk.gov.hmrc.helptosavefrontend.controllers.AuthSupport.ROps
 import uk.gov.hmrc.helptosavefrontend.controllers.{AuthSupport, ControllerSpecWithGuiceApp, CustomBaseController, routes}
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
@@ -89,7 +89,7 @@ class HelpToSaveAuthSpec extends ControllerSpecWithGuiceApp with AuthSupport {
     }
 
     "filter out empty emails" in {
-      val retrieval = new ~(Some(name), Option("")) and Option(dob) and Some(itmpName) and itmpDob and Some(itmpAddress) and mockedNINORetrieval and enrolmentsWithMatchingNino
+      val retrieval = new ~(Option(""), Option(dob)) and Some(itmpName) and itmpDob and Some(itmpAddress) and mockedNINORetrieval and enrolmentsWithMatchingNino
 
       mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(retrieval)
 
@@ -107,7 +107,7 @@ class HelpToSaveAuthSpec extends ControllerSpecWithGuiceApp with AuthSupport {
 
     "handle when address info is missing" in {
       def retrieval(address: ItmpAddress) =
-        new ~(Some(Name(None, None)), email) and Option(dob) and Some(ItmpName(None, None, None)) and itmpDob and Some(
+        new ~(email, Option(dob)) and Some(ItmpName(None, None, None)) and itmpDob and Some(
           address
         ) and mockedNINORetrieval and enrolmentsWithMatchingNino
 

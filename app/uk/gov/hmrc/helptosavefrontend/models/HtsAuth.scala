@@ -18,7 +18,7 @@ package uk.gov.hmrc.helptosavefrontend.models
 
 import uk.gov.hmrc.auth.core.AuthProvider.GovernmentGateway
 import uk.gov.hmrc.auth.core.authorise.Predicate
-import uk.gov.hmrc.auth.core.retrieve.{Name => CoreName, _}
+import uk.gov.hmrc.auth.core.retrieve._
 import uk.gov.hmrc.auth.core.{AuthProviders, ConfidenceLevel}
 
 import java.time.LocalDate
@@ -30,10 +30,9 @@ object HtsAuth {
   val AuthWithCL200: Predicate = AuthProvider and ConfidenceLevel.L200
 
   val UserInfoRetrievals: Retrieval[
-    Option[CoreName] ~ Option[String] ~ Option[LocalDate] ~ Option[ItmpName] ~ Option[LocalDate] ~ Option[ItmpAddress]
+    Option[String] ~ Option[LocalDate] ~ Option[ItmpName] ~ Option[LocalDate] ~ Option[ItmpAddress]
   ] =
-    v2.Retrievals.name and
-      v2.Retrievals.email and
+    v2.Retrievals.email and
       v2.Retrievals.dateOfBirth and
       v2.Retrievals.itmpName and
       v2.Retrievals.itmpDateOfBirth and

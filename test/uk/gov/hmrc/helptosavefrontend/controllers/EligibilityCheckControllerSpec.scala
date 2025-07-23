@@ -26,7 +26,7 @@ import play.api.http.Status
 import play.api.mvc.{Result => PlayResult}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import uk.gov.hmrc.auth.core.retrieve.{ItmpAddress, ItmpName, Name, ~}
+import uk.gov.hmrc.auth.core.retrieve.{ItmpAddress, ItmpName, ~}
 import uk.gov.hmrc.auth.core.syntax.retrieved.authSyntaxForRetrieved
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
@@ -606,7 +606,7 @@ class EligibilityCheckControllerSpec
           dob: Option[LocalDate],
           address: ItmpAddress
         ) =
-          new ~(Some(Name(name, surname)), email) and dob and Some(ItmpName(name, None, surname)) and dob and Some(
+          new ~(email, dob) and Some(ItmpName(name, None, surname)) and dob and Some(
             address
           ) and mockedNINORetrieval
 
