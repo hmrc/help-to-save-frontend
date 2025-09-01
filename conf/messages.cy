@@ -592,7 +592,7 @@ hts.reminder-confirmation.h2=Beth sy’n digwydd nesaf
 hts.reminder-frequency.select-an-option=Dewiswch opsiwn ar gyfer trefnu nodynnau atgoffa
 reminder-select.reminderFrequency.reminder_frequency_empty=Dewiswch opsiwn ar gyfer trefnu nodynnau atgoffa
 
-hts.reminder-dashboard.title.h1=Dangosfwrdd nodynnau atgoffa
+hts.reminder-dashboard.title.h1=Newid neu ganslo e-byst atgoffa
 hts.reminder-dashboard.h2=Newid neu ganslo e-byst atgoffa
 hts.reminder-dashboard.t1=Dyddiad nodynnau atgoffa
 hts.reminder-dashboard.t2=Cyfeiriad e-bost
