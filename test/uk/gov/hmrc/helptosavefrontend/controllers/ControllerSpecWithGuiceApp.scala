@@ -56,6 +56,7 @@ trait ControllerSpecWithGuiceApp extends ControllerSpecBase with GuiceOneAppPerS
             """.stripMargin)
         ).withFallback(additionalConfig)
       )
+      .disable[uk.gov.hmrc.play.bootstrap.BuiltinModule]
       .build()
 
   override lazy val app = buildFakeApplication(additionalConfig)
