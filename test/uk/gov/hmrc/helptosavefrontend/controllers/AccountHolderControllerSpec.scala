@@ -98,9 +98,7 @@ class AccountHolderControllerSpec
     injector.instanceOf[check_your_email],
     injector.instanceOf[we_updated_your_email],
     injector.instanceOf[close_account_are_you_sure]
-  ) {
-    override val authConnector = mockAuthConnector
-  }
+  )
 
   def mockEmailVerificationConn(nino: String, email: String, firstName: String)(
     result: Either[VerifyEmailError, Unit]
