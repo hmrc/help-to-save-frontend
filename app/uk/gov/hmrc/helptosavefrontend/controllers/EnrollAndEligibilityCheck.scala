@@ -48,7 +48,7 @@ trait EnrollAndEligibilityCheck extends SessionBehaviour with EnrolmentCheckBeha
               ineligibilityType.fold {
                 logger.warn(s"Could not parse ineligibility reason : $ineligibleReason")
                 toFuture(internalServerError())
-              } { i =>
+              } { _ =>
                 toFuture(SeeOther(routes.EligibilityCheckController.getIsNotEligible.url))
               }
             },
