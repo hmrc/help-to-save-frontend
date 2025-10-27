@@ -143,7 +143,7 @@ class RegisterController @Inject() (
           sessionStore
             .store(eligibleWithInfo.session.copy(changingDetails = false))
             .fold(
-              { e =>
+              { _ =>
                 internalServerError()
               }, { _ =>
                 EligibilityReason
@@ -154,7 +154,7 @@ class RegisterController @Inject() (
                       eligibleWithInfo.userInfo.userInfo.nino
                     )
                     internalServerError()
-                  } { reason =>
+                  } { _ =>
                     val period = eligibleWithInfo.session.reminderDetails.getOrElse("noValue")
                     eligibleWithInfo.session.bankDetails match {
                       case Some(bankDetails) =>
@@ -223,7 +223,7 @@ class RegisterController @Inject() (
                 submissionSuccess <- helpToSaveService
                                       .createAccount(createAccountRequest)
                                       .leftMap(s => CreateAccountError(Left(s)))
-                r <- EitherT.liftF(
+                _ <- EitherT.liftF(
                       processReminderServiceRequest(eligibleWithInfo.session.reminderDetails, nino, eligibleWithInfo)
                     )
                 _ <- {
@@ -304,7 +304,7 @@ class RegisterController @Inject() (
           )
         )
         .fold(
-          { htsError =>
+          { _ =>
             internalServerError()
           }, { htsUser =>
             logger.info(s"reminder updated ${htsUser.nino}")
@@ -408,7 +408,7 @@ class RegisterController @Inject() (
   )(implicit request: Request[_], hc: HeaderCarrier): Future[Result] =
     sessionStore
       .store(session.copy(changingDetails = true))
-      .fold({ e =>
+      .fold({ _ =>
         internalServerError()
       }, _ => SeeOther(redirectTo))
 

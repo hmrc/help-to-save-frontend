@@ -7,7 +7,7 @@ lazy val microservice = Project(appName, file("."))
   .disablePlugins(JUnitXmlReportPlugin) //Required to prevent https://github.com/scalatest/scalatest/issues/1427
   .settings(onLoadMessage := "")
   .settings(PlayKeys.playDefaultPort := 7003)
-  .settings(scalaVersion := "3.3.5")
+  .settings(scalaVersion := "3.7.1")
   .settings(
     RoutesKeys.routesImport += "uk.gov.hmrc.play.bootstrap.binders.RedirectUrl",
     majorVersion := 2,

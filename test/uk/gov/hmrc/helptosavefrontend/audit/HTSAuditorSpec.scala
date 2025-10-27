@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.helptosavefrontend.audit
 
-import org.mockito.{ArgumentMatchers, Mockito}
+import org.mockito.Mockito
 import org.mockito.Mockito.{verify, when}
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import play.api.libs.json.Json

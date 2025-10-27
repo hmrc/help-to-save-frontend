@@ -89,7 +89,7 @@ class ReminderController @Inject() (
         helpToSaveReminderService
           .getHtsUser(htsContext.nino)
           .fold(
-            e => {
+            _ => {
               logger.warn(s"error retrieving Hts User details from reminder${htsContext.nino}")
               Ok(emailSavingsReminder(Some(backLink)))
             }, { htsUserSchedule =>
@@ -257,7 +257,7 @@ class ReminderController @Inject() (
               )
             }
 
-          case Failure(e) => {
+          case Failure(_) => {
             internalServerError()
           }
         }
@@ -295,7 +295,7 @@ class ReminderController @Inject() (
         helpToSaveReminderService
           .getHtsUser(htsContext.nino)
           .fold(
-            e => {
+            _ => {
               logger.warn(s"error retrieving Hts User details from reminder${htsContext.nino}")
               internalServerError()
             }, { htsUser =>
@@ -462,7 +462,7 @@ class ReminderController @Inject() (
                     )
                   )
                   .fold(
-                    error => {
+                    _ => {
                       internalServerError()
                     },
                     if (s.changingDetails) { _ =>
@@ -475,7 +475,7 @@ class ReminderController @Inject() (
                 sessionStore
                   .store(s.copy(reminderValue = Some(success.reminderFrequency), hasSelectedReminder = true))
                   .fold(
-                    error => {
+                    _ => {
                       internalServerError()
                     },
                     _ => SeeOther(routes.ReminderController.getApplySavingsReminderSignUpPage.url)
@@ -545,7 +545,7 @@ class ReminderController @Inject() (
                     session.copy(reminderDetails = Some(success.reminderFrequency))
                   })
                   .fold(
-                    error => {
+                    _ => {
                       internalServerError()
                     },
                     if (session.changingDetails) { _ =>

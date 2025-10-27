@@ -17,7 +17,6 @@
 package uk.gov.hmrc.helptosavefrontend.controllers
 
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
-import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
 import uk.gov.hmrc.auth.core.AuthProvider.GovernmentGateway

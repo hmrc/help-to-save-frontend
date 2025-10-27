@@ -279,7 +279,7 @@ class AccountHolderController @Inject() (
                 auditor.sendEvent(auditEvent, nino)
                 SeeOther(routes.EmailController.confirmEmailErrorTryLater.url)
 
-              case UpdateEmailError.EmailMongoError(e) =>
+              case UpdateEmailError.EmailMongoError(_) =>
                 logger.warn(
                   "Email updated with NS&I but could not write email to email mongo store. Redirecting back to NS&I",
                   nino
