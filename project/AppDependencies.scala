@@ -4,16 +4,16 @@ object AppDependencies {
 
   val hmrc = "uk.gov.hmrc"
   val playVersion = "play-30"
-  val bootstrapBackendVersion = "10.5.0"
+  val bootstrapBackendVersion = "10.7.0"
   val mockitoScalaVersion = "1.17.37"
-  val mongoVersion = "2.11.0"
+  val mongoVersion = "2.12.0"
 
   val compile: Seq[ModuleID] = Seq(
     s"$hmrc.mongo"      %% s"hmrc-mongo-$playVersion"         % mongoVersion,
     hmrc                %% s"bootstrap-frontend-$playVersion" % bootstrapBackendVersion,
     "org.typelevel"     %% "cats-core"                        % "2.13.0",
     hmrc                %% s"domain-$playVersion"                           % s"13.0.0",
-    hmrc                %% s"play-frontend-hmrc-$playVersion"               % "12.25.0"
+    hmrc                %% s"play-frontend-hmrc-$playVersion"               % "12.32.0"
   )
 
   def test(scope: String = "test"): Seq[ModuleID] = Seq(
