@@ -24,7 +24,7 @@
 
 @this(layout: uk.gov.hmrc.helptosavefrontend.views.html.layout, viewHelpers: ViewHelpers, errorHelpers: FormErrorMessage)
 
-@(userInfoEmail: String, newerEmail: Option[String], form: Form[SelectEmail], backLink: Option[String] = None)(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
+@(userInfoEmail: String, newerEmail: Option[String], form: Form[SelectEmail], backLink: Option[String] = None, hasSelectedEmail: Option[Boolean] = Some(false))(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
 @title = @{messages("hts.select-email.title.h1")}
 @key = @{"email"}
 @newEmailKey = @{"new-email"}
@@ -96,7 +96,7 @@
           Some(RadioItem(
             content = Text(userInfoEmail),
             value = Some("UserInfo"),
-            checked = form.data.values.toList.contains("UserInfo")
+            checked = hasSelectedEmail.get
           )),
           newerEmail.map( email => RadioItem(
             content = Text(email),
