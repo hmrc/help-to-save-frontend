@@ -105,7 +105,15 @@ class EmailController @Inject() (
               case Some(e) if e != eligibleWithEmail.email => Some(e)
               case _                                       => None
             }
-            Ok(selectEmail(eligibleWithEmail.email, newerEmail, emailFormWithData, Some(backLinkFromSession(s))))
+            Ok(
+              selectEmail(
+                eligibleWithEmail.email,
+                newerEmail,
+                emailFormWithData,
+                Some(backLinkFromSession(s)),
+                Some(s.hasSelectedEmail)
+              )
+            )
           },
           (_, _) => SeeOther(routes.EmailController.getGiveEmailPage.url)
         )(session)
