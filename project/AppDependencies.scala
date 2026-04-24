@@ -13,7 +13,7 @@ object AppDependencies {
     hmrc                %% s"bootstrap-frontend-$playVersion" % bootstrapBackendVersion,
     "org.typelevel"     %% "cats-core"                        % "2.13.0",
     hmrc                %% s"domain-$playVersion"                           % s"13.0.0",
-    hmrc                %% s"play-frontend-hmrc-$playVersion"               % "12.32.0"
+    hmrc                %% s"play-frontend-hmrc-$playVersion"               % "13.4.0"
   )
 
   def test(scope: String = "test"): Seq[ModuleID] = Seq(
