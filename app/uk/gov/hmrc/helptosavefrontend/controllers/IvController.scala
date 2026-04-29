@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.helptosavefrontend.controllers
 
-import cats.instances.future._
 import com.google.inject.{Inject, Singleton}
 import play.api.mvc._
 import play.api.{Configuration, Environment}
@@ -204,14 +203,17 @@ class IvController @Inject() (
   ): Future[Result] =
     sessionStore
       .store(session)
-      .fold(
-        { e =>
-          logger.warn(
-            s"Could not write to session cache after redirect from IV (journey ID: ${journeyId.getOrElse("not found")}): $e"
-          )
-          internalServerError()
-        },
-        _ => SeeOther(redirectTo)
+      .value
+      .flatMap(
+        _.fold[Future[Result]](
+          { e =>
+            logger.warn(
+              s"Could not write to session cache after redirect from IV (journey ID: ${journeyId.getOrElse("not found")}): $e"
+            )
+            internalServerError()
+          },
+          _ => toFuture(SeeOther(redirectTo))
+        )
       )
 
   private def retrieveURLFromSessionCache(url: HTSSession => Option[String], defaultUrl: String)(f: String => Result)(
@@ -219,23 +221,25 @@ class IvController @Inject() (
     request: Request[_],
     hc: HeaderCarrier
   ): Future[Result] =
-    sessionStore.get.fold(
-      { e =>
-        logger.warn(s"Could not retrieve data from session cache: $e")
-        internalServerError()
-      }, { mayBeSession =>
-        mayBeSession.fold {
-          logger.warn(s"no session found for user in mongo, redirecting to $defaultUrl")
-          f(defaultUrl)
-        } { session =>
-          url(session).fold {
-            logger.warn("session exists in mongo but required information is not found")
-            internalServerError()
-          }(
-            f
-          )
+    sessionStore.get.value.flatMap(
+      _.fold[Future[Result]](
+        { e =>
+          logger.warn(s"Could not retrieve data from session cache: $e")
+          internalServerError()
+        }, { mayBeSession =>
+          mayBeSession.fold[Future[Result]] {
+            logger.warn(s"no session found for user in mongo, redirecting to $defaultUrl")
+            toFuture(f(defaultUrl))
+          } { session =>
+            url(session).fold[Future[Result]] {
+              logger.warn("session exists in mongo but required information is not found")
+              internalServerError()
+            }(
+              u => toFuture(f(u))
+            )
+          }
         }
-      }
+      )
     )
 
 }

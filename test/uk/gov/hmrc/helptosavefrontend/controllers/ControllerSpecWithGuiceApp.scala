@@ -33,6 +33,7 @@ import uk.gov.hmrc.helptosavefrontend.util._
 import uk.gov.hmrc.http.{HeaderCarrier, SessionId}
 
 import java.util.UUID
+import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future}
 import scala.language.postfixOps
@@ -79,7 +80,7 @@ trait ControllerSpecWithGuiceApp extends ControllerSpecBase with GuiceOneAppPerS
   val csrfAddToken: CSRFAddToken = injector.instanceOf[play.filters.csrf.CSRFAddToken]
 
   private lazy val technicalErrorPageContent: String =
-    injector.instanceOf[ErrorHandler].internalServerErrorTemplate(FakeRequest()).body
+    Await.result(injector.instanceOf[ErrorHandler].internalServerErrorTemplate(FakeRequest()), 5.seconds).body
 
   def checkIsTechnicalErrorPage(result: Future[Result]): Unit = {
     implicit val timeout: Timeout = Timeout(5 seconds)

@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.helptosavefrontend.controllers
 
-import cats.instances.future._
 import com.google.inject.{Inject, Singleton}
 import play.api.mvc.{Result => PlayResult, _}
 import play.api.{Configuration, Environment}
@@ -93,38 +92,44 @@ class BankAccountController @Inject() (
                 .validateBankDetails(
                   ValidateBankDetailsRequest(htsContext.nino, bankDetails.sortCode.toString, bankDetails.accountNumber)
                 )
-                .fold[Future[PlayResult]](
-                  error => {
-                    logger.warn(s"Could not validate bank details due to : $error")
-                    internalServerError()
-                  }, { result =>
-                    if (result.isValid && result.sortCodeExists) {
-                      sessionStore
-                        .store(session.copy(bankDetails = Some(bankDetails)))
-                        .fold(
-                          error => {
-                            logger.warn(s"Could not update session with bank details: $error")
-                            internalServerError()
-                          },
-                          _ => SeeOther(routes.RegisterController.getCreateAccountPage.url)
-                        )
-                    } else {
-                      val formWithErrors = if (result.isValid && !result.sortCodeExists) {
-                        BankDetailsForm
-                          .giveBankDetailsForm()
-                          .fill(bankDetails)
-                          .withError("sortCode", BankDetailsValidation.ErrorMessages.sortCodeBackendInvalid)
+                .value
+                .flatMap(
+                  _.fold[Future[PlayResult]](
+                    error => {
+                      logger.warn(s"Could not validate bank details due to : $error")
+                      internalServerError()
+                    }, { result =>
+                      if (result.isValid && result.sortCodeExists) {
+                        sessionStore
+                          .store(session.copy(bankDetails = Some(bankDetails)))
+                          .value
+                          .flatMap(
+                            _.fold[Future[PlayResult]](
+                              error => {
+                                logger.warn(s"Could not update session with bank details: $error")
+                                internalServerError()
+                              },
+                              _ => toFuture(SeeOther(routes.RegisterController.getCreateAccountPage.url))
+                            )
+                          )
                       } else {
-                        BankDetailsForm
-                          .giveBankDetailsForm()
-                          .fill(bankDetails)
-                          .withError("sortCode", BankDetailsValidation.ErrorMessages.sortCodeBackendInvalid)
-                          .withError("accountNumber", BankDetailsValidation.ErrorMessages.accountNumberBackendInvalid)
-                      }
+                        val formWithErrors = if (result.isValid && !result.sortCodeExists) {
+                          BankDetailsForm
+                            .giveBankDetailsForm()
+                            .fill(bankDetails)
+                            .withError("sortCode", BankDetailsValidation.ErrorMessages.sortCodeBackendInvalid)
+                        } else {
+                          BankDetailsForm
+                            .giveBankDetailsForm()
+                            .fill(bankDetails)
+                            .withError("sortCode", BankDetailsValidation.ErrorMessages.sortCodeBackendInvalid)
+                            .withError("accountNumber", BankDetailsValidation.ErrorMessages.accountNumberBackendInvalid)
+                        }
 
-                      Ok(bankAccountDetails(formWithErrors, backLinkFromSession(session)))
+                        Ok(bankAccountDetails(formWithErrors, backLinkFromSession(session)))
+                      }
                     }
-                  }
+                  )
                 )
                 .flatMap(identity _)
             }

@@ -57,7 +57,7 @@ trait HelpToSaveAuth extends AuthorisedFunctions with Logging {
       case (mayBeNino ~ enrolments, request, time) =>
         withNINO(mayBeNino, enrolments, time) { nino =>
           action(request)(HtsContextWithNINO(authorised = true, nino))
-        }(request)
+        }(request, ec)
     }(loginContinueURL)
 
   def authorisedForHtsWithNINOAndName(
@@ -70,7 +70,7 @@ trait HelpToSaveAuth extends AuthorisedFunctions with Logging {
         withNINO(mayBeNino, enrolments, time) { nino =>
           val name = maybeItmpName.flatMap(_.givenName)
           action(request)(HtsContextWithNINOAndFirstName(authorised = true, nino, name))
-        }(request)
+        }(request, ec)
     }(loginContinueURL)
 
   def authorisedForHtsWithInfo(
@@ -97,7 +97,7 @@ trait HelpToSaveAuth extends AuthorisedFunctions with Logging {
           )
 
           action(request)(HtsContextWithNINOAndUserDetails(authorised = true, nino, userDetails))
-        }(request)
+        }(request, ec)
     }(loginContinueURL)
 
   def authorisedForHts(
@@ -140,7 +140,7 @@ trait HelpToSaveAuth extends AuthorisedFunctions with Logging {
               }
           }
         }
-        .recover {
+        .recoverWith {
           val time = timer.stop()
           handleAuthFailure(loginContinueURL, time)
         }
@@ -148,10 +148,10 @@ trait HelpToSaveAuth extends AuthorisedFunctions with Logging {
 
   private def withNINO[A](mayBeNino: Option[String], enrolments: Enrolments, nanos: Long)(
     action: NINO => Future[Result]
-  )(implicit request: Request[_]): Future[Result] =
+  )(implicit request: Request[_], ec: ExecutionContext): Future[Result] =
     mayBeNino.fold {
       logger.warn(s"NINO retrieval failed ${timeString(nanos)}")
-      toFuture(internalServerError())
+      internalServerError()
     } { nino =>
       enrolments.getEnrolment("HMRC-PT").flatMap(_.getIdentifier("NINO")) match {
         case enrolmentIdentifiers
@@ -230,19 +230,20 @@ trait HelpToSaveAuth extends AuthorisedFunctions with Logging {
       extends AuthorisationException("MaintenancePeriodException")
 
   def handleAuthFailure(loginContinueURL: RelativeURL, time: Long)(
-    implicit request: Request[_]
-  ): PartialFunction[Throwable, Result] = {
+    implicit request: Request[_],
+    ec: ExecutionContext
+  ): PartialFunction[Throwable, Future[Result]] = {
     case _: NoActiveSession =>
-      toGGLogin(loginContinueURL)
+      toFuture(toGGLogin(loginContinueURL))
 
     case _: InsufficientConfidenceLevel | _: InsufficientEnrolments =>
-      SeeOther(appConfig.ivUrl(loginContinueURL))
+      toFuture(SeeOther(appConfig.ivUrl(loginContinueURL)))
 
     case MaintenancePeriodException(endTime: LocalDateTime) =>
-      SeeOther(routes.RegisterController.getServiceOutagePage(endTime.toString).url)
+      toFuture(SeeOther(routes.RegisterController.getServiceOutagePage(endTime.toString).url))
 
     case _: UnsupportedAuthProvider =>
-      SeeOther(routes.RegisterController.getCannotCheckDetailsPage.url)
+      toFuture(SeeOther(routes.RegisterController.getCannotCheckDetailsPage.url))
 
     case ex: AuthorisationException =>
       logger.warn(s"could not authenticate user due to: $ex ${timeString(time)}")
@@ -261,6 +262,6 @@ trait HelpToSaveAuth extends AuthorisedFunctions with Logging {
 
   private def timeString(nanos: Long): String = s"(round-trip time: ${nanosToPrettyString(nanos)})"
 
-  def internalServerError()(implicit request: Request[_]): Result
+  def internalServerError()(implicit request: Request[_], ec: ExecutionContext): Future[Result]
 
 }

@@ -293,13 +293,9 @@ class EmailController @Inject() (
           r <- EitherT.liftF(ifSuccess)
         } yield r
 
-        result.fold(
-          { e =>
-            logger.warn(s"Could not write confirmed email: $e", nino)
-            internalServerError()
-          },
-          identity
-        )
+        foldWithInternalServerError(result)(
+          e => logger.warn(s"Could not write confirmed email: $e", nino)
+        )(toFuture)
       }
 
       def ifDigitalNewApplicant(session: Option[HTSSession]) =
@@ -351,13 +347,9 @@ class EmailController @Inject() (
                   }
                 } yield r
 
-                result.fold[Result](
-                  errors => {
-                    logger.warn(s"error during update email, error = $errors")
-                    internalServerError()
-                  },
-                  identity
-                )
+                foldWithInternalServerError(result)(
+                  errors => logger.warn(s"error during update email, error = $errors")
+                )(toFuture)
               }
             )
           }
@@ -380,10 +372,7 @@ class EmailController @Inject() (
               )
         } yield r
 
-      result.leftMap { e =>
-        logger.warn(e)
-        internalServerError()
-      }.merge
+      mergeWithInternalServerError(result)(e => logger.warn(e))
     }(loginContinueURL = routes.EmailController.emailConfirmedCallback(emailVerificationParams).url)
 
   private def handleCallback(status: EnrolmentStatus, emailVerificationParams: String, path: String)(
@@ -443,7 +432,7 @@ class EmailController @Inject() (
     htsContext.userDetails.fold[EitherT[Future, String, Result]](
       missingInfo => {
         logger.warn(s"DE user missing infos, missing = ${missingInfo.missingInfo.mkString(",")}")
-        EitherT.pure[Future, String](internalServerError())
+        internalServerErrorResultT
       },
       userInfo => {
         withEmailVerificationParameters(
@@ -496,15 +485,9 @@ class EmailController @Inject() (
     if (original.contains(updated)) {
       ifSuccessful
     } else {
-      sessionStore
-        .store(updated)
-        .fold[Result](
-          e => {
-            logger.warn(s"error updating the session, error = $e")
-            internalServerError()
-          },
-          _ => ifSuccessful
-        )
+      foldWithInternalServerError(sessionStore.store(updated))(
+        e => logger.warn(s"error updating the session, error = $e")
+      )(_ => toFuture(ifSuccessful))
     }
 
   /** Return `None` if user is ineligible */
@@ -848,33 +831,23 @@ class EmailController @Inject() (
       enrolmentStatus <- helpToSaveService.getUserEnrolmentStatus()
     } yield session -> enrolmentStatus
 
-    result
-      .leftSemiflatMap { e =>
-        logger.warn(s"Could not get session or enrolment status: $e")
-        internalServerError()
-      }
-      .semiflatMap {
+    mergeWithInternalServerError(
+      result.semiflatMap {
         case (session, enrolmentStatus) =>
           enrolmentStatus.fold(
             ifDuringRegistrationJourney(session), { _ =>
-              helpToSaveService
-                .getConfirmedEmail()
-                .leftSemiflatMap { e =>
-                  logger.warn(s"Could not get confirmed email: $e")
-                  internalServerError()
-                }
-                .semiflatMap {
+              mergeWithInternalServerError(
+                helpToSaveService.getConfirmedEmail().semiflatMap {
                   // Digital account holder
                   case Some(email) => ifDigitalAccountHolder(session, email)
                   // DE account holder
                   case None => ifDE(session)
                 }
-                .merge
-
+              )(e => logger.warn(s"Could not get confirmed email: $e"))
             }
           )
       }
-      .merge
+    )(e => logger.warn(s"Could not get session or enrolment status: $e"))
   }
 
   private def decryptEmail(encryptedEmail: String): Either[String, String] =
