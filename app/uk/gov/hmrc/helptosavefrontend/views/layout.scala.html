@@ -28,7 +28,6 @@
     appConfig: FrontendAppConfig,
     hmrcReportTechnicalIssueHelper: HmrcReportTechnicalIssueHelper,
     govukBackLink: GovukBackLink,
-    hmrcLanguageSelectHelper: HmrcLanguageSelectHelper,
     hmrcTimeoutDialogHelper: HmrcTimeoutDialogHelper,
     hmrcHead: HmrcHead
 )
@@ -68,7 +67,6 @@
 }
 @beforeContentBlock = {
   <div class="govuk-!-display-none-print">
-    @hmrcLanguageSelectHelper()
     @{
       backLink map { url =>
         govukBackLink(BackLink(href = url, attributes = Map("id" -> "back"), content = Text(messages("hts.global.link.back"))))
