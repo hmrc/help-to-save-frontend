@@ -118,12 +118,7 @@ class EligibilityCheckController @Inject() (
                             )
       } yield eligibilityResult
 
-      result
-        .leftMap[PlayResult]({ e =>
-          logger.warn(s"Could not check eligibility: $e")
-          internalServerError()
-        })
-        .merge
+      mergeWithInternalServerError(result)(e => logger.warn(s"Could not check eligibility: $e"))
     }(loginContinueURL = routes.EligibilityCheckController.getCheckEligibility.url)
 
   def getIsNotEligible: Action[AnyContent] =
@@ -219,13 +214,9 @@ class EligibilityCheckController @Inject() (
         logger.warn(s"User has missing information: ${missingUserInfo.missingInfo.mkString(",")}", missingUserInfo.nino)
         SeeOther(routes.EligibilityCheckController.getMissingInfoPage.url)
       }, { userInfo =>
-        performEligibilityChecks(userInfo).fold(
-          { e =>
-            logger.warn(e, htsContext.nino)
-            internalServerError()
-          },
-          handleEligibilityResult(_, session)
-        )
+        foldWithInternalServerError(performEligibilityChecks(userInfo))(
+          e => logger.warn(e, htsContext.nino)
+        )(handleEligibilityResult(_, session))
       }
     )
 

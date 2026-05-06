@@ -41,13 +41,12 @@ trait SessionBehaviour {
     transformer: NINOLogMessageTransformer,
     ec: ExecutionContext
   ): Future[Result] =
-    sessionStore.get
-      .semiflatMap(_.fold(noSession)(whenSession))
-      .leftMap { e =>
-        logger.warn(s"Could not read sessions data from mongo due to : $e", htsContext.nino)
-        internalServerError()
-      }
-      .merge
+    mergeWithInternalServerError(
+      sessionStore.get
+        .semiflatMap(_.fold(noSession)(whenSession))
+    )(
+      e => logger.warn(s"Could not read sessions data from mongo due to : $e", htsContext.nino)
+    )
 }
 
 object SessionBehaviour {

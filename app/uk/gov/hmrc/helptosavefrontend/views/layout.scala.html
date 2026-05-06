@@ -39,7 +39,7 @@
   enableSignOutLink: Boolean = true,
   extraMeta: Option[Html] = None,
   beforeContent: Option[Html] = None
-)(contentBlock: Html)(implicit htsContext: HtsContext, request : Request[_], messages: Messages)
+)(contentBlock: Html)(implicit htsContext: HtsContext, request: RequestHeader, messages: Messages)
 
 @serviceName = @{messages("hts.global.title-suffix")}
 

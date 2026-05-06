@@ -15,6 +15,7 @@
  */
 
 package uk.gov.hmrc.helptosavefrontend.controllers
+
 import cats.instances.future.*
 import cats.instances.string.*
 import cats.syntax.eq.*
@@ -32,13 +33,13 @@ import uk.gov.hmrc.helptosavefrontend.models.*
 import uk.gov.hmrc.helptosavefrontend.models.reminder.{CancelHtsUserReminder, DateToDaysMapper, DaysToDateMapper, HtsUserSchedule}
 import uk.gov.hmrc.helptosavefrontend.repo.SessionStore
 import uk.gov.hmrc.helptosavefrontend.services.{HelpToSaveReminderService, HelpToSaveService}
-import uk.gov.hmrc.helptosavefrontend.util.*
+import uk.gov.hmrc.helptosavefrontend.util.{Result => _, *}
 import uk.gov.hmrc.helptosavefrontend.views.html.closeaccount.account_closed
 import uk.gov.hmrc.helptosavefrontend.views.html.reminder.*
 
 import java.time.LocalDate
 import java.util.UUID
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
 
 @Singleton
@@ -201,23 +202,28 @@ class ReminderController @Inject() (
                         )
                         helpToSaveReminderService
                           .updateHtsUser(htsUserToBeUpdated)
-                          .fold(
-                            htsError => {
-                              logger.warn(
-                                s"An error occurred while accessing HTS Reminder service for user: ${userInfo.nino} Error: $htsError"
-                              )
-                              internalServerError()
-                            },
-                            htsUser =>
-                              SeeOther(
-                                routes.ReminderController
-                                  .getRendersConfirmPage(
-                                    crypto.encrypt(htsUser.email),
-                                    success.reminderFrequency,
-                                    "Set"
+                          .value
+                          .flatMap(
+                            _.fold[Future[Result]](
+                              htsError => {
+                                logger.warn(
+                                  s"An error occurred while accessing HTS Reminder service for user: ${userInfo.nino} Error: $htsError"
+                                )
+                                internalServerError()
+                              },
+                              htsUser =>
+                                toFuture(
+                                  SeeOther(
+                                    routes.ReminderController
+                                      .getRendersConfirmPage(
+                                        crypto.encrypt(htsUser.email),
+                                        success.reminderFrequency,
+                                        "Set"
+                                      )
+                                      .url
                                   )
-                                  .url
-                              )
+                                )
+                            )
                           )
 
                       }
@@ -271,20 +277,23 @@ class ReminderController @Inject() (
     authorisedForHtsWithNINO { implicit request => implicit htsContext =>
       helpToSaveService
         .getAccount(htsContext.nino, UUID.randomUUID())
-        .fold(
-          e => {
-            logger.warn(s"error retrieving Account details from NS&I, error = $e")
-            internalServerError()
-          }, { account =>
-            {
-              if (account.isClosed) {
-                def bckLink: String = routes.ReminderController.getEmailsavingsReminders.url
-                Ok(accountClosed(Some(bckLink), account.closureDate.getOrElse(LocalDate.now())))
-              } else {
-                SeeOther(routes.ReminderController.accountOpenGetSelectedRendersPage.url)
+        .value
+        .flatMap(
+          _.fold[Future[Result]](
+            e => {
+              logger.warn(s"error retrieving Account details from NS&I, error = $e")
+              internalServerError()
+            }, { account =>
+              {
+                if (account.isClosed) {
+                  def bckLink: String = routes.ReminderController.getEmailsavingsReminders.url
+                  toFuture(Ok(accountClosed(Some(bckLink), account.closureDate.getOrElse(LocalDate.now()))))
+                } else {
+                  toFuture(SeeOther(routes.ReminderController.accountOpenGetSelectedRendersPage.url))
+                }
               }
             }
-          }
+          )
         )
     }(loginContinueURL = routes.ReminderController.selectRemindersSubmit.url)
 
@@ -294,21 +303,26 @@ class ReminderController @Inject() (
         def bckLink: String = routes.ReminderController.getEmailsavingsReminders.url
         helpToSaveReminderService
           .getHtsUser(htsContext.nino)
-          .fold(
-            _ => {
-              logger.warn(s"error retrieving Hts User details from reminder${htsContext.nino}")
-              internalServerError()
-            }, { htsUser =>
-              Ok(
-                reminderFrequencySet(
-                  ReminderForm.giveRemindersDetailsForm(),
-                  DaysToDateMapper.reverseMapper.getOrElse(htsUser.daysToReceive, "String"),
-                  "cancel",
-                  Some(bckLink)
+          .value
+          .flatMap(
+            _.fold[Future[Result]](
+              _ => {
+                logger.warn(s"error retrieving Hts User details from reminder${htsContext.nino}")
+                internalServerError()
+              }, { htsUser =>
+                toFuture(
+                  Ok(
+                    reminderFrequencySet(
+                      ReminderForm.giveRemindersDetailsForm(),
+                      DaysToDateMapper.reverseMapper.getOrElse(htsUser.daysToReceive, "String"),
+                      "cancel",
+                      Some(bckLink)
+                    )
+                  )
                 )
-              )
 
-            }
+              }
+            )
           )
       } else {
         SeeOther(routes.RegisterController.getServiceUnavailablePage.url)
@@ -348,14 +362,17 @@ class ReminderController @Inject() (
                           val cancelHtsUserReminder = CancelHtsUserReminder(htsContext.nino)
                           helpToSaveReminderService
                             .cancelHtsUserReminders(cancelHtsUserReminder)
-                            .fold(
-                              htsservError => {
-                                logger.warn(
-                                  s"An error occurred while accessing HTS Reminder service for user: ${htsContext.nino} Error: $htsservError"
-                                )
-                                internalServerError()
-                              },
-                              _ => SeeOther(routes.ReminderController.getRendersCancelConfirmPage.url)
+                            .value
+                            .flatMap(
+                              _.fold[Future[Result]](
+                                htsservError => {
+                                  logger.warn(
+                                    s"An error occurred while accessing HTS Reminder service for user: ${htsContext.nino} Error: $htsservError"
+                                  )
+                                  internalServerError()
+                                },
+                                _ => toFuture(SeeOther(routes.ReminderController.getRendersCancelConfirmPage.url))
+                              )
                             )
 
                         } else {
@@ -387,23 +404,28 @@ class ReminderController @Inject() (
                           )
                           helpToSaveReminderService
                             .updateHtsUser(htsUserToBeUpdated)
-                            .fold(
-                              htsError => {
-                                logger.warn(
-                                  s"An error occurred while accessing HTS Reminder service for user: ${userInfo.nino} Error: $htsError"
-                                )
-                                internalServerError()
-                              },
-                              htsUser =>
-                                SeeOther(
-                                  routes.ReminderController
-                                    .getRendersConfirmPage(
-                                      crypto.encrypt(htsUser.email),
-                                      success.reminderFrequency,
-                                      "Update"
+                            .value
+                            .flatMap(
+                              _.fold[Future[Result]](
+                                htsError => {
+                                  logger.warn(
+                                    s"An error occurred while accessing HTS Reminder service for user: ${userInfo.nino} Error: $htsError"
+                                  )
+                                  internalServerError()
+                                },
+                                htsUser =>
+                                  toFuture(
+                                    SeeOther(
+                                      routes.ReminderController
+                                        .getRendersConfirmPage(
+                                          crypto.encrypt(htsUser.email),
+                                          success.reminderFrequency,
+                                          "Update"
+                                        )
+                                        .url
                                     )
-                                    .url
-                                )
+                                  )
+                              )
                             )
                         }
                       }
@@ -461,24 +483,31 @@ class ReminderController @Inject() (
                       hasSelectedReminder = false
                     )
                   )
-                  .fold(
-                    _ => {
-                      internalServerError()
-                    },
-                    if (s.changingDetails) { _ =>
-                      SeeOther(routes.RegisterController.getCreateAccountPage.url)
-                    } else { _ =>
-                      SeeOther(routes.BankAccountController.getBankDetailsPage.url)
-                    }
+                  .value
+                  .flatMap(
+                    _.fold[Future[Result]](
+                      _ => {
+                        internalServerError()
+                      },
+                      _ =>
+                        if (s.changingDetails) {
+                          toFuture(SeeOther(routes.RegisterController.getCreateAccountPage.url))
+                        } else {
+                          toFuture(SeeOther(routes.BankAccountController.getBankDetailsPage.url))
+                        }
+                    )
                   )
               } else {
                 sessionStore
                   .store(s.copy(reminderValue = Some(success.reminderFrequency), hasSelectedReminder = true))
-                  .fold(
-                    _ => {
-                      internalServerError()
-                    },
-                    _ => SeeOther(routes.ReminderController.getApplySavingsReminderSignUpPage.url)
+                  .value
+                  .flatMap(
+                    _.fold[Future[Result]](
+                      _ => {
+                        internalServerError()
+                      },
+                      _ => toFuture(SeeOther(routes.ReminderController.getApplySavingsReminderSignUpPage.url))
+                    )
                   )
 
               }
@@ -544,15 +573,19 @@ class ReminderController @Inject() (
                   } else {
                     session.copy(reminderDetails = Some(success.reminderFrequency))
                   })
-                  .fold(
-                    _ => {
-                      internalServerError()
-                    },
-                    if (session.changingDetails) { _ =>
-                      SeeOther(routes.RegisterController.getCreateAccountPage.url)
-                    } else { _ =>
-                      SeeOther(routes.BankAccountController.getBankDetailsPage.url)
-                    }
+                  .value
+                  .flatMap(
+                    _.fold[Future[Result]](
+                      _ => {
+                        internalServerError()
+                      },
+                      _ =>
+                        if (session.changingDetails) {
+                          toFuture(SeeOther(routes.RegisterController.getCreateAccountPage.url))
+                        } else {
+                          toFuture(SeeOther(routes.BankAccountController.getBankDetailsPage.url))
+                        }
+                    )
                   )
               } else {
                 internalServerError()

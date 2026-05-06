@@ -118,28 +118,23 @@ class AccessAccountController @Inject() (
 
   def getNoAccountPage: Action[AnyContent] =
     authorisedForHtsWithNINO { implicit request => implicit htsContext =>
-      sessionStore.get.value.flatMap(
-        _.fold(
-          { e =>
-            logger.warn(s"Could not get session data: $e")
-            internalServerError()
-          }, { session =>
-            checkIfEnrolled(
-              { () =>
-                Ok(confirmCheckEligibility())
-              }, { _ =>
-                SeeOther(routes.EligibilityCheckController.getCheckEligibility.url)
-              },
-              () =>
-                SeeOther(
-                  session
-                    .flatMap(_.attemptedAccountHolderPageURL)
-                    .getOrElse(appConfig.nsiManageAccountUrl)
-                )
+      foldWithInternalServerError(sessionStore.get)(
+        e => logger.warn(s"Could not get session data: $e")
+      ) { session =>
+        checkIfEnrolled(
+          { () =>
+            Ok(confirmCheckEligibility())
+          }, { _ =>
+            SeeOther(routes.EligibilityCheckController.getCheckEligibility.url)
+          },
+          () =>
+            SeeOther(
+              session
+                .flatMap(_.attemptedAccountHolderPageURL)
+                .getOrElse(appConfig.nsiManageAccountUrl)
             )
-          }
         )
-      )
+      }
 
     }(loginContinueURL = routes.AccessAccountController.getNoAccountPage.url)
 
@@ -151,15 +146,11 @@ class AccessAccountController @Inject() (
   ): Future[Result] = {
 
     def storeAttemptedRedirectThenRedirect(redirectTo: String): Future[Result] =
-      sessionStore
-        .store(HTSSession.empty.copy(attemptedAccountHolderPageURL = Some(pageURL)))
-        .value
-        .map {
-          _.fold[Result]({ e =>
-            logger.warn(s"Could not store session data: $e")
-            internalServerError()
-          }, _ => SeeOther(redirectTo))
-        }
+      foldWithInternalServerError(
+        sessionStore.store(HTSSession.empty.copy(attemptedAccountHolderPageURL = Some(pageURL)))
+      )(
+        e => logger.warn(s"Could not store session data: $e")
+      )(_ => toFuture(SeeOther(redirectTo)))
 
     checkIfEnrolled(
       {

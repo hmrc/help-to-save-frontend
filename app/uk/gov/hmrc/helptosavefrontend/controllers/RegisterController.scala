@@ -96,36 +96,33 @@ class RegisterController @Inject() (
                     sessionStore.get
                   })
       } yield session
-      result.fold(
-        { e =>
-          logger.warn(s"Could not get enrolment status or session: $e")
-          internalServerError()
-        }, { session =>
-          val accountNumberAndEmail: Option[(String, Email)] = for {
-            s <- session
-            a <- s.accountNumber
-            e <- s.confirmedEmail
-          } yield (a, e)
+      foldWithInternalServerError(result)(
+        e => logger.warn(s"Could not get enrolment status or session: $e")
+      ) { session =>
+        val accountNumberAndEmail: Option[(String, Email)] = for {
+          s <- session
+          a <- s.accountNumber
+          e <- s.confirmedEmail
+        } yield (a, e)
 
-          accountNumberAndEmail.fold(SeeOther(routes.EligibilityCheckController.getCheckEligibility.url)) {
-            case (accountNumber, email) =>
-              val lastDayOfMonth = LocalDate.now(clock).`with`(TemporalAdjusters.lastDayOfMonth())
-              this.payNowForm
-                .bindFromRequest()
-                .fold(
-                  e => {
-                    Ok(accountCreatedView(e, accountNumber, email, lastDayOfMonth))
-                  },
-                  payInNow =>
-                    if (payInNow) {
-                      SeeOther(routes.AccessAccountController.payIn.url)
-                    } else {
-                      SeeOther(routes.AccessAccountController.accessAccount.url)
-                    }
-                )
-          }
+        accountNumberAndEmail.fold(SeeOther(routes.EligibilityCheckController.getCheckEligibility.url)) {
+          case (accountNumber, email) =>
+            val lastDayOfMonth = LocalDate.now(clock).`with`(TemporalAdjusters.lastDayOfMonth())
+            this.payNowForm
+              .bindFromRequest()
+              .fold(
+                e => {
+                  Ok(accountCreatedView(e, accountNumber, email, lastDayOfMonth))
+                },
+                payInNow =>
+                  if (payInNow) {
+                    SeeOther(routes.AccessAccountController.payIn.url)
+                  } else {
+                    SeeOther(routes.AccessAccountController.accessAccount.url)
+                  }
+              )
         }
-      )
+      }
     }(loginContinueURL = routes.RegisterController.getCreateAccountPage.url)
 
   val payNowForm: Form[Boolean] = {
@@ -140,37 +137,35 @@ class RegisterController @Inject() (
     authorisedForHtsWithNINO { implicit request => implicit htsContext =>
       checkIfAlreadyEnrolled { () =>
         checkIfDoneEligibilityChecks { eligibleWithInfo =>
-          sessionStore
-            .store(eligibleWithInfo.session.copy(changingDetails = false))
-            .fold(
-              { _ =>
+          foldWithInternalServerError(sessionStore.store(eligibleWithInfo.session.copy(changingDetails = false)))(
+            _ => ()
+          ) { _ =>
+            EligibilityReason
+              .fromEligible(eligibleWithInfo.userInfo.eligible)
+              .fold[Future[Result]] {
+                logger.warn(
+                  s"Could not parse eligibility reason: ${eligibleWithInfo.userInfo.eligible}",
+                  eligibleWithInfo.userInfo.userInfo.nino
+                )
                 internalServerError()
-              }, { _ =>
-                EligibilityReason
-                  .fromEligible(eligibleWithInfo.userInfo.eligible)
-                  .fold {
-                    logger.warn(
-                      s"Could not parse eligibility reason: ${eligibleWithInfo.userInfo.eligible}",
-                      eligibleWithInfo.userInfo.userInfo.nino
-                    )
-                    internalServerError()
-                  } { _ =>
-                    val period = eligibleWithInfo.session.reminderDetails.getOrElse("noValue")
-                    eligibleWithInfo.session.bankDetails match {
-                      case Some(bankDetails) =>
-                        Ok(
-                          createAccountView(
-                            eligibleWithInfo.userInfo,
-                            period,
-                            eligibleWithInfo.email,
-                            bankDetails
-                          )
+              } { _ =>
+                val period = eligibleWithInfo.session.reminderDetails.getOrElse("noValue")
+                eligibleWithInfo.session.bankDetails match {
+                  case Some(bankDetails) =>
+                    toFuture(
+                      Ok(
+                        createAccountView(
+                          eligibleWithInfo.userInfo,
+                          period,
+                          eligibleWithInfo.email,
+                          bankDetails
                         )
-                      case None => SeeOther(routes.BankAccountController.getBankDetailsPage.url)
-                    }
-                  }
+                      )
+                    )
+                  case None => toFuture(SeeOther(routes.BankAccountController.getBankDetailsPage.url))
+                }
               }
-            )
+          }
         }
       }
     }(loginContinueURL = routes.RegisterController.getCreateAccountPage.url)
@@ -292,8 +287,8 @@ class RegisterController @Inject() (
         ),
         nino
       )
-      helpToSaveReminderService
-        .updateHtsUser(
+      val result =
+        helpToSaveReminderService.updateHtsUser(
           HtsUserSchedule(
             Nino(nino),
             eligibleWithInfo.email,
@@ -303,14 +298,11 @@ class RegisterController @Inject() (
             DateToDaysMapper.d2dMapper.getOrElse(daysToReceiveReminders, Seq())
           )
         )
-        .fold(
-          { _ =>
-            internalServerError()
-          }, { htsUser =>
-            logger.info(s"reminder updated ${htsUser.nino}")
-            SeeOther(routes.RegisterController.getAccountCreatedPage.url)
-          }
-        )
+
+      foldWithInternalServerError(result)(_ => ()) { htsUser =>
+        logger.info(s"reminder updated ${htsUser.nino}")
+        toFuture(SeeOther(routes.RegisterController.getAccountCreatedPage.url))
+      }
 
     } else {
       SeeOther(routes.RegisterController.getAccountCreatedPage.url)
@@ -326,24 +318,21 @@ class RegisterController @Inject() (
                   })
       } yield session
 
-      result.fold(
-        { e =>
-          logger.warn(s"Could not get enrolment status or session: $e")
-          internalServerError()
-        }, { session =>
-          val accountNumberAndEmail: Option[(String, Email)] = for {
-            s <- session
-            a <- s.accountNumber
-            e <- s.confirmedEmail
-          } yield (a, e)
+      foldWithInternalServerError(result)(
+        e => logger.warn(s"Could not get enrolment status or session: $e")
+      ) { session =>
+        val accountNumberAndEmail: Option[(String, Email)] = for {
+          s <- session
+          a <- s.accountNumber
+          e <- s.confirmedEmail
+        } yield (a, e)
 
-          accountNumberAndEmail.fold(SeeOther(routes.EligibilityCheckController.getCheckEligibility.url)) {
-            case (accountNumber, email) =>
-              val lastDayOfMonth = LocalDate.now(clock).`with`(TemporalAdjusters.lastDayOfMonth())
-              Ok(accountCreatedView(payNowForm, accountNumber, email, lastDayOfMonth))
-          }
+        accountNumberAndEmail.fold(SeeOther(routes.EligibilityCheckController.getCheckEligibility.url)) {
+          case (accountNumber, email) =>
+            val lastDayOfMonth = LocalDate.now(clock).`with`(TemporalAdjusters.lastDayOfMonth())
+            Ok(accountCreatedView(payNowForm, accountNumber, email, lastDayOfMonth))
         }
-      )
+      }
     }(loginContinueURL = routes.RegisterController.getCreateAccountPage.url)
 
   def getCreateAccountErrorPage: Action[AnyContent] =
@@ -408,9 +397,10 @@ class RegisterController @Inject() (
   )(implicit request: Request[_], hc: HeaderCarrier): Future[Result] =
     sessionStore
       .store(session.copy(changingDetails = true))
-      .fold({ _ =>
+      .value
+      .flatMap(_.fold[Future[Result]]({ _ =>
         internalServerError()
-      }, _ => SeeOther(redirectTo))
+      }, _ => toFuture(SeeOther(redirectTo))))
 
   /**
     * Checks the HTSSession data from mongo - if the is no session the user has not done the eligibility

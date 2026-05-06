@@ -147,20 +147,19 @@ class AccountHolderController @Inject() (
   def emailVerifiedCallback(emailVerificationParams: String): Action[AnyContent] = {
     val path = routes.AccountHolderController.emailVerifiedCallback(emailVerificationParams).url
     authorisedForHtsWithInfo { implicit request => implicit htsContext =>
-      withEmailVerificationParameters(
-        emailVerificationParams,
-        params =>
-          EitherT.right(
-            checkIfAlreadyEnrolled(
-              oldEmail => handleEmailVerified(params, oldEmail, path),
-              routes.AccountHolderController.getUpdateYourEmailAddress.url
-            )
-          ),
-        EitherT.right(toFuture(SeeOther(routes.EmailController.confirmEmailErrorTryLater.url)))
-      )(path).leftMap { e =>
-        logger.warn(e)
-        internalServerError()
-      }.merge
+      mergeWithInternalServerError(
+        withEmailVerificationParameters(
+          emailVerificationParams,
+          params =>
+            EitherT.right(
+              checkIfAlreadyEnrolled(
+                oldEmail => handleEmailVerified(params, oldEmail, path),
+                routes.AccountHolderController.getUpdateYourEmailAddress.url
+              )
+            ),
+          EitherT.right(toFuture(SeeOther(routes.EmailController.confirmEmailErrorTryLater.url)))
+        )(path)
+      )(e => logger.warn(e))
     }(loginContinueURL = path)
   }
 
