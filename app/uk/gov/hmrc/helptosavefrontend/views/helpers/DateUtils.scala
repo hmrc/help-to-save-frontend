@@ -26,6 +26,7 @@ object DateUtils {
   private val dayExtractor: DateTimeFormatter = DateTimeFormatter.ofPattern("d")
   private val monthExtractor: DateTimeFormatter = DateTimeFormatter.ofPattern("MMMM")
   private val yearExtractor: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy")
+  private val englishDOBFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("MMM d, yyyy")
 
   def toLocalisedStringMonth(date: LocalDate)(implicit messages: Messages): String = {
     val monthKey = date.format(monthExtractor)
@@ -36,4 +37,12 @@ object DateUtils {
     val monthValue: String = toLocalisedStringMonth(date)
     s"${date.format(dayExtractor)} $monthValue ${date.format(yearExtractor)}"
   }
+
+  def formatDate(localDate: LocalDate)(implicit messages: Messages): String =
+    if (messages.lang.code == "cy") {
+      val welshMonth= messages(s"hts.short-month.${localDate.getMonthValue}")
+      s"$welshMonth ${localDate.format(dayExtractor)}, ${localDate.format(yearExtractor)}"
+    } else {
+      localDate.format(englishDOBFormatter)
+    }
 }

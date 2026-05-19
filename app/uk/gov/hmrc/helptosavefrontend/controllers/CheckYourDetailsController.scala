@@ -24,10 +24,9 @@ import uk.gov.hmrc.helptosavefrontend.config.{ErrorHandler, FrontendAppConfig}
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
 import uk.gov.hmrc.helptosavefrontend.util.{Logging, MaintenanceSchedule, NINOLogMessageTransformer, toFuture}
+import uk.gov.hmrc.helptosavefrontend.views.helpers.DateUtils
 import uk.gov.hmrc.helptosavefrontend.views.html.email.accountholder.check_your_details
 
-import java.time.format.DateTimeFormatter.ofLocalizedDate
-import java.time.format.FormatStyle
 import scala.concurrent.ExecutionContext
 
 class CheckYourDetailsController @Inject() (
@@ -58,7 +57,7 @@ class CheckYourDetailsController @Inject() (
             userInfo.address.postcode match {
               case None => SeeOther(routes.EligibilityCheckController.getMissingInfoPage.url)
               case Some(postcode) =>
-                val formattedDateOfBirth = userInfo.dateOfBirth.format(ofLocalizedDate(FormatStyle.MEDIUM))
+                val formattedDateOfBirth = DateUtils.formatDate(userInfo.dateOfBirth)
                 Ok(checkYourDetailsView(userInfo, postcode, formattedDateOfBirth, userInfo.address.lines))
             }
         }
