@@ -259,6 +259,8 @@ hts.email-verification.check-your-email.what-next=What you must do
 hts.email-verification.check-your-email.content1=Go to your email account and select the link in the message we sent you.
 hts.email-verification.check-your-email.where-used-heading=If the email did not arrive
 hts.email-verification.check-your-email.where-used=You can tell us to <a class="govuk-link" href={0}>resend the email</a> to that email account.
+hts.global.success=Success
+hts.email-verification.check-your-email.email-resent=Email resent
 
 hts.email-verification.error-title=There is a problem
 hts.email-verification.error-link-description=Enter a valid email address
@@ -368,6 +370,7 @@ hts.register.create_account.title=Create a Help to Save account
 hts.register.create_account.intro=You’ll need to make sure your details are correct and agree to the terms and conditions before you can create a Help to Save account.
 hts.register.create_account.your-details=Your details
 hts.register.create_account.change-your-name=Change your name
+hts.register.create_account.change-your-name-hidden-text=Name
 hts.register.create_account.change-your-dob=Change your date of birth
 hts.register.create_account.change-your-nino=Change your National Insurance number
 hts.register.create_account.your-details.name=Name
@@ -381,6 +384,7 @@ hts.register.create_account.change-your-account-number=Change your account numbe
 hts.register.create_account.change-your-roll-number=Change your roll number
 hts.register.create_account.change-your-account-name=Change your account name
 hts.register.create_account.address=Address
+hts.register.create_account.change-address-hidden-text=Address
 
 hts.register.create_account.your-bank-details.sort-code=Sort code
 hts.register.create_account.your-bank-details.account-number=Account number

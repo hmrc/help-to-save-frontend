@@ -16,10 +16,16 @@
 
 @import uk.gov.hmrc.helptosavefrontend.controllers.routes
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
+@import uk.gov.hmrc.govukfrontend.views.html.components.{GovukNotificationBanner, NotificationBanner}
+@import uk.gov.hmrc.govukfrontend.views.viewmodels.content.Text
 
-@this(layout: uk.gov.hmrc.helptosavefrontend.views.html.layout)
+@this(
+  layout: uk.gov.hmrc.helptosavefrontend.views.html.layout,
+  viewHelpers: uk.gov.hmrc.helptosavefrontend.views.ViewHelpers,
+  govukNotificationBanner: GovukNotificationBanner
+)
 
-@(email: String, oldEmail: Option[String])(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
+@(email: String, oldEmail: Option[String], emailResent: Boolean)(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
 
 @title = @{messages("hts.email-verification.check-your-email.title.h1")}
 
@@ -36,5 +42,13 @@
   <h2 class="govuk-heading-m">@messages("hts.email-verification.check-your-email.what-next")</h2>
   <p class="content govuk-body">@Html(messages("hts.email-verification.check-your-email.content1"))</p>
   <h2 class="govuk-heading-m">@messages("hts.email-verification.check-your-email.where-used-heading")</h2>
-  <p class="content govuk-body">@Html(messages("hts.email-verification.check-your-email.where-used", routes.EmailController.confirmEmail.url))</p>
+  <p class="content govuk-body">@Html(messages("hts.email-verification.check-your-email.where-used", routes.EmailController.confirmEmail.url+ "?emailResent=true"))</p>
+  @if(emailResent) {
+    @govukNotificationBanner(NotificationBanner(
+      bannerType = Some("success"),
+      title = Text(messages("hts.global.success")),
+      content = Text(messages("hts.email-verification.check-your-email.email-resent"))
+    ))
+  }
+
 }
