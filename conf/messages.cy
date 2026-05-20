@@ -743,5 +743,18 @@ hts.month.October = Hydref
 hts.month.November = Tachwedd
 hts.month.December = Rhagfyr
 
+hts.short-month.1 = Ion
+hts.short-month.2 = Chwe
+hts.short-month.3 = Maw
+hts.short-month.4 = Ebr
+hts.short-month.5 = Mai
+hts.short-month.6 = Meh
+hts.short-month.7 = Gor
+hts.short-month.8 = Awst
+hts.short-month.9 = Medi
+hts.short-month.10 = Hyd
+hts.short-month.11 = Tach
+hts.short-month.12 = Rhag
+
 ############################### Footer ###############################
 footer.links.accessibility.text = Datganiad hygyrchedd
