@@ -251,6 +251,8 @@ hts.email-verification.note=Ni fydd y cyfeiriadau e-bost a ddefnyddiwch ar gyfer
 hts.email-verification.input.label=Cyfeiriad e-bost
 hts.email-verification.input.hint=Er enghraifft, enw@enghraifft.com
 hts.email-verification.submit.text=Dilysu’ch e-bost
+hts.global.success=Llwyddiant
+hts.email-verification.check-your-email.email-resent=E-bost wedi'i ail-anfon
 
 hts.email-verification.check-your-email.title.h1=Mae gennych 30 munud i gadarnhau’r cyfeiriad e-bost
 hts.email-verification.check-your-email.we-have-sent-mail=Rydym wedi anfon e-bost at {0}. <a class="govuk-link" href={1}>Defnyddiwch gyfeiriad e-bost gwahanol</a>.
