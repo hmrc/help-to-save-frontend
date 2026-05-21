@@ -43,7 +43,8 @@
             items = Seq(
               ActionItem(
                 href = routes.RegisterController.getDetailsAreIncorrect.url,
-                content = Text(Messages("hts.register.create_account.change"))
+                content = Text(Messages("hts.register.create_account.change")),
+                visuallyHiddenText = Some("Change")
               )
             )
           ))
@@ -63,7 +64,8 @@
             items = Seq(
               ActionItem(
                 href = routes.RegisterController.getDetailsAreIncorrect.url,
-                content = Text(Messages("hts.register.create_account.change"))
+                content = Text(Messages("hts.register.create_account.change")),
+                visuallyHiddenText = Some("Change")
               )
             )
           ))
