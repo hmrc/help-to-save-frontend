@@ -559,11 +559,12 @@ class EmailController @Inject() (
 
   def confirmEmail: Action[AnyContent] =
     authorisedForHtsWithInfo { implicit request => implicit htsContext =>
+      val emailResent = request.getQueryString("emailResent").contains("true")
       def sendVerificationRequest(pendingEmail: String, userInfo: UserInfo) =
         sendEmailVerificationRequest(
           pendingEmail,
           userInfo.forename,
-          Ok(checkYourEmail(pendingEmail, userInfo.email)),
+          Ok(checkYourEmail(pendingEmail, userInfo.email, emailResent)),
           params => routes.EmailController.emailConfirmedCallback(params.encode()).url,
           _ =>
             SeeOther(
