@@ -32,6 +32,7 @@ GET         /enter-email                                        uk.gov.hmrc.help
 POST        /enter-email                                        uk.gov.hmrc.helptosavefrontend.controllers.EmailController.giveEmailSubmit
 GET         /confirm-email/:email                               uk.gov.hmrc.helptosavefrontend.controllers.EmailController.emailConfirmed(email)
 GET         /confirm-email                                      uk.gov.hmrc.helptosavefrontend.controllers.EmailController.confirmEmail
+GET         /resend                                             uk.gov.hmrc.helptosavefrontend.controllers.EmailController.resendEmail
 GET         /email-confirmed-callback                           uk.gov.hmrc.helptosavefrontend.controllers.EmailController.emailConfirmedCallback(p: String)
 GET         /email-confirmed                                    uk.gov.hmrc.helptosavefrontend.controllers.EmailController.getEmailConfirmed
 GET         /cannot-change-email                                uk.gov.hmrc.helptosavefrontend.controllers.EmailController.confirmEmailError
@@ -65,6 +66,7 @@ GET         /failed-iv-precondition-failed                      uk.gov.hmrc.help
 GET         /account-home/change-email                          uk.gov.hmrc.helptosavefrontend.controllers.AccountHolderController.getUpdateYourEmailAddress
 POST        /account-home/change-email                          uk.gov.hmrc.helptosavefrontend.controllers.AccountHolderController.onSubmit
 GET         /account-home/confirm-email                         uk.gov.hmrc.helptosavefrontend.controllers.AccountHolderController.getCheckYourEmail
+
 GET         /account-home/email-confirmed-callback              uk.gov.hmrc.helptosavefrontend.controllers.AccountHolderController.emailVerifiedCallback(p: String)
 GET         /account-home/email-verified                        uk.gov.hmrc.helptosavefrontend.controllers.AccountHolderController.getEmailVerified
 GET         /account-home/help-information                      uk.gov.hmrc.helptosavefrontend.controllers.IntroductionController.getHelpPage

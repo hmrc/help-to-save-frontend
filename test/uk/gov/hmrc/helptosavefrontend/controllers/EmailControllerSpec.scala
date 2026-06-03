@@ -1245,6 +1245,18 @@ class EmailControllerSpec
 
     }
 
+    "resendEmail" should {
+
+      "redirect to confirmEmail and add emailResent to the session" in {
+        mockAuthWithNINOAndName(AuthWithCL200)(mockedNINOAndNameRetrieval)
+        val request = FakeRequest("GET", "/resend")
+        val result = controller.resendEmail()(request)
+        status(result) shouldBe SEE_OTHER
+        redirectLocation(result) shouldBe Some(routes.EmailController.confirmEmail.url)
+        session(result).get("emailResent") shouldBe Some("true")
+      }
+    }
+
     "handling confirmEmail requests" must {
       def confirmEmail: Future[Result] =
         csrfAddToken(controller.confirmEmail)(fakeRequest)

@@ -145,8 +145,7 @@ class AccountHolderControllerSpec
 
       val email = "email@test.com"
 
-      val fakePostRequest =
-        fakeRequest.withMethod("POST").withFormUrlEncodedBody("new-email-address" -> email)
+      val fakePostRequest = fakeRequest.withMethod("POST").withFormUrlEncodedBody("new-email-address" -> email)
 
       def submit(email: String): Future[Result] =
         controller.onSubmit()(
@@ -170,7 +169,9 @@ class AccountHolderControllerSpec
 
         val result = Future.successful(await(csrfAddToken(controller.onSubmit())(fakePostRequest)))
         status(result) shouldBe Status.SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.AccountHolderController.getCheckYourEmail.url)
+        redirectLocation(result) shouldBe Some(
+          routes.AccountHolderController.getCheckYourEmail.url
+        )
       }
 
       "return an AlreadyVerified status and redirect the user to email verified page," +
@@ -238,6 +239,137 @@ class AccountHolderControllerSpec
         val result = csrfAddToken(controller.onSubmit())(fakePostRequest)
         status(result) shouldBe Status.SEE_OTHER
         redirectLocation(result) shouldBe Some(routes.EmailController.confirmEmailErrorTryLater.url)
+      }
+
+      "redirect to check your email page with emailResent flag in session, when user clicks resend email button with valid pending email" in {
+        val pendingEmail = "pending@test.com"
+        val resendPostRequest =
+          FakeRequest()
+            .withMethod("POST")
+            .withFormUrlEncodedBody(
+              "resendEmail"       -> "true",
+              "new-email-address" -> pendingEmail
+            )
+
+        mockAuthWithNINOAndName(AuthWithCL200)(mockedNINOAndNameRetrieval)
+        mockSessionStoreGet(Right(Some(HTSSession(None, None, Some(pendingEmail)))))
+        mockEmailVerificationConn(nino, pendingEmail, firstName)(Right(()))
+
+        val result = csrfAddToken(controller.onSubmit())(resendPostRequest)
+        status(result) shouldBe Status.SEE_OTHER
+        redirectLocation(result) shouldBe Some(routes.AccountHolderController.getCheckYourEmail.url)
+
+        // Verify emailResent flag is added to session
+        session(result).get("emailResent") shouldBe Some("true")
+      }
+
+      "show an error page if pending email retrieval from session fails during resend" in {
+        val resendPostRequest =
+          FakeRequest()
+            .withMethod("POST")
+            .withFormUrlEncodedBody(
+              "resendEmail"       -> "true",
+              "new-email-address" -> email
+            )
+
+        mockAuthWithNINOAndName(AuthWithCL200)(mockedNINOAndNameRetrieval)
+        mockSessionStoreGet(Left("Session store error"))
+
+        val result = csrfAddToken(controller.onSubmit())(resendPostRequest)
+        status(result) shouldBe Status.SEE_OTHER
+        redirectLocation(result) shouldBe Some(routes.EmailController.confirmEmailErrorTryLater.url)
+      }
+
+      "show an error page if there is no pending email in session during resend" in {
+        val resendPostRequest =
+          FakeRequest()
+            .withMethod("POST")
+            .withFormUrlEncodedBody(
+              "resendEmail"       -> "true",
+              "new-email-address" -> email
+            )
+
+        mockAuthWithNINOAndName(AuthWithCL200)(mockedNINOAndNameRetrieval)
+        mockSessionStoreGet(Right(Some(HTSSession(None, None, None))))
+
+        val result = csrfAddToken(controller.onSubmit())(resendPostRequest)
+        status(result) shouldBe Status.SEE_OTHER
+        redirectLocation(result) shouldBe Some(routes.EmailController.confirmEmailErrorTryLater.url)
+      }
+
+      "show an error page if email verification fails during resend" in {
+        val pendingEmail = "pending@test.com"
+        val resendPostRequest =
+          FakeRequest()
+            .withMethod("POST")
+            .withFormUrlEncodedBody(
+              "resendEmail"       -> "true",
+              "new-email-address" -> pendingEmail
+            )
+
+        mockAuthWithNINOAndName(AuthWithCL200)(mockedNINOAndNameRetrieval)
+        mockSessionStoreGet(Right(Some(HTSSession(None, None, Some(pendingEmail)))))
+        mockEmailVerificationConn(nino, pendingEmail, firstName)(Left(OtherError))
+
+        val result = csrfAddToken(controller.onSubmit())(resendPostRequest)
+        status(result) shouldBe Status.SEE_OTHER
+        redirectLocation(result) shouldBe Some(routes.EmailController.confirmEmailErrorTryLater.url)
+      }
+
+      "show an error page if session is empty during resend" in {
+        val resendPostRequest =
+          FakeRequest()
+            .withMethod("POST")
+            .withFormUrlEncodedBody(
+              "resendEmail"       -> "true",
+              "new-email-address" -> email
+            )
+
+        mockAuthWithNINOAndName(AuthWithCL200)(mockedNINOAndNameRetrieval)
+        mockSessionStoreGet(Right(None))
+
+        val result = csrfAddToken(controller.onSubmit())(resendPostRequest)
+        status(result) shouldBe Status.SEE_OTHER
+        redirectLocation(result) shouldBe Some(routes.EmailController.confirmEmailErrorTryLater.url)
+      }
+
+      "handle resend request error when session retrieval returns AlreadyVerified error" in {
+        val pendingEmail = "already-verified@test.com"
+        val resendPostRequest =
+          FakeRequest()
+            .withMethod("POST")
+            .withFormUrlEncodedBody(
+              "resendEmail"       -> "true",
+              "new-email-address" -> pendingEmail
+            )
+
+        mockAuthWithNINOAndName(AuthWithCL200)(mockedNINOAndNameRetrieval)
+        mockSessionStoreGet(Right(Some(HTSSession(None, None, Some(pendingEmail)))))
+        mockEmailVerificationConn(nino, pendingEmail, firstName)(Left(OtherError))
+
+        val result = csrfAddToken(controller.onSubmit())(resendPostRequest)
+        status(result) shouldBe Status.SEE_OTHER
+        redirectLocation(result) shouldBe Some(routes.EmailController.confirmEmailErrorTryLater.url)
+      }
+
+      "redirect to check your email page when resending with already verified email in different flow" in {
+        val pendingEmail = "verified@test.com"
+        val resendPostRequest =
+          FakeRequest()
+            .withMethod("POST")
+            .withFormUrlEncodedBody(
+              "resendEmail"       -> "true",
+              "new-email-address" -> pendingEmail
+            )
+
+        mockAuthWithNINOAndName(AuthWithCL200)(mockedNINOAndNameRetrieval)
+        mockSessionStoreGet(Right(Some(HTSSession(None, None, Some(pendingEmail)))))
+        mockEmailVerificationConn(nino, pendingEmail, firstName)(Right(()))
+
+        val result = csrfAddToken(controller.onSubmit())(resendPostRequest)
+        status(result) shouldBe Status.SEE_OTHER
+        redirectLocation(result) shouldBe Some(routes.AccountHolderController.getCheckYourEmail.url)
+        session(result).get("emailResent") shouldBe Some("true")
       }
 
     }
