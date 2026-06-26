@@ -370,6 +370,7 @@ hts.register.create_account.title=Creu cyfrif Cymorth i Gynilo
 hts.register.create_account.intro=Bydd angen i chi sicrhau bod eich manylion yn gywir a’ch bod yn cytuno â’r telerau ac amodau cyn y gallwch greu cyfrif Cymorth i Gynilo.
 hts.register.create_account.your-details=Eich manylion
 hts.register.create_account.change-your-name=Newid eich enw
+hts.register.create_account.change-your-name-hidden-text=Enw
 hts.register.create_account.change-your-dob=Newid eich dyddiad geni
 hts.register.create_account.change-your-nino=Newid eich rhif Yswiriant Gwladol
 hts.register.create_account.your-details.name=Enw
@@ -383,6 +384,7 @@ hts.register.create_account.change-your-account-number=Newid rhif eich cyfrif
 hts.register.create_account.change-your-roll-number=Newid eich rhif rôl
 hts.register.create_account.change-your-account-name=Newid enw eich cyfrif
 hts.register.create_account.address=Cyfeiriad
+hts.register.create_account.change-address-hidden-text=Cyfeiriad
 
 hts.register.create_account.your-bank-details.sort-code=Cod didoli
 hts.register.create_account.your-bank-details.account-number=Rhif y cyfrif

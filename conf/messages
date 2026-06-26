@@ -370,6 +370,7 @@ hts.register.create_account.title=Create a Help to Save account
 hts.register.create_account.intro=You’ll need to make sure your details are correct and agree to the terms and conditions before you can create a Help to Save account.
 hts.register.create_account.your-details=Your details
 hts.register.create_account.change-your-name=Change your name
+hts.register.create_account.change-your-name-hidden-text=Name
 hts.register.create_account.change-your-dob=Change your date of birth
 hts.register.create_account.change-your-nino=Change your National Insurance number
 hts.register.create_account.your-details.name=Name
@@ -383,6 +384,7 @@ hts.register.create_account.change-your-account-number=Change your account numbe
 hts.register.create_account.change-your-roll-number=Change your roll number
 hts.register.create_account.change-your-account-name=Change your account name
 hts.register.create_account.address=Address
+hts.register.create_account.change-address-hidden-text=Address
 
 hts.register.create_account.your-bank-details.sort-code=Sort code
 hts.register.create_account.your-bank-details.account-number=Account number
