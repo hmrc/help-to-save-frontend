@@ -40,7 +40,7 @@ object DateUtils {
 
   def formatDate(localDate: LocalDate)(implicit messages: Messages): String =
     if (messages.lang.code == "cy") {
-      val welshMonth= messages(s"hts.short-month.${localDate.getMonthValue}")
+      val welshMonth = messages(s"hts.short-month.${localDate.getMonthValue}")
       s"$welshMonth ${localDate.format(dayExtractor)}, ${localDate.format(yearExtractor)}"
     } else {
       localDate.format(englishDOBFormatter)

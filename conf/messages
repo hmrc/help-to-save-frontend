@@ -279,9 +279,8 @@ hts.email-verification.existing-user.check-your-email.we-have-sent-mail=We’ve 
 hts.email-verification.existing-user.check-your-email.what-next=What you must do
 hts.email-verification.existing-user.check-your-email.content1=Go to your email account and select the link in the message we sent you.
 hts.email-verification.existing-user.check-your-email.h3=If the email did not arrive
-hts.email-verification.existing-user.check-your-email.resend-1=You can tell us to
+hts.email-verification.existing-user.check-your-email.resend-1=We can send another email.
 hts.email-verification.existing-user.check-your-email.resend-button-text=resend the email
-hts.email-verification.existing-user.check-your-email.resend-2=to that email account.
 
 # Link expired
 hts.email-verification.link-expired.title.h1=This link has expired

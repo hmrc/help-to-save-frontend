@@ -557,14 +557,20 @@ class EmailController @Inject() (
         )
     }
 
+  def resendEmail: Action[AnyContent] =
+    authorisedForHtsWithNINO { implicit request => implicit htsContext =>
+      Redirect(routes.EmailController.confirmEmail.url)
+        .addingToSession("emailResent" -> "true")
+    }(loginContinueURL = routes.EmailController.confirmEmail.url)
+
   def confirmEmail: Action[AnyContent] =
     authorisedForHtsWithInfo { implicit request => implicit htsContext =>
-      val emailResent = request.getQueryString("emailResent").contains("true")
+      val emailResent = request.session.get("emailResent").contains("true")
       def sendVerificationRequest(pendingEmail: String, userInfo: UserInfo) =
         sendEmailVerificationRequest(
           pendingEmail,
           userInfo.forename,
-          Ok(checkYourEmail(pendingEmail, userInfo.email, emailResent)),
+          Ok(checkYourEmail(pendingEmail, userInfo.email, emailResent)).removingFromSession("emailResent"),
           params => routes.EmailController.emailConfirmedCallback(params.encode()).url,
           _ =>
             SeeOther(
