@@ -19,11 +19,12 @@
 @import uk.gov.hmrc.helptosavefrontend.controllers.routes
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 @import uk.gov.hmrc.helptosavefrontend.views.ViewHelpers
+@import uk.gov.hmrc.govukfrontend.views.html.components.{GovukNotificationBanner, NotificationBanner}
 
 @this(layout: uk.gov.hmrc.helptosavefrontend.views.html.layout, viewHelpers: ViewHelpers,
-      button: uk.gov.hmrc.helptosavefrontend.views.html.helpers.button)
+      button: uk.gov.hmrc.helptosavefrontend.views.html.helpers.button, govukNotificationBanner: GovukNotificationBanner)
 
-@(email: String)(implicit htsContext: HtsContext, request: Request[_], messages: Messages, frontendAppConfig: FrontendAppConfig)
+@(email: String, emailResent: Boolean)(implicit htsContext: HtsContext, request: Request[_], messages: Messages, frontendAppConfig: FrontendAppConfig)
 
 @beforeContentBlock = {
     @viewHelpers.govukBreadcrumbs(Breadcrumbs(
@@ -52,18 +53,28 @@
     <h2 class="govuk-heading-m">@messages("hts.email-verification.existing-user.check-your-email.h3")</h2>
 
 @viewHelpers.form(uk.gov.hmrc.helptosavefrontend.controllers.routes.AccountHolderController.onSubmit) {
-<p class="govuk-body">@Messages("hts.email-verification.existing-user.check-your-email.resend-1")
-    <input type="hidden" name="new-email-address" value="@{email}">
-    @viewHelpers.govukButton(
-    Button(
-    attributes = Map("id" -> "resend-verification", "data-prevent-double-click"->"true"),
-    classes="govuk-button--secondary",
-    content = Text(messages("hts.email-verification.existing-user.check-your-email.resend-button-text"))
-    )
-    )
-    @Messages("hts.email-verification.existing-user.check-your-email.resend-2")</p>
+    <p class="govuk-body">@Messages("hts.email-verification.existing-user.check-your-email.resend-1")
+        <input type="hidden" name="new-email-address" value="@{email}" />
+        <input type="hidden" name="resendEmail" value="true" />
+        <div class="govuk-!-margin-top-4">
+                @viewHelpers.govukButton(
+                    Button(
+                        inputType = Some("submit"),
+                        attributes = Map("id" -> "resend-verification", "data-prevent-double-click"->"true"),
+                        classes="govuk-button--secondary",
+                        content = Text(messages("hts.email-verification.existing-user.check-your-email.resend-button-text"))
+                    )
+                )
+        </div>
+    </p>
 }
-    
+    @if(emailResent) {
+        @govukNotificationBanner(NotificationBanner(
+        bannerType = Some("success"),
+        title = Text(messages("hts.global.success")),
+        content = Text(messages("hts.email-verification.check-your-email.email-resent"))
+        ))
+    }
     <p class="govuk-body">
         @viewHelpers.govukButton(Button(
         content = Text(messages("hts.global.back-to-account")),

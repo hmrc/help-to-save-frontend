@@ -14,15 +14,18 @@
  * limitations under the License.
  *@
 
+@import uk.gov.hmrc.govukfrontend.views.html.components._
+@import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 @import uk.gov.hmrc.helptosavefrontend.controllers.routes
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 @import uk.gov.hmrc.govukfrontend.views.html.components.{GovukNotificationBanner, NotificationBanner}
 @import uk.gov.hmrc.govukfrontend.views.viewmodels.content.Text
 
 @this(
-  layout: uk.gov.hmrc.helptosavefrontend.views.html.layout,
-  viewHelpers: uk.gov.hmrc.helptosavefrontend.views.ViewHelpers,
-  govukNotificationBanner: GovukNotificationBanner
+layout: uk.gov.hmrc.helptosavefrontend.views.html.layout,
+viewHelpers: uk.gov.hmrc.helptosavefrontend.views.ViewHelpers,
+govukNotificationBanner: GovukNotificationBanner,
+button: uk.gov.hmrc.helptosavefrontend.views.html.helpers.button
 )
 
 @(email: String, oldEmail: Option[String], emailResent: Boolean)(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
@@ -31,24 +34,36 @@
 
 @layout(title) {
 
-  <h1 class="govuk-heading-l">@title</h1>
-  
-  @defining(
-    oldEmail.fold(routes.EmailController.getGiveEmailPage)(_ => routes.EmailController.getSelectEmailPage)
-  ){ call =>
-    <p class="govuk-body">@Html(messages("hts.email-verification.check-your-email.we-have-sent-mail", email, call))</p>
-  }
+    <h1 class="govuk-heading-l">@title</h1>
 
-  <h2 class="govuk-heading-m">@messages("hts.email-verification.check-your-email.what-next")</h2>
-  <p class="content govuk-body">@Html(messages("hts.email-verification.check-your-email.content1"))</p>
-  <h2 class="govuk-heading-m">@messages("hts.email-verification.check-your-email.where-used-heading")</h2>
-  <p class="content govuk-body">@Html(messages("hts.email-verification.check-your-email.where-used", routes.EmailController.confirmEmail.url+ "?emailResent=true"))</p>
-  @if(emailResent) {
-    @govukNotificationBanner(NotificationBanner(
-      bannerType = Some("success"),
-      title = Text(messages("hts.global.success")),
-      content = Text(messages("hts.email-verification.check-your-email.email-resent"))
-    ))
-  }
+    @defining(
+        oldEmail.fold(routes.EmailController.getGiveEmailPage)(_ => routes.EmailController.getSelectEmailPage)
+    ){ call =>
+        <p class="govuk-body">@Html(messages("hts.email-verification.check-your-email.we-have-sent-mail", email, call))</p>
+    }
 
+    <h2 class="govuk-heading-m">@messages("hts.email-verification.check-your-email.what-next")</h2>
+    <p class="content govuk-body">@Html(messages("hts.email-verification.check-your-email.content1"))</p>
+    <h2 class="govuk-heading-m">@messages("hts.email-verification.check-your-email.where-used-heading")</h2>
+    <p class="content govuk-body">@Html(messages("hts.email-verification.existing-user.check-your-email.resend-1"))</p>
+    <input type="hidden" name="new-email-address" value="@email">
+
+    <div class="govuk-!-margin-top-4">
+        @viewHelpers.govukButton(
+            Button(
+                href = Some(routes.EmailController.resendEmail.url),
+                attributes = Map("id" -> "resend-verification", "data-prevent-double-click" -> "true"),
+                classes = "govuk-button--secondary",
+                content = Text(messages("hts.email-verification.existing-user.check-your-email.resend-button-text"))
+            )
+        )
+    </div>
+    @if(emailResent) {
+        @govukNotificationBanner(NotificationBanner(
+            bannerType = Some("success"),
+            title = Text(messages("hts.global.success")),
+            content = Text(messages("hts.email-verification.check-your-email.email-resent"))
+        ))
+    }
 }
+

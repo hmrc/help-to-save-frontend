@@ -88,47 +88,80 @@ class AccountHolderController @Inject() (
       htsContext.firstName.fold[Future[Result]](
         SeeOther(routes.EmailController.confirmEmailErrorTryLater.url)
       ) { name =>
-        checkIfAlreadyEnrolled(
-          _ =>
-            UpdateEmailForm.verifyEmailForm
-              .bindFromRequest()
-              .fold(
-                formWithErrors => {
-                  BadRequest(updateEmailAddress(formWithErrors))
-                },
-                (details: UpdateEmail) =>
-                  emailValidation.validate(details.email).toEither match {
-                    case Right(validEmail) =>
-                      sessionStore
-                        .store(HTSSession(None, None, Some(validEmail: String)))
-                        .semiflatMap(
-                          _ =>
-                            sendEmailVerificationRequest(
-                              validEmail,
-                              name,
-                              SeeOther(routes.AccountHolderController.getCheckYourEmail.url),
-                              params => routes.AccountHolderController.emailVerifiedCallback(params.encode()).url,
-                              _ => SeeOther(routes.EmailController.confirmEmailErrorTryLater.url),
-                              isNewApplicant = false
-                            )
-                        )
-                        .leftMap { e =>
-                          logger.warn(s"Could not write pending email to session cache: $e")
-                          SeeOther(routes.EmailController.confirmEmailErrorTryLater.url)
-                        }
-                        .merge
-                    case Left(e) =>
-                      logger.warn(s"Given email address failed validation, errors: $e")
-                      SeeOther(routes.AccountHolderController.getUpdateYourEmailAddress.url)
-                  }
-              ),
-          routes.AccountHolderController.getUpdateYourEmailAddress.url
-        )
+        val isResend = request.body.asFormUrlEncoded
+          .flatMap(_.get("resendEmail"))
+          .flatMap(_.headOption)
+          .contains("true")
+
+        if (isResend) {
+          val result: EitherT[Future, String, Email] = for {
+            maybeSession <- sessionStore.get
+            pendingEmail <- EitherT.fromEither[Future](
+                             getEmailFromSession(maybeSession)(_.pendingEmail, "pending email")
+                           )
+          } yield pendingEmail
+
+          result
+            .semiflatMap { pendingEmail =>
+              sendEmailVerificationRequest(
+                pendingEmail,
+                name,
+                SeeOther(routes.AccountHolderController.getCheckYourEmail.url)
+                  .addingToSession("emailResent" -> "true"),
+                params => routes.AccountHolderController.emailVerifiedCallback(params.encode()).url,
+                _ => SeeOther(routes.EmailController.confirmEmailErrorTryLater.url),
+                isNewApplicant = false
+              )
+            }
+            .leftMap { e =>
+              logger.warn(s"Could not get pending email for resend: $e", htsContext.nino)
+              SeeOther(routes.EmailController.confirmEmailErrorTryLater.url)
+            }
+            .merge
+        } else {
+          checkIfAlreadyEnrolled(
+            _ =>
+              UpdateEmailForm.verifyEmailForm
+                .bindFromRequest()
+                .fold(
+                  formWithErrors => {
+                    BadRequest(updateEmailAddress(formWithErrors))
+                  },
+                  (details: UpdateEmail) =>
+                    emailValidation.validate(details.email).toEither match {
+                      case Right(validEmail) =>
+                        sessionStore
+                          .store(HTSSession(None, None, Some(validEmail: String)))
+                          .semiflatMap(
+                            _ =>
+                              sendEmailVerificationRequest(
+                                validEmail,
+                                name,
+                                SeeOther(routes.AccountHolderController.getCheckYourEmail.url),
+                                params => routes.AccountHolderController.emailVerifiedCallback(params.encode()).url,
+                                _ => SeeOther(routes.EmailController.confirmEmailErrorTryLater.url),
+                                isNewApplicant = false
+                              )
+                          )
+                          .leftMap { e =>
+                            logger.warn(s"Could not write pending email to session cache: $e")
+                            SeeOther(routes.EmailController.confirmEmailErrorTryLater.url)
+                          }
+                          .merge
+                      case Left(e) =>
+                        logger.warn(s"Given email address failed validation, errors: $e")
+                        SeeOther(routes.AccountHolderController.getUpdateYourEmailAddress.url)
+                    }
+                ),
+            routes.AccountHolderController.getUpdateYourEmailAddress.url
+          )
+        }
       }
     }(loginContinueURL = routes.AccountHolderController.onSubmit.url)
 
   def getCheckYourEmail: Action[AnyContent] =
     authorisedForHtsWithNINO { implicit request => implicit htsContext =>
+      val emailResent = request.session.get("emailResent").contains("true")
       val result: EitherT[Future, String, Email] = for {
         maybeSession <- sessionStore.get
         pendingEmail <- EitherT.fromEither[Future](getEmailFromSession(maybeSession)(_.pendingEmail, "pending email"))
@@ -139,7 +172,7 @@ class AccountHolderController @Inject() (
           logger.warn(s"Could not get pending email: $e", htsContext.nino)
           SeeOther(routes.EmailController.confirmEmailErrorTryLater.url)
         }, { pendingEmail =>
-          Ok(checkYourEmail(pendingEmail))
+          Ok(checkYourEmail(pendingEmail, emailResent)).removingFromSession("emailResent")
         }
       )
     }(loginContinueURL = routes.AccountHolderController.getCheckYourEmail.url)
