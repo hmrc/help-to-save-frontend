@@ -76,3 +76,16 @@
     }
   }
 }
+
+.app-store-link {
+  display: inline-flex;
+  border-radius: 8px;
+  &:focus {
+    border: 4px solid #ffdd00;
+    box-shadow: 0 0 0 1px #0b0c0c;
+    outline: none;
+  }
+  img {
+    display: block;
+  }
+}
