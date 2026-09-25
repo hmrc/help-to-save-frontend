@@ -16,9 +16,13 @@
 
 package uk.gov.hmrc.helptosavefrontend.views
 
+import play.api.i18n.{Lang, MessagesApi}
 import java.time.format.DateTimeFormatter
 
 package object register {
 
   val dateTimeFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd MMMM yyyy")
+
+  def keepTextInEnglish(key: String)(implicit messagesApi: MessagesApi): String =
+    messagesApi(key)(Lang("en"))
 }
