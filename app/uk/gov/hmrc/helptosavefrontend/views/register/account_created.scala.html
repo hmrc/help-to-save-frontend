@@ -15,20 +15,21 @@
  *@
 
 @import play.api.data.Form
+@import play.api.i18n.MessagesApi
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 @import uk.gov.hmrc.helptosavefrontend.controllers.routes
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 @import uk.gov.hmrc.helptosavefrontend.views.ViewHelpers
 @import uk.gov.hmrc.helptosavefrontend.views.helpers.DateUtils
-
+@import uk.gov.hmrc.helptosavefrontend.views.register._
 @import java.time.LocalDate
 
 @this(layout: uk.gov.hmrc.helptosavefrontend.views.html.layout,
 viewHelpers: ViewHelpers
 )
 
-@(form: Form[Boolean], accountNumber: String, email: String, lastPayDateThisMonth: LocalDate)(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
+@(form: Form[Boolean], accountNumber: String, email: String, lastPayDateThisMonth: LocalDate)(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig, messagesApi : MessagesApi)
 
 @key = @{"payInNow"}
 @title = @{messages("hts.account-created.title.h1")}
@@ -125,11 +126,11 @@ viewHelpers: ViewHelpers
 
       <p class="govuk-body">@messages("hts.register.create_account.hmrc-app.get-the-app.s1")</p>
 
-      <a class="govuk-link app-store-link" href='@appConfig.appleAppUrl' target="_blank" aria-label='@messages("hts.register.create_account.hmrc-app.get-the-app.apple.label")'>
-          <img alt='@messages("hts.register.create_account.hmrc-app.get-the-app.apple.alt")' src='@controllers.routes.Assets.versioned("images/apple-store.svg")'></a>
+      <a class="govuk-link app-store-link" href='@appConfig.appleAppUrl' target="_blank" >
+          <img alt='@keepTextInEnglish("hts.register.create_account.hmrc-app.get-the-app.apple.alt")' lang="en" src='@controllers.routes.Assets.versioned("images/apple-store.svg")'></a>
 
-      <a class="govuk-link app-store-link" href="@appConfig.androidAppUrl" target="_blank" aria-label='@messages("hts.register.create_account.hmrc-app.get-the-app.android.label")'>
-          <img alt='@messages("hts.register.create_account.hmrc-app.get-the-app.android.alt")' src='@controllers.routes.Assets.versioned("images/android-store.svg")'></a>
+      <a class="govuk-link app-store-link" href="@appConfig.androidAppUrl" target="_blank" >
+          <img alt='@keepTextInEnglish("hts.register.create_account.hmrc-app.get-the-app.android.alt")' lang="en" src='@controllers.routes.Assets.versioned("images/android-store.svg")'></a>
 
       <p class="govuk-body">@messages("hts.register.create_account.hmrc-app.get-the-app.new-tab")</p>
     }
