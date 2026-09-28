@@ -410,9 +410,7 @@ hts.register.create_account.hmrc-app.get-the-app.s1.ul1-li2.1=the
 hts.register.create_account.hmrc-app.get-the-app.s1.ul1-li2.link=Google Play Store
 hts.register.create_account.hmrc-app.get-the-app.s1.ul1-li2.2=for Android
 
-hts.register.create_account.hmrc-app.get-the-app.apple.label=Download from the apple app store
 hts.register.create_account.hmrc-app.get-the-app.apple.alt=apple store logo
-hts.register.create_account.hmrc-app.get-the-app.android.label=Download from the google play store
 hts.register.create_account.hmrc-app.get-the-app.android.alt=google play store logo
 hts.register.create_account.hmrc-app.get-the-app.new-tab=App store links open in new tab.
 

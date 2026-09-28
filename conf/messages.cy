@@ -412,9 +412,7 @@ hts.register.create_account.hmrc-app.get-the-app.s1.ul1-li2.1=y
 hts.register.create_account.hmrc-app.get-the-app.s1.ul1-li2.link=Google Play Store
 hts.register.create_account.hmrc-app.get-the-app.s1.ul1-li2.2=ar gyfer Android
 
-hts.register.create_account.hmrc-app.get-the-app.apple.label=Lawrlwythwch o siop apiau Apple
 hts.register.create_account.hmrc-app.get-the-app.apple.alt=logo siop apiau Apple
-hts.register.create_account.hmrc-app.get-the-app.android.label=Lawrlwythwch o siop apiau Google Play
 hts.register.create_account.hmrc-app.get-the-app.android.alt=logo siop apiau Google Play
 hts.register.create_account.hmrc-app.get-the-app.new-tab=Mae cysylltiadau’r Siop Apiau yn agor tab newydd.
 
