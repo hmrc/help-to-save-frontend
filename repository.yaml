@@ -4,3 +4,4 @@ test-repositories:
   - help-to-save-performance-tests
   - help-to-save-acceptance-tests
   - help-to-save-integration-tests
+serviceNowMapping: SNSVC0006082
