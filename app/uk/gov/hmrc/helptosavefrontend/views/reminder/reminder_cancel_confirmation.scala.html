@@ -38,6 +38,11 @@
     @Messages("hts.reminder-cancel-confirmation.li-signup")</a>
         @Messages("hts.reminder-cancel-confirmation.p1-2")</p>
 
-    <p class="govuk-body"><a class="govuk-link" href=@{appConfig.nsiManageAccountUrl}>@messages("hts.global.back-to-account")</a></p>
+    <p class="govuk-body">
+        @viewHelpers.govukButton(Button(
+        content = Text(messages("hts.global.back-to-account")),
+        href = Some(appConfig.nsiManageAccountUrl)
+        ))
+      </p>
 
 }
