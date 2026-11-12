@@ -29,7 +29,7 @@
   Messages("hts.register.you-are-eligible.title.h1")
 }
 
-@layout(title) {
+@layout(title, backLink = Some(routes.CheckYourDetailsController.checkYourDetails.url)) {
 
     <h1 class="govuk-heading-l">
       @title

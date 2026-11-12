@@ -1616,7 +1616,7 @@ class EmailControllerSpec
 
         val result = controller.emailUpdatedSubmit()(FakeRequest())
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.BankAccountController.getBankDetailsPage.url)
+        redirectLocation(result) shouldBe Some(routes.ReminderController.getApplySavingsReminderPage.url)
       }
 
       "handle Digital users and redirect to the checkDetailsPage if the user is in the process of changing details" in {

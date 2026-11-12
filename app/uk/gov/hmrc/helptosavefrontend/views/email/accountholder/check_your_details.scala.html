@@ -32,7 +32,7 @@
     Messages("hts.register.create_account.your-details")
   }
 
-  @layout(title = title) {
+  @layout(title = title, backLink = Some(routes.AccessAccountController.getSignInPage.url)) {
     <h1 class="govuk-heading-l">@title</h1>
     @govukSummaryList(SummaryList(
       rows = Seq(

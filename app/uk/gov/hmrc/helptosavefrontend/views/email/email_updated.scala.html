@@ -25,7 +25,7 @@
 
 @title = @{messages("hts.email-updated.title.h1")}
 
-@layout(title) {
+@layout(title, backLink = Some(routes.RegisterController.getCreateAccountPage.url)) {
 
   <h1 class="govuk-heading-l">@title</h1>
  
