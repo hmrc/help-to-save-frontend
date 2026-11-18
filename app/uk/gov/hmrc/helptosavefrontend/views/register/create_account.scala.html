@@ -51,8 +51,13 @@
     <li>@Messages("hts.register.create_account.tandc-ul1-li4")</li>
   </ul>
 
+<span
+        id="submission-progress"
+        aria-live="assertive"
+        aria-atomic="true">
+</span>
+
   @viewHelpers.form(routes.RegisterController.createAccount, Symbol("data-prevent-multiple-submit") -> "true", Symbol("id") -> "submission-form") {
-    <span id="submission-progress" aria-live="assertive"></span>
     @viewHelpers.govukButton(Button(
       attributes = Map(
         "data-prevent-double-click"->"true",
@@ -64,8 +69,10 @@
       content = Text(Messages("hts.register.create_account.accept-label"))
     ))
   }
-  <template id="live-region-content">
-    <span class="spinner"></span>
-    <span class="govuk-body">@messages("hts.register.create_account.progress")</span>
-  </template>
+<template id="live-region-content">
+    <span class="spinner" aria-hidden="true"></span>
+    <span class="govuk-body">
+    @messages("hts.register.create_account.progress")
+  </span>
+</template>
 }

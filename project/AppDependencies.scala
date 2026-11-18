@@ -4,7 +4,7 @@ object AppDependencies {
 
   val hmrc = "uk.gov.hmrc"
   val playVersion = "play-30"
-  val bootstrapBackendVersion = "10.7.0"
+  val bootstrapBackendVersion = "10.9.0"
   val mockitoScalaVersion = "1.17.37"
   val mongoVersion = "2.14.0"
 
