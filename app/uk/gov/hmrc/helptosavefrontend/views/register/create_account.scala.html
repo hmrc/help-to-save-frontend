@@ -53,8 +53,7 @@
 
 <span
         id="submission-progress"
-        aria-live="assertive"
-        aria-atomic="true">
+        role="status">
 </span>
 
   @viewHelpers.form(routes.RegisterController.createAccount, Symbol("data-prevent-multiple-submit") -> "true", Symbol("id") -> "submission-form") {
