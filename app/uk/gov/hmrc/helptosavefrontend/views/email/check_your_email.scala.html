@@ -32,7 +32,7 @@ button: uk.gov.hmrc.helptosavefrontend.views.html.helpers.button
 
 @title = @{messages("hts.email-verification.check-your-email.title.h1")}
 
-@layout(title) {
+@layout(title, backLink = Some(routes.EmailController.getSelectEmailPage.url)) {
 
     <h1 class="govuk-heading-l">@title</h1>
 

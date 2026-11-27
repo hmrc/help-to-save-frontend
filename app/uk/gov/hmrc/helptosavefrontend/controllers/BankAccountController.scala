@@ -57,14 +57,16 @@ class BankAccountController @Inject() (
     if (session.changingDetails) {
       routes.RegisterController.getCreateAccountPage.url
     } else {
-      if (session.pendingEmail.isDefined) {
+      if (isFeatureEnabled) {
+        if (session.hasSelectedReminder) {
+          routes.ReminderController.getApplySavingsReminderSignUpPage.url
+        } else {
+          routes.ReminderController.getApplySavingsReminderPage.url
+        }
+      } else if (session.pendingEmail.isDefined) {
         routes.EmailController.getEmailConfirmed.url
-      } else if (!isFeatureEnabled) {
-        routes.EmailController.getSelectEmailPage.url
-      } else if (session.hasSelectedReminder) {
-        routes.ReminderController.getApplySavingsReminderSignUpPage.url
       } else {
-        routes.ReminderController.getApplySavingsReminderPage.url
+        routes.EmailController.getSelectEmailPage.url
       }
     }
 
