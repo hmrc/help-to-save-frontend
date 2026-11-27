@@ -97,10 +97,10 @@ class BankAccountControllerSpec
         contentAsString(result) should include(
           "Enter the UK bank account details you want us to pay your bonuses and transfer withdrawals into"
         )
-        contentAsString(result) should include("/help-to-save/apply-savings-reminders")
+        contentAsString(result) should include(routes.ReminderController.getApplySavingsReminderPage.url)
       }
 
-      "display the page with correct Back link when they came from emailVerified page" in {
+      "display the reminder page as the Back link after email confirmation" in {
 
         mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
         mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
@@ -113,7 +113,29 @@ class BankAccountControllerSpec
         contentAsString(result) should include(
           "Enter the UK bank account details you want us to pay your bonuses and transfer withdrawals into"
         )
-        contentAsString(result) should include("/help-to-save/email-confirmed")
+        contentAsString(result) should include(routes.ReminderController.getApplySavingsReminderPage.url)
+      }
+
+      "display the reminder sign-up page as the Back link when the reminder has been selected" in {
+
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrievalWithPTEnrolment)
+        mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
+        mockSessionStoreGet(
+          Right(
+            Some(
+              HTSSession(
+                Some(Right(randomEligibleWithUserInfo(validUserInfo))),
+                None,
+                Some("pendingEmail"),
+                hasSelectedReminder = true
+              )
+            )
+          )
+        )
+
+        val result = doRequest()
+        status(result) shouldBe Status.OK
+        contentAsString(result) should include(routes.ReminderController.getApplySavingsReminderSignUpPage.url)
       }
 
       "display the page with correct Back link when they came from check details page" in {

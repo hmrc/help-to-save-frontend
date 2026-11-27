@@ -156,7 +156,8 @@ class ReminderController @Inject() (
         .bindFromRequest()
         .fold(
           withErrors => {
-            Ok(reminderFrequencySet(withErrors, "none", "account"))
+            def bckLink: String = routes.ReminderController.getEmailsavingsReminders.url
+            Ok(reminderFrequencySet(withErrors, "none", "account", Some(bckLink)))
           },
           success =>
             htsContext.userDetails match {
